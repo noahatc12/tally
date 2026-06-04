@@ -19,7 +19,7 @@ export default function Header({ onAdd, onHelp }) {
       <div className="header__top">
         <div>
           <p className="header__greeting">{greeting}</p>
-          <h1 className="header__title">Habits</h1>
+          <h1 className="header__title">tally</h1>
           <p className="header__date">{dateLabel}</p>
         </div>
         <div className="header__actions">

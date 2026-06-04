@@ -1,9 +1,9 @@
-# Habit Tracker
+# Tally
 
 A mobile-first habit tracker with a **forgiving streak model** — built so a single
 missed day doesn't wipe out your progress or your motivation.
 
-**Live:** https://noahatc12.github.io/habit-tracker/
+**Live:** https://noahatc12.github.io/tally/
 
 Pure client-side: React + Vite, `localStorage` only, no backend, no accounts, no
 tracking. Your data never leaves your device.
@@ -93,7 +93,7 @@ npm run lint
 
 Pushing to `main` runs the workflow in `.github/workflows/deploy.yml` (test → build →
 deploy to Pages). One-time setup: **Settings → Pages → Source → "GitHub Actions."**
-The Vite `base` and the PWA scope must match the repo name (`/habit-tracker/`).
+The Vite `base` and the PWA scope must match the repo name (`/tally/`).
 
 ## Install on iPhone
 

@@ -9,7 +9,7 @@ describe('App smoke', () => {
 
   it('renders the header and the empty state', () => {
     render(<App />)
-    expect(screen.getByText('Habits')).toBeInTheDocument()
+    expect(screen.getByText('tally')).toBeInTheDocument()
     expect(screen.getByText('Build momentum, one day at a time')).toBeInTheDocument()
   })
 
