@@ -87,7 +87,7 @@ export default function HabitFormModal({ habit, existingHabits, onClose }) {
       <form className="modal__panel" onSubmit={onSubmit}>
         <div className="modal__head">
           <h2>{isEdit ? 'Edit habit' : 'New habit'}</h2>
-          <button type="button" className="btn btn--ghost" onClick={onClose} aria-label="Close">
+          <button type="button" className="btn btn--ghost btn--icon" onClick={onClose} aria-label="Close">
             ✕
           </button>
         </div>

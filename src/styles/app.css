@@ -31,6 +31,13 @@
 .btn--block {
   width: 100%;
 }
+.btn--icon {
+  width: 44px;
+  padding: 0;
+  display: grid;
+  place-items: center;
+  font-size: 17px;
+}
 
 /* ---------- header ---------- */
 .header {
@@ -72,9 +79,8 @@
 .quote {
   margin-top: var(--space-2);
   padding: var(--space-4);
-  background: var(--surface);
+  background: transparent;
   border: 1px solid var(--border);
-  border-left: 3px solid var(--accent);
   border-radius: var(--radius-lg);
 }
 .quote__text {

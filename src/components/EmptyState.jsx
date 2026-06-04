@@ -1,16 +1,19 @@
 import { useHabitsContext } from '../context/habits-store.js'
+import { resolvePalette } from '../lib/theme.js'
 
 // A small, friendly starter set. The timeline copy is honest: ~66 days, not 21.
+// Colors are assigned from the active theme's palette at seed time.
 const EXAMPLES = [
-  { name: 'Strength training', icon: '💪', color: '#C7F94B', schedule: { kind: 'timesPerWeek', timesPerWeek: 3 }, minimumVersion: '1 set', plan: { cue: 'morning coffee', time: '', place: '' } },
-  { name: 'Read', icon: '📖', color: '#5BA8E2', schedule: { kind: 'daily' }, minimumVersion: 'one page', plan: { cue: 'getting into bed', time: '', place: '' } },
-  { name: 'Drink water', icon: '💧', color: '#5BE2A8', type: 'quantitative', target: { amount: 8, unit: 'glasses' }, schedule: { kind: 'daily' } },
+  { name: 'Strength training', icon: '💪', schedule: { kind: 'timesPerWeek', timesPerWeek: 3 }, minimumVersion: '1 set', plan: { cue: 'morning coffee', time: '', place: '' } },
+  { name: 'Read', icon: '📖', schedule: { kind: 'daily' }, minimumVersion: 'one page', plan: { cue: 'getting into bed', time: '', place: '' } },
+  { name: 'Drink water', icon: '💧', type: 'quantitative', target: { amount: 8, unit: 'glasses' }, schedule: { kind: 'daily' } },
 ]
 
 export default function EmptyState({ onAdd, onHelp }) {
-  const { addHabit } = useHabitsContext()
+  const { addHabit, meta } = useHabitsContext()
+  const palette = resolvePalette(meta?.theme || 'dark', meta?.customThemes || [])
 
-  const seed = () => EXAMPLES.forEach((e) => addHabit(e))
+  const seed = () => EXAMPLES.forEach((e, i) => addHabit({ ...e, color: palette[i % palette.length] }))
 
   return (
     <div className="empty">

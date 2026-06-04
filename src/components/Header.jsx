@@ -25,7 +25,7 @@ export default function Header({ onAdd, onHelp }) {
         <div className="header__actions">
           <button
             type="button"
-            className="btn btn--ghost"
+            className="btn btn--ghost btn--icon"
             onClick={onHelp}
             aria-label="How it works"
             title="How it works"
@@ -34,7 +34,7 @@ export default function Header({ onAdd, onHelp }) {
           </button>
           <button
             type="button"
-            className="btn btn--ghost"
+            className="btn btn--ghost btn--icon"
             onClick={() => setThemeOpen(true)}
             aria-label="Themes"
             title="Themes"

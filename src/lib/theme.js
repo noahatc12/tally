@@ -21,42 +21,44 @@ export const PRESET_SEED = {
 // base colors PLUS a matching set of habit colors that look good on that theme. The
 // rest of the token set is derived. Applied like custom themes (inline vars) but
 // built-in: not editable or deletable.
+// Each theme suggests a generous, cohesive set of habit colors (its accent family +
+// complementary hues + neutrals like tan/grey).
 export const CURATED_THEMES = [
   // Dark
   { id: 'midnight', name: 'Midnight', bg: '#0b1020', surface: '#141b2e', text: '#e6eaf2', accent: '#6aa9ff',
-    palette: ['#6aa9ff', '#7cd6f9', '#9ae25b', '#c792ea', '#ff8a5b', '#5fd08a'] },
+    palette: ['#6aa9ff', '#7cd6f9', '#3fb6c9', '#5fd08a', '#9ae25b', '#c792ea', '#9aa9ff', '#e2b85b', '#ff8a5b', '#e25b8c', '#b3a895', '#8a93a3'] },
   { id: 'forest', name: 'Forest', bg: '#0e1410', surface: '#16201a', text: '#e7efe8', accent: '#5fd08a',
-    palette: ['#5fd08a', '#9ae25b', '#e2b85b', '#7cd6f9', '#cf9b5b', '#e28c5b'] },
+    palette: ['#5fd08a', '#9ae25b', '#3fb6c9', '#7cd6f9', '#e2b85b', '#cf9b5b', '#e28c5b', '#c792ea', '#6aa9ff', '#b0937a', '#8f9e7e', '#9a948a'] },
   { id: 'plum', name: 'Plum', bg: '#140f1a', surface: '#1e1726', text: '#ece6f2', accent: '#c792ea',
-    palette: ['#c792ea', '#e28cc9', '#9aa9ff', '#7cd6f9', '#e2b85b', '#5fd08a'] },
+    palette: ['#c792ea', '#e28cc9', '#9aa9ff', '#7cd6f9', '#6aa9ff', '#5fd08a', '#e2b85b', '#ff8a5b', '#e25b8c', '#b3a895', '#9a8aa8', '#8a8a8a'] },
   { id: 'ember', name: 'Ember', bg: '#140f0d', surface: '#211915', text: '#f1e9e3', accent: '#ff8a5b',
-    palette: ['#ff8a5b', '#f9c14b', '#e2b85b', '#e2725b', '#c792ea', '#5fd08a'] },
+    palette: ['#ff8a5b', '#f9c14b', '#e2b85b', '#e2725b', '#e25b8c', '#c792ea', '#5fd08a', '#9ae25b', '#6aa9ff', '#b0937a', '#c2b39a', '#9a948a'] },
   { id: 'slate', name: 'Slate', bg: '#0f1417', surface: '#192026', text: '#e4eaee', accent: '#3fb6c9',
-    palette: ['#3fb6c9', '#6aa9ff', '#5fd08a', '#c792ea', '#e2b85b', '#e2725b'] },
+    palette: ['#3fb6c9', '#6aa9ff', '#7cd6f9', '#5fd08a', '#9ae25b', '#c792ea', '#e2b85b', '#ff8a5b', '#e25b8c', '#a89f94', '#8f9e92', '#8a8a8a'] },
   // Dark — muted / neutral
   { id: 'charcoal', name: 'Charcoal', bg: '#121212', surface: '#1c1c1c', text: '#e6e6e6', accent: '#9a948a',
-    palette: ['#b3a895', '#9a948a', '#8f9e92', '#b0937a', '#8a93a3', '#c2bcae'] },
+    palette: ['#b3a895', '#9a948a', '#8f9e92', '#b0937a', '#8a93a3', '#c2bcae', '#6aa9ff', '#5fd08a', '#c792ea', '#e2b85b', '#e2725b', '#7d7d7d'] },
   { id: 'mocha', name: 'Mocha', bg: '#16110d', surface: '#211913', text: '#efe6da', accent: '#b08968',
-    palette: ['#b08968', '#a89270', '#8f9e7e', '#9a8a76', '#7e8a9a', '#c2b39a'] },
+    palette: ['#b08968', '#a89270', '#c2b39a', '#8f9e7e', '#9a8a76', '#7e8a9a', '#e2b85b', '#cf9b5b', '#c792ea', '#5fd08a', '#6aa9ff', '#9a948a'] },
   // Light — muted / neutral
   { id: 'stone', name: 'Stone', bg: '#f4f4f2', surface: '#ffffff', text: '#232323', accent: '#6f6f6f',
-    palette: ['#7d7d7d', '#a8997f', '#7e8f7e', '#8a7c69', '#7d8a9a', '#9c8a8a'] },
+    palette: ['#7d7d7d', '#a8997f', '#7e8f7e', '#8a7c69', '#7d8a9a', '#9c8a8a', '#3f94b6', '#2e9e6b', '#c8763c', '#9a6bcb', '#c95b7a', '#5ba8e2'] },
   { id: 'clay', name: 'Clay', bg: '#f2ece1', surface: '#fffdf9', text: '#2a241c', accent: '#a87f54',
-    palette: ['#a87f54', '#8a9a7d', '#7d8a9a', '#b07d6b', '#9a8aa8', '#6f6f6f'] },
+    palette: ['#a87f54', '#8a9a7d', '#7d8a9a', '#b07d6b', '#9a8aa8', '#6f6f6f', '#2e9e6b', '#c8763c', '#3f94b6', '#d5577e', '#a8997f', '#7e8f7e'] },
   { id: 'sand', name: 'Sand', bg: '#f6f1e7', surface: '#ffffff', text: '#2a2722', accent: '#c8763c',
-    palette: ['#c8763c', '#a8843c', '#7aa95b', '#3f94b6', '#b5638c', '#c95b5b'] },
+    palette: ['#c8763c', '#a8843c', '#7aa95b', '#3f94b6', '#b5638c', '#c95b5b', '#9a6bcb', '#2e9e6b', '#a8997f', '#8a7c69', '#7e8f7e', '#7d7d7d'] },
   { id: 'mint', name: 'Mint', bg: '#f1f7f4', surface: '#ffffff', text: '#1e2622', accent: '#2e9e6b',
-    palette: ['#2e9e6b', '#3f94b6', '#7aa95b', '#c8763c', '#9a6bcb', '#c95b7a'] },
+    palette: ['#2e9e6b', '#3f94b6', '#7aa95b', '#c8763c', '#9a6bcb', '#c95b7a', '#5ba8e2', '#a8843c', '#7e8f7e', '#a8997f', '#8a7c69', '#7d7d7d'] },
   { id: 'sky', name: 'Sky', bg: '#eef4fb', surface: '#ffffff', text: '#1b2430', accent: '#2f6fed',
-    palette: ['#2f6fed', '#3f94b6', '#2e9e6b', '#c8763c', '#9a6bcb', '#c95b7a'] },
+    palette: ['#2f6fed', '#3f94b6', '#5ba8e2', '#2e9e6b', '#7aa95b', '#c8763c', '#9a6bcb', '#c95b7a', '#c95b5b', '#a8997f', '#7e8f7e', '#7d7d7d'] },
   { id: 'rose', name: 'Rose', bg: '#fbf1f3', surface: '#ffffff', text: '#2a1f23', accent: '#d5577e',
-    palette: ['#d5577e', '#c95b5b', '#9a6bcb', '#3f94b6', '#2e9e6b', '#c8763c'] },
+    palette: ['#d5577e', '#c95b5b', '#9a6bcb', '#3f94b6', '#2e9e6b', '#7aa95b', '#c8763c', '#b98ce2', '#5ba8e2', '#a8997f', '#8a7c69', '#7d7d7d'] },
 ]
 
 // Habit-color palettes for the two built-in base themes.
 const BASE_PALETTES = {
-  dark: ['#5ba8e2', '#7aa95b', '#e2725b', '#b98ce2', '#a89f94', '#8a8a8a', '#c2bcae', '#e2b85b'],
-  light: ['#5ba8e2', '#7aa95b', '#c8763c', '#b98ce2', '#a8997f', '#7d7d7d', '#8a7c69', '#d5577e'],
+  dark: ['#5ba8e2', '#7cd6f9', '#5fd08a', '#9ae25b', '#e2b85b', '#ff8a5b', '#e2725b', '#e25b8c', '#b98ce2', '#a89f94', '#8a8a8a', '#c2bcae'],
+  light: ['#5ba8e2', '#3f94b6', '#2e9e6b', '#7aa95b', '#c8763c', '#a8843c', '#d5577e', '#9a6bcb', '#a8997f', '#8a7c69', '#7e8f7e', '#7d7d7d'],
 }
 
 // Resolve any selectable theme id to its base colors (for the editor seed, etc.).

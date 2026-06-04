@@ -8,7 +8,7 @@ export default function HelpModal({ onClose }) {
       <div className="modal__panel">
         <div className="modal__head">
           <h2>How it works</h2>
-          <button type="button" className="btn btn--ghost" onClick={onClose} aria-label="Close">
+          <button type="button" className="btn btn--ghost btn--icon" onClick={onClose} aria-label="Close">
             ✕
           </button>
         </div>
