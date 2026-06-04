@@ -120,15 +120,25 @@
   color: var(--accent-contrast);
   border-color: var(--row-accent, var(--accent));
 }
-/* single-line readout with a fixed width so ＋/− never reflow the card */
+/* single-line readout with a fixed min-width + nowrap so ＋/− never reflow the card */
 .count__readout {
-  min-width: 46px;
-  text-align: center;
+  display: inline-flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 4px;
+  min-width: 60px;
+  white-space: nowrap;
   font-family: var(--font-display);
-  font-weight: 700;
-  font-size: 15px;
 }
-.count__check {
+.count__num {
+  font-size: 16px;
+  font-weight: 700;
+}
+.count__unit {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+.count.is-complete .count__num {
   color: var(--row-accent, var(--accent));
 }
 .count__skip {

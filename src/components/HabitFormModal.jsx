@@ -165,21 +165,27 @@ export default function HabitFormModal({ habit, existingHabits, onClose }) {
         </div>
 
         {f.type === 'quantitative' && (
-          <div className="field field--row">
-            <input
-              className="field__input"
-              type="number"
-              min="1"
-              value={f.targetAmount}
-              onChange={(e) => set({ targetAmount: e.target.value })}
-              placeholder="8"
-            />
-            <input
-              className="field__input"
-              value={f.targetUnit}
-              onChange={(e) => set({ targetUnit: e.target.value })}
-              placeholder="glasses"
-            />
+          <div className="field--row">
+            <label className="field">
+              <span className="field__label">Amount</span>
+              <input
+                className="field__input"
+                type="number"
+                min="1"
+                value={f.targetAmount}
+                onChange={(e) => set({ targetAmount: e.target.value })}
+                placeholder="8"
+              />
+            </label>
+            <label className="field">
+              <span className="field__label">Unit</span>
+              <input
+                className="field__input"
+                value={f.targetUnit}
+                onChange={(e) => set({ targetUnit: e.target.value })}
+                placeholder="glasses"
+              />
+            </label>
           </div>
         )}
 
@@ -236,16 +242,14 @@ export default function HabitFormModal({ habit, existingHabits, onClose }) {
             <span className="field__label">Cue — “after …”</span>
             <input className="field__input" value={f.cue} onChange={(e) => set({ cue: e.target.value })} placeholder="morning coffee" />
           </label>
-          <div className="field field--row">
-            <label className="field">
-              <span className="field__label">Time</span>
-              <input className="field__input" type="time" value={f.time} onChange={(e) => set({ time: e.target.value })} />
-            </label>
-            <label className="field">
-              <span className="field__label">Place</span>
-              <input className="field__input" value={f.place} onChange={(e) => set({ place: e.target.value })} placeholder="home gym" />
-            </label>
-          </div>
+          <label className="field">
+            <span className="field__label">Time</span>
+            <input className="field__input" type="time" value={f.time} onChange={(e) => set({ time: e.target.value })} />
+          </label>
+          <label className="field">
+            <span className="field__label">Place</span>
+            <input className="field__input" value={f.place} onChange={(e) => set({ place: e.target.value })} placeholder="home gym" />
+          </label>
           {anchorOptions.length > 0 && (
             <label className="field">
               <span className="field__label">Stack onto (anchor habit)</span>

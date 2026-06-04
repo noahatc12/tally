@@ -17,6 +17,30 @@ export const PRESET_SEED = {
   light: { bg: '#faf7f2', surface: '#ffffff', text: '#1f1b16', accent: '#e2725b' },
 }
 
+// Curated preset palettes (researched for contrast + cohesion). Each defines the four
+// base colors; the rest of the token set is derived. Applied like custom themes
+// (inline vars) but built-in: not editable or deletable.
+export const CURATED_THEMES = [
+  // Dark
+  { id: 'midnight', name: 'Midnight', bg: '#0b1020', surface: '#141b2e', text: '#e6eaf2', accent: '#6aa9ff' },
+  { id: 'forest', name: 'Forest', bg: '#0e1410', surface: '#16201a', text: '#e7efe8', accent: '#5fd08a' },
+  { id: 'plum', name: 'Plum', bg: '#140f1a', surface: '#1e1726', text: '#ece6f2', accent: '#c792ea' },
+  { id: 'ember', name: 'Ember', bg: '#140f0d', surface: '#211915', text: '#f1e9e3', accent: '#ff8a5b' },
+  { id: 'slate', name: 'Slate', bg: '#0f1417', surface: '#192026', text: '#e4eaee', accent: '#3fb6c9' },
+  // Light
+  { id: 'sand', name: 'Sand', bg: '#f6f1e7', surface: '#ffffff', text: '#2a2722', accent: '#c8763c' },
+  { id: 'mint', name: 'Mint', bg: '#f1f7f4', surface: '#ffffff', text: '#1e2622', accent: '#2e9e6b' },
+  { id: 'sky', name: 'Sky', bg: '#eef4fb', surface: '#ffffff', text: '#1b2430', accent: '#2f6fed' },
+  { id: 'rose', name: 'Rose', bg: '#fbf1f3', surface: '#ffffff', text: '#2a1f23', accent: '#d5577e' },
+]
+
+// Resolve any selectable theme id to its base colors (for the editor seed, etc.).
+export function resolveColors(id, customThemes = []) {
+  if (id === 'light') return PRESET_SEED.light
+  if (id === 'dark') return PRESET_SEED.dark
+  return [...CURATED_THEMES, ...customThemes].find((t) => t.id === id) || PRESET_SEED.dark
+}
+
 // The inline CSS variables a custom theme sets (and that we clear when switching away).
 export const THEME_VARS = [
   '--bg',
@@ -120,7 +144,7 @@ export function applyTheme(meta, root = document.documentElement) {
     root.setAttribute('data-theme', id)
     return
   }
-  const t = (meta?.customThemes || []).find((x) => x.id === id)
+  const t = [...CURATED_THEMES, ...(meta?.customThemes || [])].find((x) => x.id === id)
   if (!t) {
     root.setAttribute('data-theme', 'dark')
     return

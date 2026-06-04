@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useHabitsContext } from '../context/habits-store.js'
-import { PRESETS, PRESET_SEED, FONT_OPTIONS, deriveTokens } from '../lib/theme.js'
+import { PRESETS, CURATED_THEMES, FONT_OPTIONS, deriveTokens, resolveColors } from '../lib/theme.js'
 
 const COLOR_FIELDS = [
   { key: 'bg', label: 'Background' },
@@ -83,8 +83,8 @@ export default function ThemeModal({ onClose }) {
   const customThemes = meta?.customThemes || []
 
   const startNew = () => {
-    const seed = PRESET_SEED[active] || PRESET_SEED.dark
-    setEditing({ mode: 'new', theme: { name: 'My theme', ...seed } })
+    const seed = resolveColors(active, customThemes)
+    setEditing({ mode: 'new', theme: { name: 'My theme', bg: seed.bg, surface: seed.surface, text: seed.text, accent: seed.accent } })
   }
 
   const onSave = (form) => {
@@ -121,6 +121,18 @@ export default function ThemeModal({ onClose }) {
                   onClick={() => setTheme(p.id)}
                 >
                   {p.name}
+                </button>
+              ))}
+              {CURATED_THEMES.map((t) => (
+                <button
+                  key={t.id}
+                  type="button"
+                  className={`theme-chip${active === t.id ? ' is-active' : ''}`}
+                  onClick={() => setTheme(t.id)}
+                  style={{ background: t.surface, color: t.text, borderColor: t.bg }}
+                >
+                  <span className="theme-chip__dot" style={{ background: t.accent }} />
+                  {t.name}
                 </button>
               ))}
               {customThemes.map((t) => (
@@ -163,7 +175,7 @@ export default function ThemeModal({ onClose }) {
                   onClick={() => setFont(fnt.id)}
                   aria-label={`Font: ${fnt.name}`}
                 >
-                  Habits
+                  Momentum
                 </button>
               ))}
             </div>

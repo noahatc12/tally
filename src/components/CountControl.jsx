@@ -36,13 +36,8 @@ export default function CountControl({ habit, today, value, state }) {
         −
       </button>
       <span className="count__readout" aria-live="polite">
-        {skipped ? 'skip' : `${v}/${target}`}
-        {complete && (
-          <span className="count__check" aria-hidden="true">
-            {' '}
-            ✓
-          </span>
-        )}
+        <strong className="count__num">{skipped ? '—' : `${v}/${target}`}</strong>
+        <span className="count__unit">{skipped ? 'skipped' : unit}</span>
       </span>
       <button type="button" className="count__btn count__btn--inc" onClick={inc} aria-label={`Log one ${unit}`}>
         ＋
