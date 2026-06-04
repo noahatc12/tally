@@ -84,6 +84,21 @@ export function deriveTokens({ bg, surface, text, accent }) {
   }
 }
 
+// Selectable font pairings (loaded in index.html). Each sets the display + body vars.
+export const FONT_OPTIONS = [
+  { id: 'default', name: 'Grotesk', display: "'Space Grotesk', system-ui, sans-serif", body: "'Inter', system-ui, sans-serif" },
+  { id: 'serif', name: 'Editorial', display: "'Fraunces', Georgia, serif", body: "'Inter', system-ui, sans-serif" },
+  { id: 'rounded', name: 'Rounded', display: "'Quicksand', system-ui, sans-serif", body: "'Nunito Sans', system-ui, sans-serif" },
+  { id: 'classic', name: 'Classic', display: "'Poppins', system-ui, sans-serif", body: "'Inter', system-ui, sans-serif" },
+  { id: 'mono', name: 'Mono', display: "'Space Mono', ui-monospace, monospace", body: "'Inter', system-ui, sans-serif" },
+]
+
+export function applyFont(meta, root = document.documentElement) {
+  const opt = FONT_OPTIONS.find((f) => f.id === (meta?.font || 'default')) || FONT_OPTIONS[0]
+  root.style.setProperty('--font-display', opt.display)
+  root.style.setProperty('--font-body', opt.body)
+}
+
 export function createCustomTheme(partial = {}) {
   const seed = PRESET_SEED.dark
   return {

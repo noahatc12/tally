@@ -7,7 +7,7 @@ const EXAMPLES = [
   { name: 'Drink water', icon: '💧', color: '#5BE2A8', type: 'quantitative', target: { amount: 8, unit: 'glasses' }, schedule: { kind: 'daily' } },
 ]
 
-export default function EmptyState({ onAdd }) {
+export default function EmptyState({ onAdd, onHelp }) {
   const { addHabit } = useHabitsContext()
 
   const seed = () => EXAMPLES.forEach((e) => addHabit(e))
@@ -28,6 +28,9 @@ export default function EmptyState({ onAdd }) {
         </button>
         <button type="button" className="btn btn--ghost" onClick={seed}>
           Add a few examples
+        </button>
+        <button type="button" className="btn btn--ghost" onClick={onHelp}>
+          How it works
         </button>
       </div>
     </div>

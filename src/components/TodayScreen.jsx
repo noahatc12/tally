@@ -7,11 +7,13 @@ import HabitList from './HabitList.jsx'
 import HabitFormModal from './HabitFormModal.jsx'
 import EmptyState from './EmptyState.jsx'
 import QuoteBanner from './QuoteBanner.jsx'
+import HelpModal from './HelpModal.jsx'
 
 export default function TodayScreen() {
   const { habits, completions } = useHabitsContext()
   const [formOpen, setFormOpen] = useState(false)
   const [editing, setEditing] = useState(null)
+  const [helpOpen, setHelpOpen] = useState(false)
 
   const today = todayKey()
   const active = useMemo(() => habits.filter((h) => !h.archived), [habits])
@@ -38,11 +40,11 @@ export default function TodayScreen() {
 
   return (
     <>
-      <Header onAdd={openAdd} />
+      <Header onAdd={openAdd} onHelp={() => setHelpOpen(true)} />
       <QuoteBanner />
 
       {active.length === 0 ? (
-        <EmptyState onAdd={openAdd} />
+        <EmptyState onAdd={openAdd} onHelp={() => setHelpOpen(true)} />
       ) : (
         <main>
           <HabitList title="Today" habits={ordered.due} onEdit={openEdit} emptyHint="Nothing due today — enjoy it." />
@@ -55,6 +57,7 @@ export default function TodayScreen() {
       {formOpen && (
         <HabitFormModal habit={editing} existingHabits={active} onClose={() => setFormOpen(false)} />
       )}
+      {helpOpen && <HelpModal onClose={() => setHelpOpen(false)} />}
     </>
   )
 }

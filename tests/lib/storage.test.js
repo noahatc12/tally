@@ -12,6 +12,7 @@ describe('storage', () => {
     expect(s.meta.schemaVersion).toBe(SCHEMA_VERSION)
     expect(s.meta.theme).toBe('dark')
     expect(s.meta.customThemes).toEqual([])
+    expect(s.meta.font).toBe('default')
   })
 
   it('backfills customThemes for pre-existing meta missing the field', () => {

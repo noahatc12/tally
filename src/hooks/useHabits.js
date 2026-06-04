@@ -101,6 +101,10 @@ export function useHabits() {
     }))
   }, [])
 
+  const setFont = useCallback((font) => {
+    setMeta((m) => ({ ...(m || emptyMeta()), font }))
+  }, [])
+
   const deleteCustomTheme = useCallback((id) => {
     setMeta((m) => ({
       ...m,
@@ -121,6 +125,7 @@ export function useHabits() {
     setCompletion,
     clearCompletion,
     setTheme,
+    setFont,
     addCustomTheme,
     updateCustomTheme,
     deleteCustomTheme,

@@ -60,5 +60,6 @@ export function emptyMeta() {
     freezes: 0,
     theme: 'dark', // 'dark' | 'light' | a custom theme id
     customThemes: [], // [{ id, name, bg, surface, text, accent }]
+    font: 'default', // a FONT_OPTIONS id
   }
 }

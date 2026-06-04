@@ -222,6 +222,7 @@
   justify-content: space-between;
   gap: var(--space-3);
   margin-top: var(--space-3);
+  flex-wrap: wrap; /* counter + pill wrap on narrow screens instead of overflowing */
 }
 .row__nudge {
   margin: var(--space-3) 0 0;
@@ -416,6 +417,59 @@
   }
 }
 
+/* ---------- guide ---------- */
+.guide {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+.guide__lead {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.5;
+  color: var(--text);
+}
+.guide__section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+.guide__section h3 {
+  font-size: 15px;
+  color: var(--accent);
+}
+.guide__list {
+  margin: 0;
+  padding-left: 1.1em;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 14px;
+  line-height: 1.45;
+  color: var(--text-muted);
+}
+.guide__list strong {
+  color: var(--text);
+}
+.guide__list em {
+  color: var(--text);
+  font-style: normal;
+  font-weight: 500;
+}
+.guide__examples {
+  list-style: none;
+  padding-left: 0;
+}
+.guide__note {
+  margin: 0;
+  font-size: 13px;
+  color: var(--text-muted);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: var(--space-3);
+}
+
 /* ---------- modal + form ---------- */
 .modal {
   position: fixed;
@@ -472,9 +526,14 @@
 .field--row {
   flex-direction: row;
   gap: var(--space-2);
+  align-items: end;
 }
-.field--row .field {
-  flex: 1;
+/* flex-basis 0 + min-width 0 so paired inputs (e.g. Time / Place) share width
+   equally and don't size to their differing intrinsic widths. */
+.field--row .field,
+.field--row > .field__input {
+  flex: 1 1 0;
+  min-width: 0;
 }
 .field__label {
   font-size: 13px;
@@ -486,9 +545,11 @@
   border-radius: var(--radius-sm);
   color: var(--text);
   padding: 10px 12px;
-  font-size: 15px;
+  /* >=16px so iOS Safari doesn't auto-zoom when the field is focused. */
+  font-size: 16px;
   min-height: 44px;
   width: 100%;
+  max-width: 100%;
 }
 .field__input--sm {
   width: 64px;
@@ -565,7 +626,32 @@
   color: var(--text-muted);
 }
 
-/* ---------- theme modal ---------- */
+/* ---------- appearance modal ---------- */
+.appearance__label {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+  margin: var(--space-2) 0 calc(-1 * var(--space-1));
+}
+.font-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+.font-chip {
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  border-radius: var(--radius-md);
+  padding: 10px 16px;
+  font-size: 17px;
+  min-height: 44px;
+}
+.font-chip.is-active {
+  border-color: var(--accent);
+  outline: 2px solid var(--accent);
+}
 .theme-grid {
   display: flex;
   flex-direction: column;

@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useHabitsContext } from '../context/habits-store.js'
-import { PRESETS, PRESET_SEED, deriveTokens } from '../lib/theme.js'
+import { PRESETS, PRESET_SEED, FONT_OPTIONS, deriveTokens } from '../lib/theme.js'
 
 const COLOR_FIELDS = [
   { key: 'bg', label: 'Background' },
@@ -75,9 +75,11 @@ function ThemeEditor({ initial, onSave, onCancel }) {
 }
 
 export default function ThemeModal({ onClose }) {
-  const { meta, setTheme, addCustomTheme, updateCustomTheme, deleteCustomTheme } = useHabitsContext()
+  const { meta, setTheme, setFont, addCustomTheme, updateCustomTheme, deleteCustomTheme } =
+    useHabitsContext()
   const [editing, setEditing] = useState(null) // { mode:'new'|'edit', theme }
   const active = meta?.theme || 'dark'
+  const activeFont = meta?.font || 'default'
   const customThemes = meta?.customThemes || []
 
   const startNew = () => {
@@ -95,11 +97,11 @@ export default function ThemeModal({ onClose }) {
   }
 
   return (
-    <div className="modal" role="dialog" aria-modal="true" aria-label="Themes">
+    <div className="modal" role="dialog" aria-modal="true" aria-label="Appearance">
       <div className="modal__backdrop" onClick={onClose} />
       <div className="modal__panel">
         <div className="modal__head">
-          <h2>{editing ? (editing.mode === 'new' ? 'New theme' : 'Edit theme') : 'Themes'}</h2>
+          <h2>{editing ? (editing.mode === 'new' ? 'New theme' : 'Edit theme') : 'Appearance'}</h2>
           <button type="button" className="btn btn--ghost" onClick={onClose} aria-label="Close">
             ✕
           </button>
@@ -109,6 +111,7 @@ export default function ThemeModal({ onClose }) {
           <ThemeEditor initial={editing.theme} onSave={onSave} onCancel={() => setEditing(null)} />
         ) : (
           <>
+            <h3 className="appearance__label">Theme</h3>
             <div className="theme-grid">
               {PRESETS.map((p) => (
                 <button
@@ -148,6 +151,21 @@ export default function ThemeModal({ onClose }) {
             <button type="button" className="btn btn--accent btn--block" onClick={startNew}>
               + Create theme
             </button>
+
+            <h3 className="appearance__label">Font</h3>
+            <div className="font-grid">
+              {FONT_OPTIONS.map((fnt) => (
+                <button
+                  key={fnt.id}
+                  type="button"
+                  className={`font-chip${activeFont === fnt.id ? ' is-active' : ''}`}
+                  style={{ fontFamily: fnt.display }}
+                  onClick={() => setFont(fnt.id)}
+                >
+                  {fnt.name}
+                </button>
+              ))}
+            </div>
           </>
         )}
       </div>

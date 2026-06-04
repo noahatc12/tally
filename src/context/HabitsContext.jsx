@@ -5,7 +5,7 @@
 import { useEffect } from 'react'
 import { useHabits } from '../hooks/useHabits.js'
 import { HabitsContext } from './habits-store.js'
-import { applyTheme } from '../lib/theme.js'
+import { applyTheme, applyFont } from '../lib/theme.js'
 
 export function HabitsProvider({ children }) {
   const store = useHabits()
@@ -15,6 +15,7 @@ export function HabitsProvider({ children }) {
   // re-applies exactly when needed (incl. live edits to the active custom theme).
   useEffect(() => {
     applyTheme(store.meta)
+    applyFont(store.meta)
   }, [store.meta])
 
   return <HabitsContext.Provider value={store}>{children}</HabitsContext.Provider>
