@@ -33,20 +33,14 @@ export default function CountControl({ habit, today, value, state }) {
       <button type="button" className="count__btn" onClick={dec} disabled={!counts} aria-label="Log one fewer">
         −
       </button>
+      {/* All three lines always render (badge uses a non-breaking-space placeholder)
+          so the control keeps a constant size and the card doesn't reflow on ＋/−. */}
       <div className="count__readout" aria-live="polite">
-        {skipped ? (
-          'Skipped'
-        ) : (
-          <>
-            <span className="count__num">
-              {v} / {target}
-            </span>
-            <span className="count__unit">{unit}</span>
-            {counts && (
-              <span className="count__badge">{complete ? 'complete ✓' : 'counts ✓'}</span>
-            )}
-          </>
-        )}
+        <span className="count__num">{skipped ? 'Skip' : `${v} / ${target}`}</span>
+        <span className="count__unit">{skipped ? 'today' : unit}</span>
+        <span className="count__badge">
+          {complete ? 'complete ✓' : counts ? 'counts ✓' : ' '}
+        </span>
       </div>
       <button type="button" className="count__btn count__btn--inc" onClick={inc} aria-label={`Log one ${unit}`}>
         ＋

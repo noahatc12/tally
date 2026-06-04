@@ -124,8 +124,11 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  min-width: 70px;
-  line-height: 1.1;
+  justify-content: center;
+  /* fixed footprint so tapping ＋/− never resizes the card */
+  min-width: 88px;
+  min-height: 46px;
+  line-height: 1.15;
 }
 .count__num {
   font-family: var(--font-display);
@@ -141,6 +144,7 @@
   letter-spacing: 0.04em;
   color: var(--text-muted);
   text-transform: uppercase;
+  min-height: 13px; /* reserved even when empty, so the badge appearing doesn't shift layout */
 }
 .count.is-complete .count__badge {
   color: var(--accent);
