@@ -29,19 +29,21 @@ export default function CountControl({ habit, today, value, state }) {
   }
 
   return (
+    // Single compact row (same height as the three-state toggle) so it lines up next
+    // to the "this week" pill. Fixed-width readout = no reflow on ＋/−.
     <div className={`count${counts ? ' is-done' : ''}${complete ? ' is-complete' : ''}`}>
       <button type="button" className="count__btn" onClick={dec} disabled={!counts} aria-label="Log one fewer">
         −
       </button>
-      {/* All three lines always render (badge uses a non-breaking-space placeholder)
-          so the control keeps a constant size and the card doesn't reflow on ＋/−. */}
-      <div className="count__readout" aria-live="polite">
-        <span className="count__num">{skipped ? 'Skip' : `${v} / ${target}`}</span>
-        <span className="count__unit">{skipped ? 'today' : unit}</span>
-        <span className="count__badge">
-          {complete ? 'complete ✓' : counts ? 'counts ✓' : ' '}
-        </span>
-      </div>
+      <span className="count__readout" aria-live="polite">
+        {skipped ? 'skip' : `${v}/${target}`}
+        {complete && (
+          <span className="count__check" aria-hidden="true">
+            {' '}
+            ✓
+          </span>
+        )}
+      </span>
       <button type="button" className="count__btn count__btn--inc" onClick={inc} aria-label={`Log one ${unit}`}>
         ＋
       </button>
@@ -49,8 +51,10 @@ export default function CountControl({ habit, today, value, state }) {
         type="button"
         className={`count__skip${skipped ? ' is-active' : ''}`}
         onClick={toggleSkip}
+        aria-label="Skip today"
+        title="Skip today"
       >
-        skip
+        ~
       </button>
     </div>
   )

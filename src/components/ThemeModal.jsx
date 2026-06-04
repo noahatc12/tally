@@ -161,8 +161,9 @@ export default function ThemeModal({ onClose }) {
                   className={`font-chip${activeFont === fnt.id ? ' is-active' : ''}`}
                   style={{ fontFamily: fnt.display }}
                   onClick={() => setFont(fnt.id)}
+                  aria-label={`Font: ${fnt.name}`}
                 >
-                  {fnt.name}
+                  Habits
                 </button>
               ))}
             </div>

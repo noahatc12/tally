@@ -94,14 +94,14 @@
 .count {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: 4px;
 }
 .count__btn {
   border: 1px solid var(--border);
   background: var(--surface-2);
   color: var(--text);
   border-radius: var(--radius-sm);
-  min-width: 40px;
+  width: 38px;
   min-height: 44px;
   font-size: 20px;
   font-weight: 700;
@@ -116,47 +116,29 @@
   border-color: var(--text-muted);
 }
 .count.is-done .count__btn--inc {
-  background: var(--accent);
+  background: var(--row-accent, var(--accent));
   color: var(--accent-contrast);
-  border-color: var(--accent);
+  border-color: var(--row-accent, var(--accent));
 }
+/* single-line readout with a fixed width so ＋/− never reflow the card */
 .count__readout {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  /* fixed footprint so tapping ＋/− never resizes the card */
-  min-width: 88px;
-  min-height: 46px;
-  line-height: 1.15;
-}
-.count__num {
+  min-width: 46px;
+  text-align: center;
   font-family: var(--font-display);
   font-weight: 700;
-  font-size: 16px;
+  font-size: 15px;
 }
-.count__unit {
-  font-size: 11px;
-  color: var(--text-muted);
-}
-.count__badge {
-  font-size: 10px;
-  letter-spacing: 0.04em;
-  color: var(--text-muted);
-  text-transform: uppercase;
-  min-height: 13px; /* reserved even when empty, so the badge appearing doesn't shift layout */
-}
-.count.is-complete .count__badge {
-  color: var(--accent);
+.count__check {
+  color: var(--row-accent, var(--accent));
 }
 .count__skip {
   border: 1px solid var(--border);
   background: transparent;
   color: var(--text-muted);
   border-radius: var(--radius-sm);
+  width: 34px;
   min-height: 44px;
-  padding: 0 10px;
-  font-size: 12px;
+  font-size: 16px;
 }
 .count__skip.is-active {
   border-color: var(--text-muted);
@@ -592,16 +574,16 @@
   flex-direction: column;
   gap: 6px;
 }
+/* Two equal columns via grid — reliably equalizes paired inputs even when one is a
+   native picker (type=time) with its own intrinsic width, which flex couldn't. */
 .field--row {
-  flex-direction: row;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
   gap: var(--space-2);
   align-items: end;
 }
-/* flex-basis 0 + min-width 0 so paired inputs (e.g. Time / Place) share width
-   equally and don't size to their differing intrinsic widths. */
 .field--row .field,
 .field--row > .field__input {
-  flex: 1 1 0;
   min-width: 0;
 }
 .field__label {
