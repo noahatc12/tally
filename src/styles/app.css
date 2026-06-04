@@ -46,6 +46,13 @@
   font-size: 30px;
   letter-spacing: -0.02em;
 }
+.header__greeting {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--accent);
+}
 .header__date {
   margin: 2px 0 0;
   color: var(--text-muted);
@@ -178,12 +185,14 @@
 
 /* ---------- habit row ---------- */
 .row {
-  background: var(--surface);
+  /* faint wash of the habit's own color so each card has a distinct hue */
+  background: color-mix(in srgb, var(--row-accent) 5%, var(--surface));
   border: 1px solid var(--border);
   border-left: 3px solid var(--row-accent, var(--accent));
   border-radius: var(--radius-lg);
   padding: var(--space-4);
   box-shadow: var(--shadow);
+  transition: transform var(--transition), box-shadow var(--transition);
 }
 .row__main {
   display: flex;
@@ -191,8 +200,20 @@
   gap: var(--space-3);
 }
 .row__icon {
-  font-size: 22px;
+  width: 46px;
+  height: 46px;
+  flex: none;
+  border-radius: 13px;
+  display: grid;
+  place-items: center;
+  font-size: 24px;
   line-height: 1;
+  background: color-mix(in srgb, var(--row-accent) 16%, var(--surface));
+  border: 1px solid color-mix(in srgb, var(--row-accent) 32%, transparent);
+  transition: transform var(--transition);
+}
+.row.is-done-today .row__icon {
+  transform: scale(1.05);
 }
 .row__identity {
   flex: 1;
@@ -267,9 +288,53 @@
 }
 .strength__fill {
   height: 100%;
-  background: var(--accent);
+  background: var(--row-accent, var(--accent));
   border-radius: 999px;
   transition: width 400ms ease;
+}
+
+/* ---------- week dots ---------- */
+.weekdots {
+  display: flex;
+  justify-content: space-between;
+  gap: 4px;
+  margin-top: var(--space-3);
+}
+.weekdots__cell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  flex: 1;
+}
+.weekdots__dot {
+  width: 100%;
+  max-width: 22px;
+  aspect-ratio: 1;
+  border-radius: 6px;
+  background: var(--heat-empty);
+  border: 1px solid transparent;
+}
+.weekdots__dot.is-done {
+  background: var(--row-accent);
+}
+.weekdots__dot.is-skip {
+  background: var(--surface-2);
+  border-color: var(--text-muted);
+}
+.weekdots__dot.is-miss {
+  background: color-mix(in srgb, var(--danger) 32%, var(--surface));
+}
+.weekdots__dot.is-off {
+  background: var(--heat-empty);
+  opacity: 0.45;
+}
+.weekdots__dot.is-today {
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--row-accent) 55%, transparent);
+}
+.weekdots__label {
+  font-size: 9px;
+  color: var(--text-muted);
 }
 .strength__label {
   font-size: 12px;

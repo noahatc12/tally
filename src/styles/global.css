@@ -14,12 +14,19 @@ body {
 }
 
 body {
-  background: var(--bg);
+  background-color: var(--bg);
+  /* Soft accent-tinted wash at the top — subtle depth, adapts to the active theme. */
+  background-image: radial-gradient(
+    1100px 560px at 50% -12%,
+    color-mix(in srgb, var(--accent) 14%, var(--bg)),
+    var(--bg) 62%
+  );
+  background-repeat: no-repeat;
   color: var(--text);
   font-family: var(--font-body);
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
-  transition: background var(--transition), color var(--transition);
+  transition: background-color var(--transition), color var(--transition);
   /* Never let content force a wider-than-screen layout (which reads as zoomed out). */
   overflow-x: hidden;
 }

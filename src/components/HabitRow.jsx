@@ -5,6 +5,7 @@ import CountControl from './CountControl.jsx'
 import StreakBadge from './StreakBadge.jsx'
 import StrengthMeter from './StrengthMeter.jsx'
 import CompletionRatePill from './CompletionRatePill.jsx'
+import WeekDots from './WeekDots.jsx'
 
 export default function HabitRow({ habit, onEdit }) {
   const { setCompletion, clearCompletion } = useHabitsContext()
@@ -23,7 +24,10 @@ export default function HabitRow({ habit, onEdit }) {
   const cue = habit.plan?.cue?.trim()
 
   return (
-    <article className="row" style={{ '--row-accent': habit.color }}>
+    <article
+      className={`row${todayState === 'done' ? ' is-done-today' : ''}`}
+      style={{ '--row-accent': habit.color }}
+    >
       <div className="row__main">
         <span className="row__icon" aria-hidden="true">
           {habit.icon}
@@ -36,6 +40,7 @@ export default function HabitRow({ habit, onEdit }) {
       </div>
 
       <StrengthMeter value={strength} />
+      <WeekDots habit={habit} />
 
       <div className="row__footer">
         <CompletionRatePill week={week} />

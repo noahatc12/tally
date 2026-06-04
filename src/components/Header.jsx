@@ -11,11 +11,14 @@ export default function Header({ onAdd, onHelp }) {
   const today = todayKey()
   const dateLabel = fromKey(today).toLocaleDateString(undefined, DATE_FMT)
   const activeCount = habits.filter((h) => !h.archived).length
+  const hour = new Date().getHours()
+  const greeting = hour < 12 ? 'Good morning' : hour < 18 ? 'Good afternoon' : 'Good evening'
 
   return (
     <header className="header">
       <div className="header__top">
         <div>
+          <p className="header__greeting">{greeting}</p>
           <h1 className="header__title">Habits</h1>
           <p className="header__date">{dateLabel}</p>
         </div>
