@@ -16,28 +16,28 @@ export default function HelpModal({ onClose }) {
         <div className="guide">
           <p className="guide__lead">
             Tap <strong>+ New</strong> to create a habit, then mark it each day. Missing one day
-            won&apos;t reset you — only missing repeatedly does. The goal is showing up, not perfection.
+            won&apos;t reset you; only missing repeatedly does. The goal is showing up, not perfection.
           </p>
 
           <section className="guide__section">
             <h3>Each day, mark a habit</h3>
             <ul className="guide__list">
-              <li><strong>Done</strong> — you did it. Extends your streak and raises strength.</li>
-              <li><strong>Skip</strong> — a planned rest day (sick, traveling). Neutral: it never breaks your streak and doesn&apos;t count against you.</li>
-              <li><strong>Miss</strong> — the only thing that breaks a streak. One miss is fine; the app just nudges you not to miss twice.</li>
+              <li><strong>Done</strong>: you did it. Extends your streak and raises strength.</li>
+              <li><strong>Skip</strong>: a planned rest day (sick, traveling). Neutral: it never breaks your streak and doesn&apos;t count against you.</li>
+              <li><strong>Miss</strong>: the only thing that breaks a streak. One miss is fine; the app just nudges you not to miss twice.</li>
             </ul>
             <p className="guide__note">
               <strong>Habit strength</strong> is a 0–100 score that rises as you show up. One miss
-              dips it a little — it never crashes to zero.
+              dips it a little; it never crashes to zero.
             </p>
           </section>
 
           <section className="guide__section">
             <h3>Two kinds of habit</h3>
             <ul className="guide__list">
-              <li><strong>Yes / no</strong> — a simple did-I-or-not. Example: <em>Meditate</em>.</li>
+              <li><strong>Yes / no</strong>: a simple did-I-or-not. Example: <em>Meditate</em>.</li>
               <li>
-                <strong>Measured</strong> — for habits with a number or done several times a day.
+                <strong>Measured</strong>: for habits with a number or done several times a day.
                 Set a target like <em>2 times</em> or <em>8 glasses</em>, then tap ＋ to log each one.
                 A single tap already keeps your streak; reaching the target marks it complete.
               </li>
@@ -47,20 +47,20 @@ export default function HelpModal({ onClose }) {
           <section className="guide__section">
             <h3>How often (schedule)</h3>
             <ul className="guide__list">
-              <li><strong>Daily</strong> — every day.</li>
-              <li><strong>Days</strong> — specific weekdays. Example: gym on <em>Mon / Wed / Fri</em>.</li>
-              <li><strong>×/week</strong> — a weekly target, any days. Example: <em>run 3× a week</em>.</li>
-              <li><strong>Every N</strong> — a fixed gap. Example: water plants <em>every 3 days</em>.</li>
+              <li><strong>Daily</strong>: every day.</li>
+              <li><strong>Days</strong>: specific weekdays. Example: gym on <em>Mon / Wed / Fri</em>.</li>
+              <li><strong>×/week</strong>: a weekly target, any days. Example: <em>run 3× a week</em>.</li>
+              <li><strong>Every N</strong>: a fixed gap. Example: water plants <em>every 3 days</em>.</li>
             </ul>
           </section>
 
           <section className="guide__section">
             <h3>Make it stick (optional)</h3>
             <ul className="guide__list">
-              <li><strong>Minimum version</strong> — your two-minute floor (e.g. “one set,” “one page”). Showing up at the minimum still counts.</li>
-              <li><strong>Cue</strong> — “after [something you already do]” (e.g. <em>after morning coffee</em>).</li>
-              <li><strong>Time &amp; place</strong> — when and where it happens.</li>
-              <li><strong>Anchor</strong> — stack a new habit onto an existing one.</li>
+              <li><strong>Minimum version</strong>: your two-minute floor (e.g. “one set,” “one page”). Showing up at the minimum still counts.</li>
+              <li><strong>Cue</strong>: “after [something you already do]” (e.g. <em>after morning coffee</em>).</li>
+              <li><strong>Time &amp; place</strong>: when and where it happens.</li>
+              <li><strong>Anchor</strong>: stack a new habit onto an existing one.</li>
             </ul>
           </section>
 

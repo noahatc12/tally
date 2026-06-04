@@ -46,11 +46,7 @@ export default function Header({ onAdd, onHelp }) {
           </button>
         </div>
       </div>
-      {activeCount > 0 && (
-        <p className="header__sub">
-          {activeCount} active {activeCount === 1 ? 'habit' : 'habits'}
-        </p>
-      )}
+      {activeCount > 0 && <p className="header__sub">{activeCount} active</p>}
       {themeOpen && <ThemeModal onClose={() => setThemeOpen(false)} />}
     </header>
   )

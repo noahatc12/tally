@@ -241,7 +241,7 @@ export default function HabitFormModal({ habit, existingHabits, onClose }) {
             <input className="field__input" value={f.minimumVersion} onChange={(e) => set({ minimumVersion: e.target.value })} placeholder="e.g. one set / one page" />
           </label>
           <label className="field">
-            <span className="field__label">Cue — “after …”</span>
+            <span className="field__label">Cue: “after …”</span>
             <input className="field__input" value={f.cue} onChange={(e) => set({ cue: e.target.value })} placeholder="morning coffee" />
           </label>
           <label className="field">
@@ -256,7 +256,7 @@ export default function HabitFormModal({ habit, existingHabits, onClose }) {
             <label className="field">
               <span className="field__label">Stack onto (anchor habit)</span>
               <select className="field__input" value={f.anchor} onChange={(e) => set({ anchor: e.target.value })}>
-                <option value="">— none —</option>
+                <option value="">None</option>
                 {anchorOptions.map((h) => (
                   <option key={h.id} value={h.id}>
                     {h.icon} {h.name}

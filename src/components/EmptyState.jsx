@@ -22,12 +22,12 @@ export default function EmptyState({ onAdd, onHelp }) {
       </div>
       <h2 className="empty__title">Build momentum, one day at a time</h2>
       <p className="empty__body">
-        Habits build on an asymptotic curve — a median of about <strong>66 days</strong> (it
-        varies widely). Missing a day won&apos;t derail you. Showing up at the minimum will.
+        Small, steady actions compound. Miss a day and nothing is lost. Showing up at the
+        minimum is the whole game.
       </p>
       <div className="empty__actions">
         <button type="button" className="btn btn--accent" onClick={onAdd}>
-          Create a habit
+          Create one
         </button>
         <button type="button" className="btn btn--ghost" onClick={seed}>
           Add a few examples

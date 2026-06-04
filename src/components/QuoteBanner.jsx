@@ -6,7 +6,7 @@ export default function QuoteBanner() {
   return (
     <aside className="quote">
       <p className="quote__text">“{quote.text}”</p>
-      {quote.author && <p className="quote__author">— {quote.author}</p>}
+      {quote.author && <p className="quote__author">{quote.author}</p>}
     </aside>
   )
 }

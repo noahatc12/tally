@@ -47,9 +47,9 @@ export default function TodayScreen() {
         <EmptyState onAdd={openAdd} onHelp={() => setHelpOpen(true)} />
       ) : (
         <main>
-          <HabitList title="Today" habits={ordered.due} onEdit={openEdit} emptyHint="Nothing due today — enjoy it." />
+          <HabitList title="Today" habits={ordered.due} onEdit={openEdit} emptyHint="Nothing due today. Enjoy it." />
           {ordered.rest.length > 0 && (
-            <HabitList title="Other habits" habits={ordered.rest} onEdit={openEdit} />
+            <HabitList title="Other" habits={ordered.rest} onEdit={openEdit} />
           )}
         </main>
       )}

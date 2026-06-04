@@ -36,7 +36,7 @@ export default function CountControl({ habit, today, value, state }) {
         −
       </button>
       <span className="count__readout" aria-live="polite">
-        <strong className="count__num">{skipped ? '—' : `${v}/${target}`}</strong>
+        <strong className="count__num">{skipped ? '·' : `${v}/${target}`}</strong>
         <span className="count__unit">{skipped ? 'skipped' : unit}</span>
       </span>
       <button type="button" className="count__btn count__btn--inc" onClick={inc} aria-label={`Log one ${unit}`}>
