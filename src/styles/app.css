@@ -50,8 +50,10 @@
   gap: var(--space-3);
 }
 .header__title {
-  font-size: 30px;
-  letter-spacing: -0.02em;
+  font-size: 18px;
+  font-weight: 500;
+  letter-spacing: 0;
+  color: var(--text-muted);
 }
 .header__greeting {
   margin: 0;
