@@ -234,8 +234,8 @@ export default function HabitFormModal({ habit, existingHabits, onClose }) {
           )}
         </div>
 
-        <fieldset className="plan">
-          <legend>Make it stick</legend>
+        <div className="plan">
+          <p className="plan__legend">Make it stick</p>
           <label className="field">
             <span className="field__label">Minimum version (the 2-minute floor)</span>
             <input className="field__input" value={f.minimumVersion} onChange={(e) => set({ minimumVersion: e.target.value })} placeholder="e.g. one set / one page" />
@@ -265,7 +265,7 @@ export default function HabitFormModal({ habit, existingHabits, onClose }) {
               </select>
             </label>
           )}
-        </fieldset>
+        </div>
 
         <div className="modal__foot">
           <button type="submit" className="btn btn--accent btn--block">

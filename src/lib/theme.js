@@ -33,7 +33,16 @@ export const CURATED_THEMES = [
     palette: ['#ff8a5b', '#f9c14b', '#e2b85b', '#e2725b', '#c792ea', '#5fd08a'] },
   { id: 'slate', name: 'Slate', bg: '#0f1417', surface: '#192026', text: '#e4eaee', accent: '#3fb6c9',
     palette: ['#3fb6c9', '#6aa9ff', '#5fd08a', '#c792ea', '#e2b85b', '#e2725b'] },
-  // Light
+  // Dark — muted / neutral
+  { id: 'charcoal', name: 'Charcoal', bg: '#121212', surface: '#1c1c1c', text: '#e6e6e6', accent: '#9a948a',
+    palette: ['#b3a895', '#9a948a', '#8f9e92', '#b0937a', '#8a93a3', '#c2bcae'] },
+  { id: 'mocha', name: 'Mocha', bg: '#16110d', surface: '#211913', text: '#efe6da', accent: '#b08968',
+    palette: ['#b08968', '#a89270', '#8f9e7e', '#9a8a76', '#7e8a9a', '#c2b39a'] },
+  // Light — muted / neutral
+  { id: 'stone', name: 'Stone', bg: '#f4f4f2', surface: '#ffffff', text: '#232323', accent: '#6f6f6f',
+    palette: ['#7d7d7d', '#a8997f', '#7e8f7e', '#8a7c69', '#7d8a9a', '#9c8a8a'] },
+  { id: 'clay', name: 'Clay', bg: '#f2ece1', surface: '#fffdf9', text: '#2a241c', accent: '#a87f54',
+    palette: ['#a87f54', '#8a9a7d', '#7d8a9a', '#b07d6b', '#9a8aa8', '#6f6f6f'] },
   { id: 'sand', name: 'Sand', bg: '#f6f1e7', surface: '#ffffff', text: '#2a2722', accent: '#c8763c',
     palette: ['#c8763c', '#a8843c', '#7aa95b', '#3f94b6', '#b5638c', '#c95b5b'] },
   { id: 'mint', name: 'Mint', bg: '#f1f7f4', surface: '#ffffff', text: '#1e2622', accent: '#2e9e6b',
@@ -46,8 +55,8 @@ export const CURATED_THEMES = [
 
 // Habit-color palettes for the two built-in base themes.
 const BASE_PALETTES = {
-  dark: ['#c7f94b', '#5ba8e2', '#e2725b', '#b98ce2', '#5be2a8', '#e2b85b'],
-  light: ['#e2725b', '#c8763c', '#5ba8e2', '#7aa95b', '#b98ce2', '#d5577e'],
+  dark: ['#5ba8e2', '#7aa95b', '#e2725b', '#b98ce2', '#a89f94', '#8a8a8a', '#c2bcae', '#e2b85b'],
+  light: ['#5ba8e2', '#7aa95b', '#c8763c', '#b98ce2', '#a8997f', '#7d7d7d', '#8a7c69', '#d5577e'],
 }
 
 // Resolve any selectable theme id to its base colors (for the editor seed, etc.).

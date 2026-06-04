@@ -901,11 +901,11 @@
   flex-direction: column;
   gap: var(--space-3);
 }
-.plan legend {
+.plan__legend {
+  margin: 0;
   font-family: var(--font-display);
   font-weight: 600;
   font-size: 13px;
-  padding: 0 6px;
   color: var(--text-muted);
 }
 
