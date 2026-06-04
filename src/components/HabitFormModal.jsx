@@ -97,7 +97,6 @@ export default function HabitFormModal({ habit, existingHabits, onClose }) {
             value={f.name}
             onChange={(e) => set({ name: e.target.value })}
             placeholder="e.g. Strength training"
-            autoFocus
           />
         </label>
 
