@@ -11,6 +11,14 @@ describe('storage', () => {
     expect(s.completions).toEqual({})
     expect(s.meta.schemaVersion).toBe(SCHEMA_VERSION)
     expect(s.meta.theme).toBe('dark')
+    expect(s.meta.customThemes).toEqual([])
+  })
+
+  it('backfills customThemes for pre-existing meta missing the field', () => {
+    localStorage.setItem(KEYS.meta, JSON.stringify({ schemaVersion: 1, theme: 'light', points: 0 }))
+    const s = loadAll()
+    expect(s.meta.customThemes).toEqual([])
+    expect(s.meta.theme).toBe('light')
   })
 
   it('degrades to null on corrupt JSON rather than throwing', () => {

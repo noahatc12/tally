@@ -1,11 +1,13 @@
+import { useState } from 'react'
 import { useHabitsContext } from '../context/habits-store.js'
 import { todayKey, fromKey } from '../lib/dates.js'
-import ThemeToggle from './ThemeToggle.jsx'
+import ThemeModal from './ThemeModal.jsx'
 
 const DATE_FMT = { weekday: 'long', month: 'long', day: 'numeric' }
 
 export default function Header({ onAdd }) {
   const { habits } = useHabitsContext()
+  const [themeOpen, setThemeOpen] = useState(false)
   const today = todayKey()
   const dateLabel = fromKey(today).toLocaleDateString(undefined, DATE_FMT)
   const activeCount = habits.filter((h) => !h.archived).length
@@ -18,7 +20,15 @@ export default function Header({ onAdd }) {
           <p className="header__date">{dateLabel}</p>
         </div>
         <div className="header__actions">
-          <ThemeToggle />
+          <button
+            type="button"
+            className="btn btn--ghost"
+            onClick={() => setThemeOpen(true)}
+            aria-label="Themes"
+            title="Themes"
+          >
+            🎨
+          </button>
           <button type="button" className="btn btn--accent" onClick={onAdd} aria-label="Add habit">
             + New
           </button>
@@ -29,6 +39,7 @@ export default function Header({ onAdd }) {
           {activeCount} active {activeCount === 1 ? 'habit' : 'habits'}
         </p>
       )}
+      {themeOpen && <ThemeModal onClose={() => setThemeOpen(false)} />}
     </header>
   )
 }

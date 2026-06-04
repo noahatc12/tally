@@ -5,6 +5,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { loadAll, saveHabits, saveCompletions, saveMeta } from '../lib/storage.js'
 import { createHabit, emptyMeta } from '../lib/factories.js'
+import { createCustomTheme } from '../lib/theme.js'
 
 export function useHabits() {
   // Load once via a lazy initializer (loadAll is called a single time at mount).
@@ -84,6 +85,27 @@ export function useHabits() {
     setMeta((m) => ({ ...(m || emptyMeta()), theme }))
   }, [])
 
+  const addCustomTheme = useCallback((partial) => {
+    const t = createCustomTheme(partial)
+    setMeta((m) => ({ ...m, customThemes: [...(m.customThemes || []), t], theme: t.id }))
+    return t
+  }, [])
+
+  const updateCustomTheme = useCallback((id, patch) => {
+    setMeta((m) => ({
+      ...m,
+      customThemes: (m.customThemes || []).map((t) => (t.id === id ? { ...t, ...patch } : t)),
+    }))
+  }, [])
+
+  const deleteCustomTheme = useCallback((id) => {
+    setMeta((m) => ({
+      ...m,
+      customThemes: (m.customThemes || []).filter((t) => t.id !== id),
+      theme: m.theme === id ? 'dark' : m.theme,
+    }))
+  }, [])
+
   return {
     habits,
     completions,
@@ -96,5 +118,8 @@ export function useHabits() {
     setCompletion,
     clearCompletion,
     setTheme,
+    addCustomTheme,
+    updateCustomTheme,
+    deleteCustomTheme,
   }
 }

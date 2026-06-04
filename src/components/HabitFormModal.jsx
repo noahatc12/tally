@@ -114,6 +114,14 @@ export default function HabitFormModal({ habit, existingHabits, onClose }) {
                 {ic}
               </button>
             ))}
+            <input
+              className="chip chip--input"
+              value={HABIT_ICONS.includes(f.icon) ? '' : f.icon}
+              onChange={(e) => set({ icon: e.target.value.slice(0, 8) || f.icon })}
+              placeholder="＋"
+              aria-label="Type any emoji"
+              inputMode="text"
+            />
           </div>
         </div>
 
@@ -124,12 +132,20 @@ export default function HabitFormModal({ habit, existingHabits, onClose }) {
               <button
                 key={c}
                 type="button"
-                className={`swatch${f.color === c ? ' is-active' : ''}`}
+                className={`swatch${f.color.toLowerCase() === c.toLowerCase() ? ' is-active' : ''}`}
                 style={{ background: c }}
                 onClick={() => set({ color: c })}
                 aria-label={`Color ${c}`}
               />
             ))}
+            <label className="swatch swatch--custom" title="Custom color">
+              <input
+                type="color"
+                value={f.color}
+                onChange={(e) => set({ color: e.target.value })}
+                aria-label="Custom color"
+              />
+            </label>
           </div>
         </div>
 

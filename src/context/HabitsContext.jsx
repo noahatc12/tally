@@ -5,15 +5,17 @@
 import { useEffect } from 'react'
 import { useHabits } from '../hooks/useHabits.js'
 import { HabitsContext } from './habits-store.js'
+import { applyTheme } from '../lib/theme.js'
 
 export function HabitsProvider({ children }) {
   const store = useHabits()
 
-  // Reflect the persisted theme onto <html data-theme> so CSS tokens switch.
+  // Apply the active theme: presets via data-theme, custom themes via inline vars.
+  // meta's ref only changes when meta changes, and applyTheme is idempotent, so this
+  // re-applies exactly when needed (incl. live edits to the active custom theme).
   useEffect(() => {
-    const theme = store.meta?.theme || 'dark'
-    document.documentElement.setAttribute('data-theme', theme)
-  }, [store.meta?.theme])
+    applyTheme(store.meta)
+  }, [store.meta])
 
   return <HabitsContext.Provider value={store}>{children}</HabitsContext.Provider>
 }

@@ -11,11 +11,21 @@ export const HABIT_COLORS = [
   '#E2B85B', // amber
   '#5BE2A8', // mint
   '#E25B8C', // rose
+  '#F4A24B', // orange
+  '#7CD6F9', // sky
+  '#9AE25B', // green
+  '#E25B5B', // red
+  '#C0C6CF', // slate
 ]
 
-export const HABIT_ICONS = ['💪', '📖', '🧘', '💧', '🏃', '🥗', '😴', '🧹', '✍️', '🎯', '🎸', '💰']
+// Quick-pick emoji set; the form also accepts any pasted/typed emoji.
+export const HABIT_ICONS = [
+  '💪', '📖', '🧘', '💧', '🏃', '🥗', '😴', '🧹', '✍️', '🎯', '🎸', '💰',
+  '🧠', '🦷', '🚭', '☕', '🌱', '🛏️', '📱', '🧴', '🐕', '🙏', '🎨', '🧺',
+  '⏰', '📵', '🥦', '🚴', '🏊', '⛰️', '📓', '🎹',
+]
 
-function uuid() {
+export function uuid() {
   if (typeof crypto !== 'undefined' && crypto.randomUUID) return crypto.randomUUID()
   // Fallback for very old environments / certain test runners.
   return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
@@ -48,6 +58,7 @@ export function emptyMeta() {
     level: 0,
     badges: [],
     freezes: 0,
-    theme: 'dark',
+    theme: 'dark', // 'dark' | 'light' | a custom theme id
+    customThemes: [], // [{ id, name, bg, surface, text, accent }]
   }
 }
