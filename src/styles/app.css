@@ -61,6 +61,97 @@
   font-size: 13px;
 }
 
+/* ---------- daily quote ---------- */
+.quote {
+  margin-top: var(--space-2);
+  padding: var(--space-4);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--accent);
+  border-radius: var(--radius-lg);
+}
+.quote__text {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 16px;
+  line-height: 1.45;
+  color: var(--text);
+}
+.quote__author {
+  margin: var(--space-2) 0 0;
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+/* ---------- count control (measured / multi-per-day) ---------- */
+.count {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.count__btn {
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+  color: var(--text);
+  border-radius: var(--radius-sm);
+  min-width: 40px;
+  min-height: 44px;
+  font-size: 20px;
+  font-weight: 700;
+  display: grid;
+  place-items: center;
+}
+.count__btn:disabled {
+  opacity: 0.4;
+}
+.count__btn--inc {
+  background: var(--surface);
+  border-color: var(--text-muted);
+}
+.count.is-done .count__btn--inc {
+  background: var(--accent);
+  color: var(--accent-contrast);
+  border-color: var(--accent);
+}
+.count__readout {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 70px;
+  line-height: 1.1;
+}
+.count__num {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 16px;
+}
+.count__unit {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+.count__badge {
+  font-size: 10px;
+  letter-spacing: 0.04em;
+  color: var(--text-muted);
+  text-transform: uppercase;
+}
+.count.is-complete .count__badge {
+  color: var(--accent);
+}
+.count__skip {
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text-muted);
+  border-radius: var(--radius-sm);
+  min-height: 44px;
+  padding: 0 10px;
+  font-size: 12px;
+}
+.count__skip.is-active {
+  border-color: var(--text-muted);
+  color: var(--text);
+}
+
 /* ---------- habit list ---------- */
 .habit-list {
   margin-top: var(--space-5);

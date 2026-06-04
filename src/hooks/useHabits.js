@@ -61,7 +61,9 @@ export function useHabits() {
     })
   }, [])
 
-  const setCompletion = useCallback((habitId, dateKey, state, value) => {
+  // celebrate defaults to "on done"; callers (e.g. counters) can override so they
+  // only celebrate when a multi-per-day target is fully reached.
+  const setCompletion = useCallback((habitId, dateKey, state, value, celebrate) => {
     setCompletions((c) => {
       const day = { ...(c[dateKey] || {}) }
       if (state == null) {
@@ -73,7 +75,8 @@ export function useHabits() {
       if (!Object.keys(day).length) delete next[dateKey]
       return next
     })
-    if (state === 'done') setCelebration({ habitId, ts: Date.now() })
+    const shouldCelebrate = celebrate === undefined ? state === 'done' : celebrate
+    if (shouldCelebrate) setCelebration({ habitId, ts: Date.now() })
   }, [])
 
   const clearCompletion = useCallback(

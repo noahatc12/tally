@@ -10,7 +10,16 @@ describe('App smoke', () => {
   it('renders the header and the empty state', () => {
     render(<App />)
     expect(screen.getByText('Habits')).toBeInTheDocument()
-    expect(screen.getByText('Start one small habit')).toBeInTheDocument()
+    expect(screen.getByText('Build momentum, one day at a time')).toBeInTheDocument()
+  })
+
+  it('counts a measured habit as done after a single tap (forgiving target)', () => {
+    render(<App />)
+    fireEvent.click(screen.getByText('Add a few examples'))
+    // "Drink water" is quantitative (8 glasses) -> a count control with a ＋ button.
+    fireEvent.click(screen.getByRole('button', { name: /log one glasses/i }))
+    expect(screen.getByText('1 / 8')).toBeInTheDocument()
+    expect(screen.getByText('counts ✓')).toBeInTheDocument() // one tap already secures the day
   })
 
   it('seeds example habits and shows them', () => {

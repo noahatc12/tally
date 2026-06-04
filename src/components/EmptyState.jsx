@@ -17,7 +17,7 @@ export default function EmptyState({ onAdd }) {
       <div className="empty__art" aria-hidden="true">
         ◇
       </div>
-      <h2 className="empty__title">Start one small habit</h2>
+      <h2 className="empty__title">Build momentum, one day at a time</h2>
       <p className="empty__body">
         Habits build on an asymptotic curve — a median of about <strong>66 days</strong> (it
         varies widely). Missing a day won&apos;t derail you. Showing up at the minimum will.

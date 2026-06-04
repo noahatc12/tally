@@ -30,8 +30,8 @@
   --text: #e8e8ea;
   --text-muted: #9aa0aa;
   --border: #262a31;
-  --accent: #c7f94b;
-  --accent-contrast: #0e0f12; /* text on top of the accent */
+  --accent: #474747;
+  --accent-contrast: #ffffff; /* text on top of the accent */
   --danger: #f4796b;
   --shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
   --heat-empty: #1b1e24;

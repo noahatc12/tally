@@ -18,6 +18,7 @@ export function useHabitDerived(habit) {
     const strength = computeStrength(habit, completions, today)
     const week = rateForWindow(habit, completions, 'week', today)
     const todayState = getState(completions, today, habit.id) || null
+    const todayValue = completions[today]?.[habit.id]?.value
 
     // "Never miss twice": count consecutive misses ending just before today.
     const events = streakEvents(habit, completions, today)
@@ -25,7 +26,7 @@ export function useHabitDerived(habit) {
     let trailingMisses = 0
     for (let i = resolved.length - 1; i >= 0 && resolved[i] === 'miss'; i--) trailingMisses++
 
-    return { streaks, strength, week, today, todayState, trailingMisses }
+    return { streaks, strength, week, today, todayState, todayValue, trailingMisses }
     // habit fields and the completion entries we read are covered by these deps.
   }, [habit, completions, today])
 }

@@ -6,6 +6,7 @@ import Header from './Header.jsx'
 import HabitList from './HabitList.jsx'
 import HabitFormModal from './HabitFormModal.jsx'
 import EmptyState from './EmptyState.jsx'
+import QuoteBanner from './QuoteBanner.jsx'
 
 export default function TodayScreen() {
   const { habits, completions } = useHabitsContext()
@@ -38,6 +39,7 @@ export default function TodayScreen() {
   return (
     <>
       <Header onAdd={openAdd} />
+      <QuoteBanner />
 
       {active.length === 0 ? (
         <EmptyState onAdd={openAdd} />

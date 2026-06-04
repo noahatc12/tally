@@ -1,13 +1,15 @@
 import { useHabitsContext } from '../context/habits-store.js'
 import { useHabitDerived } from '../hooks/useHabitDerived.js'
 import ThreeStateToggle from './ThreeStateToggle.jsx'
+import CountControl from './CountControl.jsx'
 import StreakBadge from './StreakBadge.jsx'
 import StrengthMeter from './StrengthMeter.jsx'
 import CompletionRatePill from './CompletionRatePill.jsx'
 
 export default function HabitRow({ habit, onEdit }) {
   const { setCompletion, clearCompletion } = useHabitsContext()
-  const { streaks, strength, week, today, todayState, trailingMisses } = useHabitDerived(habit)
+  const { streaks, strength, week, today, todayState, todayValue, trailingMisses } = useHabitDerived(habit)
+  const isCount = habit.type === 'quantitative'
 
   // One miss = gentle nudge; two+ misses = de-emphasize the streak number, no guilt.
   const showNudge = todayState !== 'done' && trailingMisses === 1
@@ -37,7 +39,11 @@ export default function HabitRow({ habit, onEdit }) {
 
       <div className="row__footer">
         <CompletionRatePill week={week} />
-        <ThreeStateToggle value={todayState} onSelect={onSelect} />
+        {isCount ? (
+          <CountControl habit={habit} today={today} value={todayValue} state={todayState} />
+        ) : (
+          <ThreeStateToggle value={todayState} onSelect={onSelect} />
+        )}
       </div>
 
       {showNudge && (

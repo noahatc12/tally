@@ -13,7 +13,7 @@ export const PRESETS = [
 
 // Seed colors used as the starting point when creating a theme "from" a preset.
 export const PRESET_SEED = {
-  dark: { bg: '#0e0f12', surface: '#16181d', text: '#e8e8ea', accent: '#c7f94b' },
+  dark: { bg: '#0e0f12', surface: '#16181d', text: '#e8e8ea', accent: '#474747' },
   light: { bg: '#faf7f2', surface: '#ffffff', text: '#1f1b16', accent: '#e2725b' },
 }
 
