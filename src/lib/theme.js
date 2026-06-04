@@ -18,27 +18,58 @@ export const PRESET_SEED = {
 }
 
 // Curated preset palettes (researched for contrast + cohesion). Each defines the four
-// base colors; the rest of the token set is derived. Applied like custom themes
-// (inline vars) but built-in: not editable or deletable.
+// base colors PLUS a matching set of habit colors that look good on that theme. The
+// rest of the token set is derived. Applied like custom themes (inline vars) but
+// built-in: not editable or deletable.
 export const CURATED_THEMES = [
   // Dark
-  { id: 'midnight', name: 'Midnight', bg: '#0b1020', surface: '#141b2e', text: '#e6eaf2', accent: '#6aa9ff' },
-  { id: 'forest', name: 'Forest', bg: '#0e1410', surface: '#16201a', text: '#e7efe8', accent: '#5fd08a' },
-  { id: 'plum', name: 'Plum', bg: '#140f1a', surface: '#1e1726', text: '#ece6f2', accent: '#c792ea' },
-  { id: 'ember', name: 'Ember', bg: '#140f0d', surface: '#211915', text: '#f1e9e3', accent: '#ff8a5b' },
-  { id: 'slate', name: 'Slate', bg: '#0f1417', surface: '#192026', text: '#e4eaee', accent: '#3fb6c9' },
+  { id: 'midnight', name: 'Midnight', bg: '#0b1020', surface: '#141b2e', text: '#e6eaf2', accent: '#6aa9ff',
+    palette: ['#6aa9ff', '#7cd6f9', '#9ae25b', '#c792ea', '#ff8a5b', '#5fd08a'] },
+  { id: 'forest', name: 'Forest', bg: '#0e1410', surface: '#16201a', text: '#e7efe8', accent: '#5fd08a',
+    palette: ['#5fd08a', '#9ae25b', '#e2b85b', '#7cd6f9', '#cf9b5b', '#e28c5b'] },
+  { id: 'plum', name: 'Plum', bg: '#140f1a', surface: '#1e1726', text: '#ece6f2', accent: '#c792ea',
+    palette: ['#c792ea', '#e28cc9', '#9aa9ff', '#7cd6f9', '#e2b85b', '#5fd08a'] },
+  { id: 'ember', name: 'Ember', bg: '#140f0d', surface: '#211915', text: '#f1e9e3', accent: '#ff8a5b',
+    palette: ['#ff8a5b', '#f9c14b', '#e2b85b', '#e2725b', '#c792ea', '#5fd08a'] },
+  { id: 'slate', name: 'Slate', bg: '#0f1417', surface: '#192026', text: '#e4eaee', accent: '#3fb6c9',
+    palette: ['#3fb6c9', '#6aa9ff', '#5fd08a', '#c792ea', '#e2b85b', '#e2725b'] },
   // Light
-  { id: 'sand', name: 'Sand', bg: '#f6f1e7', surface: '#ffffff', text: '#2a2722', accent: '#c8763c' },
-  { id: 'mint', name: 'Mint', bg: '#f1f7f4', surface: '#ffffff', text: '#1e2622', accent: '#2e9e6b' },
-  { id: 'sky', name: 'Sky', bg: '#eef4fb', surface: '#ffffff', text: '#1b2430', accent: '#2f6fed' },
-  { id: 'rose', name: 'Rose', bg: '#fbf1f3', surface: '#ffffff', text: '#2a1f23', accent: '#d5577e' },
+  { id: 'sand', name: 'Sand', bg: '#f6f1e7', surface: '#ffffff', text: '#2a2722', accent: '#c8763c',
+    palette: ['#c8763c', '#a8843c', '#7aa95b', '#3f94b6', '#b5638c', '#c95b5b'] },
+  { id: 'mint', name: 'Mint', bg: '#f1f7f4', surface: '#ffffff', text: '#1e2622', accent: '#2e9e6b',
+    palette: ['#2e9e6b', '#3f94b6', '#7aa95b', '#c8763c', '#9a6bcb', '#c95b7a'] },
+  { id: 'sky', name: 'Sky', bg: '#eef4fb', surface: '#ffffff', text: '#1b2430', accent: '#2f6fed',
+    palette: ['#2f6fed', '#3f94b6', '#2e9e6b', '#c8763c', '#9a6bcb', '#c95b7a'] },
+  { id: 'rose', name: 'Rose', bg: '#fbf1f3', surface: '#ffffff', text: '#2a1f23', accent: '#d5577e',
+    palette: ['#d5577e', '#c95b5b', '#9a6bcb', '#3f94b6', '#2e9e6b', '#c8763c'] },
 ]
+
+// Habit-color palettes for the two built-in base themes.
+const BASE_PALETTES = {
+  dark: ['#c7f94b', '#5ba8e2', '#e2725b', '#b98ce2', '#5be2a8', '#e2b85b'],
+  light: ['#e2725b', '#c8763c', '#5ba8e2', '#7aa95b', '#b98ce2', '#d5577e'],
+}
 
 // Resolve any selectable theme id to its base colors (for the editor seed, etc.).
 export function resolveColors(id, customThemes = []) {
   if (id === 'light') return PRESET_SEED.light
   if (id === 'dark') return PRESET_SEED.dark
   return [...CURATED_THEMES, ...customThemes].find((t) => t.id === id) || PRESET_SEED.dark
+}
+
+// The suggested habit colors that match a theme.
+export function resolvePalette(id, customThemes = []) {
+  if (id === 'dark') return BASE_PALETTES.dark
+  if (id === 'light') return BASE_PALETTES.light
+  const t = [...CURATED_THEMES, ...customThemes].find((x) => x.id === id)
+  if (t?.palette) return t.palette
+  // Custom themes (no palette): suggest the mode-appropriate base set.
+  return isDarkTheme(id, customThemes) ? BASE_PALETTES.dark : BASE_PALETTES.light
+}
+
+// Is the given theme a dark theme (by background luminance)?
+export function isDarkTheme(id, customThemes = []) {
+  return luminance(resolveColors(id, customThemes).bg) < 0.5
 }
 
 // The inline CSS variables a custom theme sets (and that we clear when switching away).

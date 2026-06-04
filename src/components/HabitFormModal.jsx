@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useHabitsContext } from '../context/habits-store.js'
-import { HABIT_COLORS, HABIT_ICONS } from '../lib/factories.js'
+import { HABIT_ICONS } from '../lib/factories.js'
+import { resolvePalette } from '../lib/theme.js'
 
 const WEEKDAYS = [
   { v: 0, l: 'Su' },
@@ -12,11 +13,11 @@ const WEEKDAYS = [
   { v: 6, l: 'Sa' },
 ]
 
-function initialForm(habit) {
+function initialForm(habit, palette) {
   const s = habit?.schedule || {}
   return {
     name: habit?.name || '',
-    color: habit?.color || HABIT_COLORS[0],
+    color: habit?.color || palette[0],
     icon: habit?.icon || HABIT_ICONS[0],
     type: habit?.type || 'binary',
     targetAmount: habit?.target?.amount || '',
@@ -34,8 +35,9 @@ function initialForm(habit) {
 }
 
 export default function HabitFormModal({ habit, existingHabits, onClose }) {
-  const { addHabit, updateHabit, archiveHabit, deleteHabit } = useHabitsContext()
-  const [f, setF] = useState(() => initialForm(habit))
+  const { meta, addHabit, updateHabit, archiveHabit, deleteHabit } = useHabitsContext()
+  const palette = resolvePalette(meta?.theme || 'dark', meta?.customThemes || [])
+  const [f, setF] = useState(() => initialForm(habit, palette))
   const isEdit = Boolean(habit)
   const set = (patch) => setF((prev) => ({ ...prev, ...patch }))
 
@@ -127,7 +129,7 @@ export default function HabitFormModal({ habit, existingHabits, onClose }) {
         <div className="field">
           <span className="field__label">Color</span>
           <div className="chips">
-            {HABIT_COLORS.map((c) => (
+            {palette.map((c) => (
               <button
                 key={c}
                 type="button"

@@ -1,6 +1,14 @@
 import { useState } from 'react'
 import { useHabitsContext } from '../context/habits-store.js'
-import { PRESETS, CURATED_THEMES, FONT_OPTIONS, deriveTokens, resolveColors } from '../lib/theme.js'
+import {
+  PRESETS,
+  CURATED_THEMES,
+  FONT_OPTIONS,
+  deriveTokens,
+  resolveColors,
+  isDarkTheme,
+  luminance,
+} from '../lib/theme.js'
 
 const COLOR_FIELDS = [
   { key: 'bg', label: 'Background' },
@@ -81,6 +89,9 @@ export default function ThemeModal({ onClose }) {
   const active = meta?.theme || 'dark'
   const activeFont = meta?.font || 'default'
   const customThemes = meta?.customThemes || []
+  // Show only themes matching the chosen mode (defaults to the active theme's mode).
+  const [mode, setMode] = useState(isDarkTheme(active, customThemes) ? 'dark' : 'light')
+  const inMode = (bg) => (luminance(bg) < 0.5 ? 'dark' : 'light') === mode
 
   const startNew = () => {
     const seed = resolveColors(active, customThemes)
@@ -111,9 +122,19 @@ export default function ThemeModal({ onClose }) {
           <ThemeEditor initial={editing.theme} onSave={onSave} onCancel={() => setEditing(null)} />
         ) : (
           <>
-            <h3 className="appearance__label">Theme</h3>
+            <div className="appearance__row">
+              <h3 className="appearance__label">Theme</h3>
+              <div className="segmented">
+                <button type="button" className={mode === 'dark' ? 'is-active' : ''} onClick={() => setMode('dark')}>
+                  Dark
+                </button>
+                <button type="button" className={mode === 'light' ? 'is-active' : ''} onClick={() => setMode('light')}>
+                  Light
+                </button>
+              </div>
+            </div>
             <div className="theme-grid">
-              {PRESETS.map((p) => (
+              {PRESETS.filter((p) => p.id === mode).map((p) => (
                 <button
                   key={p.id}
                   type="button"
@@ -123,7 +144,7 @@ export default function ThemeModal({ onClose }) {
                   {p.name}
                 </button>
               ))}
-              {CURATED_THEMES.map((t) => (
+              {CURATED_THEMES.filter((t) => inMode(t.bg)).map((t) => (
                 <button
                   key={t.id}
                   type="button"
@@ -135,7 +156,7 @@ export default function ThemeModal({ onClose }) {
                   {t.name}
                 </button>
               ))}
-              {customThemes.map((t) => (
+              {customThemes.filter((t) => inMode(t.bg)).map((t) => (
                 <div key={t.id} className={`theme-chip theme-chip--custom${active === t.id ? ' is-active' : ''}`}>
                   <button type="button" className="theme-chip__select" onClick={() => setTheme(t.id)}>
                     <span className="theme-chip__dot" style={{ background: t.accent }} />
