@@ -1,0 +1,34 @@
+import { useHabitsContext } from '../context/habits-store.js'
+import { todayKey, fromKey } from '../lib/dates.js'
+import ThemeToggle from './ThemeToggle.jsx'
+
+const DATE_FMT = { weekday: 'long', month: 'long', day: 'numeric' }
+
+export default function Header({ onAdd }) {
+  const { habits } = useHabitsContext()
+  const today = todayKey()
+  const dateLabel = fromKey(today).toLocaleDateString(undefined, DATE_FMT)
+  const activeCount = habits.filter((h) => !h.archived).length
+
+  return (
+    <header className="header">
+      <div className="header__top">
+        <div>
+          <h1 className="header__title">Habits</h1>
+          <p className="header__date">{dateLabel}</p>
+        </div>
+        <div className="header__actions">
+          <ThemeToggle />
+          <button type="button" className="btn btn--accent" onClick={onAdd} aria-label="Add habit">
+            + New
+          </button>
+        </div>
+      </div>
+      {activeCount > 0 && (
+        <p className="header__sub">
+          {activeCount} active {activeCount === 1 ? 'habit' : 'habits'}
+        </p>
+      )}
+    </header>
+  )
+}

@@ -1,0 +1,53 @@
+/* Semantic design tokens. Components reference these variables only — never raw hex —
+   so both themes (and future tuning) work for free. Theme is selected by the
+   data-theme attribute on <html>, set from meta.theme. */
+
+:root {
+  --font-display: 'Space Grotesk', system-ui, sans-serif;
+  --font-body: 'Inter', system-ui, sans-serif;
+
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 18px;
+
+  --maxw: 480px; /* mobile-first content column */
+  --transition: 160ms ease;
+}
+
+/* Dark (default) — clean & professional */
+:root,
+:root[data-theme='dark'] {
+  --bg: #0e0f12;
+  --surface: #16181d;
+  --surface-2: #1e2127;
+  --text: #e8e8ea;
+  --text-muted: #9aa0aa;
+  --border: #262a31;
+  --accent: #c7f94b;
+  --accent-contrast: #0e0f12; /* text on top of the accent */
+  --danger: #f4796b;
+  --shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  --heat-empty: #1b1e24;
+}
+
+/* Light — warm minimal */
+:root[data-theme='light'] {
+  --bg: #faf7f2;
+  --surface: #ffffff;
+  --surface-2: #f3ede3;
+  --text: #1f1b16;
+  --text-muted: #6b6258;
+  --border: #e7dfd3;
+  --accent: #e2725b;
+  --accent-contrast: #ffffff;
+  --danger: #c0492f;
+  --shadow: 0 6px 20px rgba(31, 27, 22, 0.08);
+  --heat-empty: #efe8dc;
+}
