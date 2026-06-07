@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { completionRate, valueTotals } from '../../src/lib/stats.js'
+import { completionRate, valueTotals, todaySummary, aggregateHeatmapData } from '../../src/lib/stats.js'
 import { habit, comp } from '../fixtures/sample.js'
 
 describe('stats — completion rate', () => {
@@ -60,5 +60,39 @@ describe('stats — valueTotals (measured / duration)', () => {
     const h = habit({ type: 'duration', target: { amount: 30 } })
     const t = valueTotals(h, {}, '2026-06-01', '2026-06-07')
     expect(t).toEqual({ total: 0, daysLogged: 0, avg: 0 })
+  })
+})
+
+describe('stats — overview aggregates', () => {
+  const today = '2026-06-10' // Wednesday, after CREATED (2026-06-01 Monday)
+
+  it('todaySummary counts done vs due across active habits, excluding archived', () => {
+    const a = habit({ schedule: { kind: 'daily' } }, 'a')
+    const b = habit({ schedule: { kind: 'daily' } }, 'b')
+    const c = habit({ schedule: { kind: 'daily' }, archived: true }, 'c')
+    const completions = { [today]: { a: { state: 'done' }, b: { state: 'missed' } } }
+    expect(todaySummary([a, b, c], completions, today)).toEqual({ due: 2, done: 1, pct: 50 })
+  })
+
+  it('todaySummary pct is null when nothing is due', () => {
+    const sundayOnly = habit({ schedule: { kind: 'weekdays', weekdays: [0] } }, 'a')
+    const s = todaySummary([sundayOnly], {}, today)
+    expect(s.due).toBe(0)
+    expect(s.pct).toBeNull()
+  })
+
+  it('aggregateHeatmapData gives done/due ratio per day', () => {
+    const a = habit({ schedule: { kind: 'daily' } }, 'a')
+    const b = habit({ schedule: { kind: 'daily' } }, 'b')
+    const completions = {
+      '2026-06-02': { a: { state: 'done' }, b: { state: 'done' } },
+      '2026-06-03': { a: { state: 'done' } },
+    }
+    const rows = aggregateHeatmapData([a, b], completions, '2026-06-02', '2026-06-03', today)
+    expect(rows.find((r) => r.date === '2026-06-02')).toMatchObject({ due: 2, done: 2, ratio: 1 })
+    const d3 = rows.find((r) => r.date === '2026-06-03')
+    expect(d3.done).toBe(1)
+    expect(d3.due).toBe(2)
+    expect(d3.ratio).toBeCloseTo(0.5)
   })
 })

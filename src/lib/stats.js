@@ -50,6 +50,43 @@ export function heatmapData(habit, completions, startKey, endKey, today = endKey
   })
 }
 
+// Today's completion across all active habits: how many due habits are done. A habit
+// counts as due if it's scheduled today (or already done today, e.g. on an off-day).
+// pct is null when nothing is due (UI shows a rest-day state).
+export function todaySummary(habits, completions, today) {
+  let due = 0
+  let done = 0
+  for (const h of habits) {
+    if (h.archived) continue
+    if (getState(completions, today, h.id) === 'done') {
+      done++
+      due++
+    } else if (isDue(h, today, completions, today)) {
+      due++
+    }
+  }
+  return { due, done, pct: due ? Math.round((done / due) * 100) : null }
+}
+
+// Per-day aggregate completion across all active habits, for the overview heatmap.
+// ratio = done / due on that day (a day with nothing due reads as 0).
+export function aggregateHeatmapData(habits, completions, startKey, endKey, today = endKey) {
+  const active = habits.filter((h) => !h.archived)
+  return eachDay(startKey, endKey).map((date) => {
+    let due = 0
+    let done = 0
+    for (const h of active) {
+      if (getState(completions, date, h.id) === 'done') {
+        done++
+        due++
+      } else if (isDue(h, date, completions, today)) {
+        due++
+      }
+    }
+    return { date, due, done, ratio: due ? Math.min(1, done / due) : 0 }
+  })
+}
+
 // Aggregate logged values (counts or minutes) for measured/duration habits over a
 // window. total = sum of values on logged days; daysLogged = days with value > 0;
 // avg = mean over logged days. Skipped days are excluded.

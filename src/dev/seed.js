@@ -64,6 +64,9 @@ function buildDemo() {
         st === 'done' && h.type === 'duration' ? { state: 'done', value: walkMinutes(off) } : { state: st }
     }
   }
+  // Make today partially complete for a livelier demo (rest stay pending).
+  const t = offsetKey(0)
+  completions[t] = { ...(completions[t] || {}), demo_walk: { state: 'done', value: 22 }, demo_read: { state: 'done' } }
   const meta = { schemaVersion: 1, points: 0, level: 0, badges: [], freezes: 0, theme: 'dark', customThemes: [], font: 'default' }
   return { habits, completions, meta }
 }

@@ -9,7 +9,7 @@ import EmptyState from './EmptyState.jsx'
 import QuoteBanner from './QuoteBanner.jsx'
 import HelpModal from './HelpModal.jsx'
 
-export default function TodayScreen({ onOpenHabit }) {
+export default function TodayScreen({ onOpenHabit, onOpenOverview }) {
   const { habits, completions } = useHabitsContext()
   const [formOpen, setFormOpen] = useState(false)
   const [helpOpen, setHelpOpen] = useState(false)
@@ -32,7 +32,7 @@ export default function TodayScreen({ onOpenHabit }) {
 
   return (
     <>
-      <Header onAdd={openAdd} onHelp={() => setHelpOpen(true)} />
+      <Header onAdd={openAdd} onHelp={() => setHelpOpen(true)} onOverview={active.length > 0 ? onOpenOverview : null} />
       <QuoteBanner />
 
       {active.length === 0 ? (

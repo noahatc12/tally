@@ -1195,6 +1195,122 @@
   border-radius: 2.5px;
 }
 
+/* ---------- overview / dashboard ---------- */
+.overview {
+  padding-bottom: calc(var(--space-6) + env(safe-area-inset-bottom));
+}
+.overview__heading {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 18px;
+}
+.overview__count {
+  font-size: 13px;
+  color: var(--text-muted);
+}
+.overview__today {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  margin-top: var(--space-3);
+  padding: var(--space-4);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+}
+.overview__pct {
+  font-family: var(--font-display);
+  font-size: 44px;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: -0.02em;
+  color: var(--accent);
+}
+.overview__today-meta {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  min-width: 0;
+}
+.overview__today-label {
+  font-size: 14px;
+  color: var(--text);
+}
+.overview__dots {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.overview__dot {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 1.5px solid var(--row-accent);
+  background: transparent;
+}
+.overview__dot.is-done {
+  background: var(--row-accent);
+}
+.overview__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+.overview__row {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  background: color-mix(in srgb, var(--row-accent) 5%, var(--surface));
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--row-accent);
+  border-radius: var(--radius-md);
+  padding: var(--space-3);
+  color: inherit;
+  min-height: 56px;
+  text-align: left;
+}
+.overview__row-icon {
+  font-size: 22px;
+  flex: none;
+  width: 32px;
+  text-align: center;
+}
+.overview__row-name {
+  flex: 1;
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 15px;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.spark {
+  flex: none;
+  display: block;
+}
+.spark--empty {
+  width: 80px;
+  height: 26px;
+}
+.overview__row-strength {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 16px;
+  min-width: 24px;
+  text-align: right;
+}
+.overview__row-chevron {
+  flex: none;
+  color: var(--text-muted);
+  opacity: 0.5;
+  font-size: 20px;
+}
+
 @media (min-width: 520px) {
   .empty__actions {
     flex-direction: row;

@@ -5,7 +5,7 @@ import ThemeModal from './ThemeModal.jsx'
 
 const DATE_FMT = { weekday: 'long', month: 'long', day: 'numeric' }
 
-export default function Header({ onAdd, onHelp }) {
+export default function Header({ onAdd, onHelp, onOverview }) {
   const { habits } = useHabitsContext()
   const [themeOpen, setThemeOpen] = useState(false)
   const today = todayKey()
@@ -23,6 +23,17 @@ export default function Header({ onAdd, onHelp }) {
           <p className="header__date">{dateLabel}</p>
         </div>
         <div className="header__actions">
+          {onOverview && (
+            <button
+              type="button"
+              className="btn btn--ghost btn--icon"
+              onClick={onOverview}
+              aria-label="Overview"
+              title="Overview"
+            >
+              📊
+            </button>
+          )}
           <button
             type="button"
             className="btn btn--ghost btn--icon"

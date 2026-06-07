@@ -70,6 +70,8 @@ function seed(theme) {
         st === 'done' && h.type === 'duration' ? { state: 'done', value: walkMinutes(off) } : { state: st }
     }
   }
+  const t = offsetKey(0)
+  completions[t] = { ...(completions[t] || {}), h_walk: { state: 'done', value: 22 }, h_read: { state: 'done' } }
   const meta = { schemaVersion: 1, points: 0, level: 0, badges: [], freezes: 0, theme, customThemes: [], font: 'default' }
   return { habits, completions, meta }
 }
@@ -92,6 +94,10 @@ async function shoot(browser, { theme, width, height, label, action }) {
     // Start the Walk habit's stopwatch and let it tick a couple seconds.
     await page.locator('.timer__primary').first().click()
     await page.waitForTimeout(2500)
+  } else if (action === 'overview') {
+    await page.locator('button[aria-label="Overview"]').click()
+    await page.locator('.overview').waitFor()
+    await page.locator('.heatmap__svg').first().waitFor()
   }
   await page.waitForTimeout(350) // settle transitions/fonts
   const file = join(OUT, `${label}.png`)
@@ -101,12 +107,12 @@ async function shoot(browser, { theme, width, height, label, action }) {
 }
 
 const shots = [
-  { theme: 'dark', width: 390, height: 844, label: '01-today-dark-390' },
-  { theme: 'dark', width: 390, height: 844, label: '02-timer-running-dark-390', action: 'timer' },
-  { theme: 'dark', width: 390, height: 844, label: '03-detail-walk-dark-390', action: 'detail' },
-  { theme: 'light', width: 390, height: 844, label: '04-detail-walk-light-390', action: 'detail' },
-  { theme: 'dark', width: 1280, height: 900, label: '05-detail-walk-dark-1280', action: 'detail' },
-  { theme: 'light', width: 390, height: 844, label: '06-today-light-390' },
+  { theme: 'dark', width: 390, height: 844, label: '01-overview-dark-390', action: 'overview' },
+  { theme: 'light', width: 390, height: 844, label: '02-overview-light-390', action: 'overview' },
+  { theme: 'dark', width: 1280, height: 900, label: '03-overview-dark-1280', action: 'overview' },
+  { theme: 'dark', width: 390, height: 844, label: '04-timer-running-dark-390', action: 'timer' },
+  { theme: 'dark', width: 390, height: 844, label: '05-detail-walk-dark-390', action: 'detail' },
+  { theme: 'midnight', width: 390, height: 844, label: '06-overview-midnight-390', action: 'overview' },
 ]
 
 const browser = await chromium.launch()
