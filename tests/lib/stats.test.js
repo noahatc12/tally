@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { completionRate } from '../../src/lib/stats.js'
+import { completionRate, valueTotals } from '../../src/lib/stats.js'
 import { habit, comp } from '../fixtures/sample.js'
 
 describe('stats — completion rate', () => {
@@ -38,5 +38,27 @@ describe('stats — completion rate', () => {
     const r = completionRate(h, c, '2026-06-01', '2026-06-10', '2026-06-04')
     expect(r.eligible).toBe(3)
     expect(r.rate).toBe(1)
+  })
+})
+
+describe('stats — valueTotals (measured / duration)', () => {
+  it('sums logged values and averages over logged days, ignoring skips', () => {
+    const h = habit({ type: 'duration', target: { amount: 30 } })
+    const c = comp([
+      ['2026-06-01', 'done', 20],
+      ['2026-06-02', 'done', 40],
+      ['2026-06-03', 'skip'],
+      ['2026-06-04', 'done', 30],
+    ])
+    const t = valueTotals(h, c, '2026-06-01', '2026-06-04')
+    expect(t.total).toBe(90)
+    expect(t.daysLogged).toBe(3)
+    expect(t.avg).toBe(30)
+  })
+
+  it('is zero when nothing is logged', () => {
+    const h = habit({ type: 'duration', target: { amount: 30 } })
+    const t = valueTotals(h, {}, '2026-06-01', '2026-06-07')
+    expect(t).toEqual({ total: 0, daysLogged: 0, avg: 0 })
   })
 })

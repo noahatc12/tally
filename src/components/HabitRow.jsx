@@ -2,6 +2,7 @@ import { useHabitsContext } from '../context/habits-store.js'
 import { useHabitDerived } from '../hooks/useHabitDerived.js'
 import ThreeStateToggle from './ThreeStateToggle.jsx'
 import CountControl from './CountControl.jsx'
+import TimerControl from './TimerControl.jsx'
 import StreakBadge from './StreakBadge.jsx'
 import StrengthMeter from './StrengthMeter.jsx'
 import CompletionRatePill from './CompletionRatePill.jsx'
@@ -11,6 +12,7 @@ export default function HabitRow({ habit, onOpen }) {
   const { setCompletion, clearCompletion } = useHabitsContext()
   const { streaks, strength, week, today, todayState, todayValue, trailingMisses } = useHabitDerived(habit)
   const isCount = habit.type === 'quantitative'
+  const isDuration = habit.type === 'duration'
 
   // One miss = gentle nudge; two+ misses = de-emphasize the streak number, no guilt.
   const showNudge = todayState !== 'done' && trailingMisses === 1
@@ -43,14 +45,23 @@ export default function HabitRow({ habit, onOpen }) {
       <StrengthMeter value={strength} />
       <WeekDots habit={habit} />
 
-      <div className="row__footer">
-        <CompletionRatePill week={week} />
-        {isCount ? (
-          <CountControl habit={habit} today={today} value={todayValue} state={todayState} />
-        ) : (
-          <ThreeStateToggle value={todayState} onSelect={onSelect} />
-        )}
-      </div>
+      {isDuration ? (
+        <>
+          <div className="row__footer">
+            <CompletionRatePill week={week} />
+          </div>
+          <TimerControl habit={habit} today={today} value={todayValue} state={todayState} />
+        </>
+      ) : (
+        <div className="row__footer">
+          <CompletionRatePill week={week} />
+          {isCount ? (
+            <CountControl habit={habit} today={today} value={todayValue} state={todayState} />
+          ) : (
+            <ThreeStateToggle value={todayState} onSelect={onSelect} />
+          )}
+        </div>
+      )}
 
       {showNudge && (
         <p className="row__nudge">One miss is an accident. Get back on track today.</p>

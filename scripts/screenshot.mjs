@@ -35,11 +35,13 @@ function stateFor(off, phase) {
 }
 
 const HABITS = [
-  { id: 'h_workout', name: 'Strength training', icon: '💪', color: '#6aa9ff', phase: 0 },
-  { id: 'h_read', name: 'Read 10 pages', icon: '📖', color: '#5fd08a', phase: 3 },
+  { id: 'h_walk', name: 'Walk', icon: '🚶', color: '#ff8a5b', phase: 0, type: 'duration', goal: 30 },
+  { id: 'h_workout', name: 'Strength training', icon: '💪', color: '#6aa9ff', phase: 2 },
+  { id: 'h_read', name: 'Read 10 pages', icon: '📖', color: '#5fd08a', phase: 4 },
   { id: 'h_water', name: 'Drink water', icon: '💧', color: '#7cd6f9', phase: 6 },
 ]
 const DAYS = 371
+const walkMinutes = (off) => 20 + ((off * 7) % 35)
 
 function seed(theme) {
   const createdAt = `${offsetKey(DAYS)}T08:00:00.000Z`
@@ -48,8 +50,8 @@ function seed(theme) {
     name: h.name,
     color: h.color,
     icon: h.icon,
-    type: 'binary',
-    target: null,
+    type: h.type || 'binary',
+    target: h.type === 'duration' ? { amount: h.goal, unit: 'min' } : null,
     schedule: { kind: 'daily', weekdays: [1, 2, 3, 4, 5], timesPerWeek: 3, everyN: 2 },
     minimumVersion: 'one set',
     plan: { cue: 'morning coffee', time: '', place: '' },
@@ -64,14 +66,15 @@ function seed(theme) {
       const st = stateFor(off, h.phase)
       if (!st) continue
       completions[key] = completions[key] || {}
-      completions[key][h.id] = { state: st }
+      completions[key][h.id] =
+        st === 'done' && h.type === 'duration' ? { state: 'done', value: walkMinutes(off) } : { state: st }
     }
   }
   const meta = { schemaVersion: 1, points: 0, level: 0, badges: [], freezes: 0, theme, customThemes: [], font: 'default' }
   return { habits, completions, meta }
 }
 
-async function shoot(browser, { theme, width, height, label, detail }) {
+async function shoot(browser, { theme, width, height, label, action }) {
   const ctx = await browser.newContext({ viewport: { width, height }, deviceScaleFactor: 2 })
   const data = seed(theme)
   await ctx.addInitScript((d) => {
@@ -81,10 +84,14 @@ async function shoot(browser, { theme, width, height, label, detail }) {
   }, data)
   const page = await ctx.newPage()
   await page.goto(BASE, { waitUntil: 'networkidle' })
-  if (detail) {
+  if (action === 'detail') {
     await page.locator('.row__identity').first().click()
     await page.locator('.detail').waitFor()
     await page.locator('.trend__svg, .trend--empty').first().waitFor()
+  } else if (action === 'timer') {
+    // Start the Walk habit's stopwatch and let it tick a couple seconds.
+    await page.locator('.timer__primary').first().click()
+    await page.waitForTimeout(2500)
   }
   await page.waitForTimeout(350) // settle transitions/fonts
   const file = join(OUT, `${label}.png`)
@@ -94,11 +101,12 @@ async function shoot(browser, { theme, width, height, label, detail }) {
 }
 
 const shots = [
-  { theme: 'dark', width: 390, height: 844, label: '01-today-dark-390', detail: false },
-  { theme: 'dark', width: 390, height: 844, label: '02-detail-dark-390', detail: true },
-  { theme: 'light', width: 390, height: 844, label: '03-detail-light-390', detail: true },
-  { theme: 'dark', width: 1280, height: 900, label: '04-detail-dark-1280', detail: true },
-  { theme: 'midnight', width: 390, height: 844, label: '05-detail-midnight-390', detail: true },
+  { theme: 'dark', width: 390, height: 844, label: '01-today-dark-390' },
+  { theme: 'dark', width: 390, height: 844, label: '02-timer-running-dark-390', action: 'timer' },
+  { theme: 'dark', width: 390, height: 844, label: '03-detail-walk-dark-390', action: 'detail' },
+  { theme: 'light', width: 390, height: 844, label: '04-detail-walk-light-390', action: 'detail' },
+  { theme: 'dark', width: 1280, height: 900, label: '05-detail-walk-dark-1280', action: 'detail' },
+  { theme: 'light', width: 390, height: 844, label: '06-today-light-390' },
 ]
 
 const browser = await chromium.launch()

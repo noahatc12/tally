@@ -3,7 +3,7 @@
 // computes derived values (streaks/strength/stats) — components call src/lib/* for that.
 
 import { useState, useEffect, useCallback, useRef } from 'react'
-import { loadAll, saveHabits, saveCompletions, saveMeta } from '../lib/storage.js'
+import { loadAll, saveHabits, saveCompletions, saveMeta, saveTimers } from '../lib/storage.js'
 import { createHabit, emptyMeta } from '../lib/factories.js'
 import { createCustomTheme } from '../lib/theme.js'
 
@@ -13,8 +13,21 @@ export function useHabits() {
   const [habits, setHabits] = useState(store.habits)
   const [completions, setCompletions] = useState(store.completions)
   const [meta, setMeta] = useState(store.meta)
+  // Running stopwatch sessions for duration habits: { [habitId]: { startedAt } }.
+  const [timers, setTimers] = useState(store.timers || {})
   // { habitId, ts } pushed when a habit is marked done — drives the celebration.
   const [celebration, setCelebration] = useState(null)
+
+  // Live refs so timer/value actions can read current state without re-creating
+  // callbacks (and without running side effects inside a setState updater).
+  const completionsRef = useRef(completions)
+  const timersRef = useRef(timers)
+  useEffect(() => {
+    completionsRef.current = completions
+  }, [completions])
+  useEffect(() => {
+    timersRef.current = timers
+  }, [timers])
 
   // Persist each slice independently so a single change writes only what changed.
   const first = useRef(true)
@@ -30,6 +43,10 @@ export function useHabits() {
     if (first.current) return
     saveMeta(meta)
   }, [meta])
+  useEffect(() => {
+    if (first.current) return
+    saveTimers(timers)
+  }, [timers])
   useEffect(() => {
     first.current = false
   }, [])
@@ -59,6 +76,12 @@ export function useHabits() {
       }
       return next
     })
+    setTimers((t) => {
+      if (!(id in t)) return t
+      const next = { ...t }
+      delete next[id]
+      return next
+    })
   }, [])
 
   // celebrate defaults to "on done"; callers (e.g. counters) can override so they
@@ -82,6 +105,57 @@ export function useHabits() {
   const clearCompletion = useCallback(
     (habitId, dateKey) => setCompletion(habitId, dateKey, null),
     [setCompletion],
+  )
+
+  // --- measured / duration value logging ---------------------------------------
+  // Set today's value to an exact amount (minutes for duration habits). value<=0
+  // clears the day. Marking done is forgiving: any value secures the streak, and
+  // crossing the goal (from under) fires the celebration.
+  const setValue = useCallback(
+    (habitId, dateKey, value, goal = 0) => {
+      const prev = completionsRef.current[dateKey]?.[habitId]?.value || 0
+      const nv = Math.max(0, value)
+      if (nv <= 0) {
+        clearCompletion(habitId, dateKey)
+        return
+      }
+      const crossed = goal > 0 && prev < goal && nv >= goal
+      setCompletion(habitId, dateKey, 'done', nv, crossed)
+    },
+    [setCompletion, clearCompletion],
+  )
+
+  // Add a delta (can be negative) to today's value.
+  const logValue = useCallback(
+    (habitId, dateKey, delta, goal = 0) => {
+      const prev = completionsRef.current[dateKey]?.[habitId]?.value || 0
+      setValue(habitId, dateKey, prev + delta, goal)
+    },
+    [setValue],
+  )
+
+  // --- duration stopwatch ------------------------------------------------------
+  const startTimer = useCallback((habitId) => {
+    setTimers((t) => ({ ...t, [habitId]: { startedAt: Date.now() } }))
+  }, [])
+
+  // Stop the running session, adding its elapsed minutes to today's value. Returns
+  // the minutes logged (0 if there was no running timer).
+  const stopTimer = useCallback(
+    (habitId, dateKey, goal = 0) => {
+      const session = timersRef.current[habitId]
+      setTimers((t) => {
+        if (!(habitId in t)) return t
+        const next = { ...t }
+        delete next[habitId]
+        return next
+      })
+      if (!session) return 0
+      const minutes = (Date.now() - session.startedAt) / 60000
+      if (minutes > 0) logValue(habitId, dateKey, minutes, goal)
+      return minutes
+    },
+    [logValue],
   )
 
   const setTheme = useCallback((theme) => {
@@ -117,6 +191,7 @@ export function useHabits() {
     habits,
     completions,
     meta,
+    timers,
     celebration,
     addHabit,
     updateHabit,
@@ -124,6 +199,10 @@ export function useHabits() {
     deleteHabit,
     setCompletion,
     clearCompletion,
+    setValue,
+    logValue,
+    startTimer,
+    stopTimer,
     setTheme,
     setFont,
     addCustomTheme,

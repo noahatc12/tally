@@ -47,7 +47,7 @@ export default function HeatmapGrid({ habit, completions, today, color }) {
           if (entry.state === 'done') kind = 'done'
           else if (entry.state === 'skip') kind = 'skip'
         }
-        cells.push({ date, kind })
+        cells.push({ date, kind, value: entry?.value || 0 })
       }
       cols.push({ w, cells })
 
@@ -68,10 +68,21 @@ export default function HeatmapGrid({ habit, completions, today, color }) {
     if (el) el.scrollLeft = el.scrollWidth
   }, [gridWidth])
 
-  const fillFor = (kind) => {
-    if (kind === 'done') return color
-    if (kind === 'skip') return `color-mix(in srgb, ${color} 22%, var(--heat-empty))`
-    if (kind === 'future') return 'transparent'
+  // Measured/timed habits ramp the done shade by how close the day got to its goal
+  // (with a floor so even a small log stays visible); binary habits are full color.
+  const ramp = (habit.type === 'quantitative' || habit.type === 'duration') && (habit.target?.amount || 0) > 0
+  const goal = habit.target?.amount || 0
+  const fillFor = (cell) => {
+    if (cell.kind === 'done') {
+      if (ramp) {
+        const ratio = Math.min(1, cell.value / goal)
+        const mixPct = Math.round((0.4 + 0.6 * ratio) * 100)
+        return `color-mix(in srgb, ${color} ${mixPct}%, var(--heat-empty))`
+      }
+      return color
+    }
+    if (cell.kind === 'skip') return `color-mix(in srgb, ${color} 22%, var(--heat-empty))`
+    if (cell.kind === 'future') return 'transparent'
     return 'var(--heat-empty)'
   }
 
@@ -106,7 +117,7 @@ export default function HeatmapGrid({ habit, completions, today, color }) {
                     width={CELL}
                     height={CELL}
                     rx="2.5"
-                    fill={fillFor(cell.kind)}
+                    fill={fillFor(cell)}
                     stroke={isToday ? color : 'none'}
                     strokeWidth={isToday ? 1.5 : 0}
                   >

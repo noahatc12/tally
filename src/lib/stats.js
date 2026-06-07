@@ -39,11 +39,31 @@ export function rateForWindow(habit, completions, windowKind, today) {
 }
 
 // One entry per calendar day in [startKey, endKey] for the v2 heatmap.
-// intensity: 0 (not done) or 1 (done); quantitative habits can later map value/target.
+// intensity: 0 (not done) or 1 (done). `value` carries the logged amount (count or
+// minutes) so measured/duration heatmaps can ramp shade by value/target.
 export function heatmapData(habit, completions, startKey, endKey, today = endKey) {
   return eachDay(startKey, endKey).map((date) => {
     const state = getState(completions, date, habit.id) || 'none'
     const due = isDue(habit, date, completions, today)
-    return { date, state, due, intensity: state === 'done' ? 1 : 0 }
+    const value = completions[date]?.[habit.id]?.value || 0
+    return { date, state, due, intensity: state === 'done' ? 1 : 0, value }
   })
+}
+
+// Aggregate logged values (counts or minutes) for measured/duration habits over a
+// window. total = sum of values on logged days; daysLogged = days with value > 0;
+// avg = mean over logged days. Skipped days are excluded.
+export function valueTotals(habit, completions, startKey, endKey) {
+  let total = 0
+  let daysLogged = 0
+  for (const key of eachDay(startKey, endKey)) {
+    const entry = completions[key]?.[habit.id]
+    if (!entry || entry.state === 'skip') continue
+    const v = entry.value || 0
+    if (v > 0) {
+      total += v
+      daysLogged++
+    }
+  }
+  return { total, daysLogged, avg: daysLogged ? total / daysLogged : 0 }
 }

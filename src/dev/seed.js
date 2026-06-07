@@ -26,11 +26,16 @@ function stateFor(off, phase) {
 }
 
 const DEMO = [
-  { id: 'demo_workout', name: 'Strength training', icon: '💪', color: '#6aa9ff', phase: 0, cue: 'morning coffee' },
-  { id: 'demo_read', name: 'Read 10 pages', icon: '📖', color: '#5fd08a', phase: 3, cue: 'lunch' },
+  { id: 'demo_walk', name: 'Walk', icon: '🚶', color: '#ff8a5b', phase: 0, cue: 'lunch', type: 'duration', goal: 30 },
+  { id: 'demo_workout', name: 'Strength training', icon: '💪', color: '#6aa9ff', phase: 2, cue: 'morning coffee' },
+  { id: 'demo_read', name: 'Read 10 pages', icon: '📖', color: '#5fd08a', phase: 4, cue: 'lunch' },
   { id: 'demo_water', name: 'Drink water', icon: '💧', color: '#7cd6f9', phase: 6, cue: 'waking up' },
 ]
 const DAYS = 371 // a full year so the whole heatmap is populated
+
+// Minutes logged on a done day for the timed habit — varies 20..54 so the heatmap
+// ramps and some days fall under / over the 30-min goal.
+const walkMinutes = (off) => 20 + ((off * 7) % 35)
 
 function buildDemo() {
   const createdAt = `${offsetKey(DAYS)}T08:00:00.000Z`
@@ -39,10 +44,10 @@ function buildDemo() {
     name: h.name,
     color: h.color,
     icon: h.icon,
-    type: 'binary',
-    target: null,
+    type: h.type || 'binary',
+    target: h.type === 'duration' ? { amount: h.goal, unit: 'min' } : null,
     schedule: { kind: 'daily', weekdays: [1, 2, 3, 4, 5], timesPerWeek: 3, everyN: 2 },
-    minimumVersion: 'one rep',
+    minimumVersion: h.type === 'duration' ? '5 minutes' : 'one rep',
     plan: { cue: h.cue, time: '', place: '' },
     anchor: null,
     createdAt,
@@ -55,7 +60,8 @@ function buildDemo() {
       const st = stateFor(off, h.phase)
       if (!st) continue
       completions[key] = completions[key] || {}
-      completions[key][h.id] = { state: st }
+      completions[key][h.id] =
+        st === 'done' && h.type === 'duration' ? { state: 'done', value: walkMinutes(off) } : { state: st }
     }
   }
   const meta = { schemaVersion: 1, points: 0, level: 0, badges: [], freezes: 0, theme: 'dark', customThemes: [], font: 'default' }

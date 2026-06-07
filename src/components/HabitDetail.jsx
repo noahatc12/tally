@@ -3,10 +3,11 @@
 
 import { useMemo, useState } from 'react'
 import { useHabitsContext } from '../context/habits-store.js'
-import { todayKey } from '../lib/dates.js'
+import { todayKey, startOfWeek } from '../lib/dates.js'
 import { computeStreaks } from '../lib/streaks.js'
 import { computeStrength, strengthSeries } from '../lib/strength.js'
-import { completionRate } from '../lib/stats.js'
+import { completionRate, valueTotals } from '../lib/stats.js'
+import { formatDuration } from '../lib/duration.js'
 import TrendChart from './TrendChart.jsx'
 import HeatmapGrid from './HeatmapGrid.jsx'
 import HabitFormModal from './HabitFormModal.jsx'
@@ -44,16 +45,21 @@ export default function HabitDetail({ habit, onBack }) {
   const [editing, setEditing] = useState(false)
   const today = todayKey()
 
-  const { strength, series, streaks, rate } = useMemo(() => {
+  const isDuration = habit.type === 'duration'
+
+  const { strength, series, streaks, rate, time } = useMemo(() => {
     const created = habit.createdAt.slice(0, 10)
     const r = completionRate(habit, completions, created, today, today)
+    const all = isDuration ? valueTotals(habit, completions, created, today) : null
+    const week = isDuration ? valueTotals(habit, completions, startOfWeek(today), today) : null
     return {
       strength: computeStrength(habit, completions, today),
       series: strengthSeries(habit, completions, today),
       streaks: computeStreaks(habit, completions, today),
       rate: r.rate == null ? null : Math.round(r.rate * 100),
+      time: isDuration ? { total: all.total, avg: all.avg, week: week.total } : null,
     }
-  }, [habit, completions, today])
+  }, [habit, completions, today, isDuration])
 
   const unit = streaks.unit === 'weeks' ? 'wk' : 'd'
   const activeHabits = habits.filter((h) => !h.archived)
@@ -94,6 +100,14 @@ export default function HabitDetail({ habit, onBack }) {
         <Stat label="Best" value={streaks.longest} unit={unit} />
         <Stat label="Completed" value={rate == null ? '—' : rate} unit={rate == null ? '' : '%'} />
       </div>
+
+      {time && (
+        <div className="detail__stats">
+          <Stat label="Total time" value={formatDuration(time.total)} />
+          <Stat label="Per day" value={formatDuration(time.avg)} />
+          <Stat label="This week" value={formatDuration(time.week)} />
+        </div>
+      )}
 
       <div className="detail__section">
         <h2 className="detail__section-title">Last 12 months</h2>

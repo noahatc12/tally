@@ -68,7 +68,9 @@ export default function HabitFormModal({ habit, existingHabits, onClose }) {
       target:
         f.type === 'quantitative' && f.targetAmount
           ? { amount: Number(f.targetAmount), unit: f.targetUnit.trim() || 'units' }
-          : null,
+          : f.type === 'duration'
+            ? { amount: Math.max(1, Number(f.targetAmount) || 30), unit: 'min' }
+            : null,
       schedule: buildSchedule(),
       minimumVersion: f.minimumVersion.trim(),
       plan: { cue: f.cue.trim(), time: f.time, place: f.place.trim() },
@@ -152,7 +154,7 @@ export default function HabitFormModal({ habit, existingHabits, onClose }) {
 
         <div className="field">
           <span className="field__label">Type</span>
-          <div className="segmented">
+          <div className="segmented segmented--wrap">
             <button type="button" className={f.type === 'binary' ? 'is-active' : ''} onClick={() => set({ type: 'binary' })}>
               Yes / no
             </button>
@@ -162,6 +164,13 @@ export default function HabitFormModal({ habit, existingHabits, onClose }) {
               onClick={() => set({ type: 'quantitative' })}
             >
               Measured
+            </button>
+            <button
+              type="button"
+              className={f.type === 'duration' ? 'is-active' : ''}
+              onClick={() => set({ type: 'duration', targetAmount: f.targetAmount || 30 })}
+            >
+              Timed
             </button>
           </div>
         </div>
@@ -188,6 +197,33 @@ export default function HabitFormModal({ habit, existingHabits, onClose }) {
                 placeholder="glasses"
               />
             </label>
+          </div>
+        )}
+
+        {f.type === 'duration' && (
+          <div className="field">
+            <span className="field__label">Daily goal (minutes)</span>
+            <input
+              className="field__input"
+              type="number"
+              min="1"
+              inputMode="numeric"
+              value={f.targetAmount}
+              onChange={(e) => set({ targetAmount: e.target.value })}
+              placeholder="30"
+            />
+            <div className="chips chips--days">
+              {[10, 15, 20, 30, 45, 60].map((m) => (
+                <button
+                  key={m}
+                  type="button"
+                  className={`chip${Number(f.targetAmount) === m ? ' is-active' : ''}`}
+                  onClick={() => set({ targetAmount: m })}
+                >
+                  {m}m
+                </button>
+              ))}
+            </div>
           </div>
         )}
 

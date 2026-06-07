@@ -163,6 +163,89 @@
   color: var(--text);
 }
 
+/* ---------- duration timer control ---------- */
+.timer {
+  margin-top: var(--space-3);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+.timer__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+.timer__readout {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 5px;
+  font-family: var(--font-display);
+}
+.timer__num {
+  font-size: 18px;
+  font-weight: 700;
+}
+.timer.is-complete .timer__num {
+  color: var(--row-accent, var(--accent));
+}
+.timer__goal {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+.timer__live {
+  font-family: var(--font-display);
+  font-variant-numeric: tabular-nums;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--row-accent, var(--accent));
+}
+.timer__bar {
+  height: 8px;
+  background: var(--surface-2);
+  border-radius: 999px;
+  overflow: hidden;
+}
+.timer__fill {
+  height: 100%;
+  background: var(--row-accent, var(--accent));
+  border-radius: 999px;
+  transition: width 400ms ease;
+}
+.timer__actions,
+.timer__edit {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.timer__primary {
+  flex: 1;
+  min-width: 130px;
+}
+.timer__chip {
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+  color: var(--text);
+  border-radius: var(--radius-sm);
+  min-width: 44px;
+  min-height: 44px;
+  padding: 4px 10px;
+  font-size: 14px;
+  font-weight: 600;
+}
+.timer__chip.is-active {
+  border-color: var(--text-muted);
+}
+.timer__edit-unit {
+  font-size: 13px;
+  color: var(--text-muted);
+}
+.timer__set {
+  min-height: 44px;
+  padding: 8px 14px;
+}
+
 /* ---------- habit list ---------- */
 .habit-list {
   margin-top: var(--space-5);

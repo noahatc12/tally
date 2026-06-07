@@ -3,7 +3,7 @@
 
 import { emptyMeta, SCHEMA_VERSION } from './factories.js'
 
-export const KEYS = { habits: 'habits', completions: 'completions', meta: 'meta' }
+export const KEYS = { habits: 'habits', completions: 'completions', meta: 'meta', timers: 'timers' }
 
 export function isAvailable() {
   try {
@@ -57,7 +57,10 @@ export function loadAll() {
   const habits = readRaw(KEYS.habits) ?? []
   const completions = readRaw(KEYS.completions) ?? {}
   const meta = readRaw(KEYS.meta) ?? emptyMeta()
-  return migrate({ habits, completions, meta })
+  // Running stopwatch sessions: { [habitId]: { startedAt } }. Persisted so a timer
+  // keeps running across a reload / app close (the point of timing a real activity).
+  const timers = readRaw(KEYS.timers) ?? {}
+  return { ...migrate({ habits, completions, meta }), timers }
 }
 
 export function saveHabits(habits) {
@@ -69,9 +72,13 @@ export function saveCompletions(completions) {
 export function saveMeta(meta) {
   writeRaw(KEYS.meta, meta)
 }
+export function saveTimers(timers) {
+  writeRaw(KEYS.timers, timers)
+}
 
-export function saveAll({ habits, completions, meta }) {
+export function saveAll({ habits, completions, meta, timers }) {
   saveHabits(habits)
   saveCompletions(completions)
   saveMeta(meta)
+  if (timers) saveTimers(timers)
 }
