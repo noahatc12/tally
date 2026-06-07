@@ -3,6 +3,9 @@
 // read as a faint neutral and everything else (miss / off-day / future) is empty —
 // the heatmap is a positive record of what you did, not a wall of red. The honest
 // "how am I doing" signal lives in the strength trend; this stays encouraging.
+//
+// Weekday labels live in a FIXED left gutter (their own small SVG) so they neither
+// scroll away with the grid nor crowd the first column.
 
 import { useEffect, useMemo, useRef } from 'react'
 import { addDays, startOfWeek, getWeekday, diffDays, fromKey } from '../lib/dates.js'
@@ -12,15 +15,16 @@ const CELL = 12
 const GAP = 3
 const STEP = CELL + GAP
 const TOP = 16 // room for month labels
-const LEFT = 22 // room for weekday labels
+const GUTTER = 30 // fixed weekday-label column width
 const WEEKS = 53
 const DOW = ['', 'Mon', '', 'Wed', '', 'Fri', '']
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+const HEIGHT = TOP + 7 * STEP
 
 export default function HeatmapGrid({ habit, completions, today, color }) {
   const scroller = useRef(null)
 
-  const { weeks, months, width, height } = useMemo(() => {
+  const { weeks, months, gridWidth } = useMemo(() => {
     const start = startOfWeek(addDays(today, -(WEEKS - 1) * 7)) // Sunday, ~12 months back
     const byDate = new Map()
     for (const d of heatmapData(habit, completions, start, today, today)) byDate.set(d.date, d)
@@ -49,25 +53,20 @@ export default function HeatmapGrid({ habit, completions, today, color }) {
 
       // Month label sits above the first column that lands in a new month.
       const m = fromKey(weekStart).getMonth()
-      if (m !== prevMonth && getWeekday(weekStart) <= 6) {
-        monthLabels.push({ x: LEFT + w * STEP, label: MONTHS[m] })
+      if (m !== prevMonth) {
+        monthLabels.push({ x: w * STEP, label: MONTHS[m] })
         prevMonth = m
       }
     }
 
-    return {
-      weeks: cols,
-      months: monthLabels,
-      width: LEFT + WEEKS * STEP,
-      height: TOP + 7 * STEP,
-    }
+    return { weeks: cols, months: monthLabels, gridWidth: WEEKS * STEP }
   }, [habit, completions, today])
 
   // Open scrolled to the right so the most recent weeks (incl. today) are visible.
   useEffect(() => {
     const el = scroller.current
     if (el) el.scrollLeft = el.scrollWidth
-  }, [width])
+  }, [gridWidth])
 
   const fillFor = (kind) => {
     if (kind === 'done') return color
@@ -78,42 +77,46 @@ export default function HeatmapGrid({ habit, completions, today, color }) {
 
   return (
     <div className="heatmap">
-      <div className="heatmap__scroll" ref={scroller}>
-        <svg width={width} height={height} className="heatmap__svg" role="img" aria-label="Daily completion over the last year">
-          {months.map((m) => (
-            <text key={`${m.label}-${m.x}`} x={m.x} y={11} className="heatmap__month">
-              {m.label}
-            </text>
-          ))}
+      <div className="heatmap__body">
+        <svg className="heatmap__gutter" width={GUTTER} height={HEIGHT} aria-hidden="true">
           {DOW.map((d, i) =>
             d ? (
-              <text key={d} x={LEFT - 6} y={TOP + i * STEP + CELL - 2} textAnchor="end" className="heatmap__dow">
+              <text key={d} x={GUTTER - 6} y={TOP + i * STEP + CELL - 2} textAnchor="end" className="heatmap__dow">
                 {d}
               </text>
             ) : null,
           )}
-          {weeks.map((col) =>
-            col.cells.map((cell) => {
-              const dow = getWeekday(cell.date)
-              const isToday = cell.date === today
-              return (
-                <rect
-                  key={cell.date}
-                  x={LEFT + col.w * STEP}
-                  y={TOP + dow * STEP}
-                  width={CELL}
-                  height={CELL}
-                  rx="2.5"
-                  fill={fillFor(cell.kind)}
-                  stroke={isToday ? color : 'none'}
-                  strokeWidth={isToday ? 1.5 : 0}
-                >
-                  <title>{cell.date}</title>
-                </rect>
-              )
-            }),
-          )}
         </svg>
+        <div className="heatmap__scroll" ref={scroller}>
+          <svg width={gridWidth} height={HEIGHT} className="heatmap__svg" role="img" aria-label="Daily completion over the last year">
+            {months.map((m) => (
+              <text key={`${m.label}-${m.x}`} x={m.x} y={11} className="heatmap__month">
+                {m.label}
+              </text>
+            ))}
+            {weeks.map((col) =>
+              col.cells.map((cell) => {
+                const dow = getWeekday(cell.date)
+                const isToday = cell.date === today
+                return (
+                  <rect
+                    key={cell.date}
+                    x={col.w * STEP}
+                    y={TOP + dow * STEP}
+                    width={CELL}
+                    height={CELL}
+                    rx="2.5"
+                    fill={fillFor(cell.kind)}
+                    stroke={isToday ? color : 'none'}
+                    strokeWidth={isToday ? 1.5 : 0}
+                  >
+                    <title>{cell.date}</title>
+                  </rect>
+                )
+              }),
+            )}
+          </svg>
+        </div>
       </div>
       <div className="heatmap__legend">
         <span>Less</span>

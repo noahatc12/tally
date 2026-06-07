@@ -1074,7 +1074,16 @@
   color: var(--text-muted);
   margin-bottom: var(--space-3);
 }
+.heatmap__body {
+  display: flex;
+  align-items: flex-start;
+}
+.heatmap__gutter {
+  flex: none;
+}
 .heatmap__scroll {
+  flex: 1;
+  min-width: 0;
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
   padding-bottom: 4px;
