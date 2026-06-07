@@ -14,11 +14,12 @@ function offsetKey(off) {
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`
 }
 
-// Mostly done, periodic skips/misses, and a rough patch ~8 weeks back so the
-// strength curve visibly dips and recovers.
+// Mostly done, periodic skips/misses, and two rough patches (one early, one ~8
+// weeks back) so the strength curve has texture and visibly dips and recovers.
 function stateFor(off, phase) {
   if (off === 0) return null // today unmarked
-  if (off >= 52 + phase && off <= 66 + phase) return off % 3 === 0 ? 'done' : 'missed'
+  if (off >= 52 + phase && off <= 64 + phase) return off % 3 === 0 ? 'done' : 'missed'
+  if (off >= 208 + phase && off <= 222 + phase) return off % 2 === 0 ? 'done' : 'missed'
   if (off % 19 === 0) return 'skip'
   if (off % 13 === 0) return 'missed'
   return 'done'
@@ -29,7 +30,7 @@ const DEMO = [
   { id: 'demo_read', name: 'Read 10 pages', icon: '📖', color: '#5fd08a', phase: 3, cue: 'lunch' },
   { id: 'demo_water', name: 'Drink water', icon: '💧', color: '#7cd6f9', phase: 6, cue: 'waking up' },
 ]
-const DAYS = 150
+const DAYS = 371 // a full year so the whole heatmap is populated
 
 function buildDemo() {
   const createdAt = `${offsetKey(DAYS)}T08:00:00.000Z`

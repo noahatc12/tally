@@ -11,7 +11,9 @@ const H = 132
 const PAD = { top: 10, right: 10, bottom: 8, left: 10 }
 const GRAD_ID = 'trend-fill'
 
-const DATE_FMT = { month: 'short', day: 'numeric' }
+// Include a 2-digit year: the trend can span a full year, so "Jun 1 -> Jun 6" alone
+// reads like days rather than a year apart.
+const DATE_FMT = { month: 'short', day: 'numeric', year: '2-digit' }
 const shortDate = (key) => fromKey(key).toLocaleDateString(undefined, DATE_FMT)
 
 // Catmull-Rom -> cubic bezier for a smooth line through every point (tension 1/6).

@@ -27,7 +27,8 @@ function offsetKey(off) {
 // deliberate rough patch ~8 weeks back so the strength curve dips then recovers.
 function stateFor(off, phase) {
   if (off === 0) return null // today unmarked
-  if (off >= 52 + phase && off <= 66 + phase) return off % 3 === 0 ? 'done' : 'missed'
+  if (off >= 52 + phase && off <= 64 + phase) return off % 3 === 0 ? 'done' : 'missed'
+  if (off >= 208 + phase && off <= 222 + phase) return off % 2 === 0 ? 'done' : 'missed'
   if (off % 19 === 0) return 'skip'
   if (off % 13 === 0) return 'missed'
   return 'done'
@@ -38,7 +39,7 @@ const HABITS = [
   { id: 'h_read', name: 'Read 10 pages', icon: '📖', color: '#5fd08a', phase: 3 },
   { id: 'h_water', name: 'Drink water', icon: '💧', color: '#7cd6f9', phase: 6 },
 ]
-const DAYS = 150
+const DAYS = 371
 
 function seed(theme) {
   const createdAt = `${offsetKey(DAYS)}T08:00:00.000Z`
