@@ -1,0 +1,86 @@
+// Opt-in demo seeder. Loading the app with `?demo` writes a realistic example
+// dataset (3 habits, ~150 days of history with a deliberate rough patch) into
+// localStorage so the heatmap and strength trend are populated on any device —
+// handy for showing the app off or testing on a phone with no history yet.
+// `?reset` clears all Tally data. The query param is stripped afterward so a
+// refresh keeps any edits you make. It is a no-op unless one of those params is
+// present, so it is safe to run on every load (including production).
+
+const pad = (n) => String(n).padStart(2, '0')
+function offsetKey(off) {
+  const d = new Date()
+  d.setHours(12, 0, 0, 0)
+  d.setDate(d.getDate() - off)
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`
+}
+
+// Mostly done, periodic skips/misses, and a rough patch ~8 weeks back so the
+// strength curve visibly dips and recovers.
+function stateFor(off, phase) {
+  if (off === 0) return null // today unmarked
+  if (off >= 52 + phase && off <= 66 + phase) return off % 3 === 0 ? 'done' : 'missed'
+  if (off % 19 === 0) return 'skip'
+  if (off % 13 === 0) return 'missed'
+  return 'done'
+}
+
+const DEMO = [
+  { id: 'demo_workout', name: 'Strength training', icon: '💪', color: '#6aa9ff', phase: 0, cue: 'morning coffee' },
+  { id: 'demo_read', name: 'Read 10 pages', icon: '📖', color: '#5fd08a', phase: 3, cue: 'lunch' },
+  { id: 'demo_water', name: 'Drink water', icon: '💧', color: '#7cd6f9', phase: 6, cue: 'waking up' },
+]
+const DAYS = 150
+
+function buildDemo() {
+  const createdAt = `${offsetKey(DAYS)}T08:00:00.000Z`
+  const habits = DEMO.map((h) => ({
+    id: h.id,
+    name: h.name,
+    color: h.color,
+    icon: h.icon,
+    type: 'binary',
+    target: null,
+    schedule: { kind: 'daily', weekdays: [1, 2, 3, 4, 5], timesPerWeek: 3, everyN: 2 },
+    minimumVersion: 'one rep',
+    plan: { cue: h.cue, time: '', place: '' },
+    anchor: null,
+    createdAt,
+    archived: false,
+  }))
+  const completions = {}
+  for (let off = DAYS - 1; off >= 0; off--) {
+    const key = offsetKey(off)
+    for (const h of DEMO) {
+      const st = stateFor(off, h.phase)
+      if (!st) continue
+      completions[key] = completions[key] || {}
+      completions[key][h.id] = { state: st }
+    }
+  }
+  const meta = { schemaVersion: 1, points: 0, level: 0, badges: [], freezes: 0, theme: 'dark', customThemes: [], font: 'default' }
+  return { habits, completions, meta }
+}
+
+function stripParam(name) {
+  const params = new URLSearchParams(location.search)
+  params.delete(name)
+  const qs = params.toString()
+  history.replaceState(null, '', location.pathname + (qs ? `?${qs}` : '') + location.hash)
+}
+
+export function maybeSeedDemo() {
+  const params = new URLSearchParams(location.search)
+  if (params.has('reset')) {
+    localStorage.removeItem('habits')
+    localStorage.removeItem('completions')
+    localStorage.removeItem('meta')
+    stripParam('reset')
+    return
+  }
+  if (!params.has('demo')) return
+  const { habits, completions, meta } = buildDemo()
+  localStorage.setItem('habits', JSON.stringify(habits))
+  localStorage.setItem('completions', JSON.stringify(completions))
+  localStorage.setItem('meta', JSON.stringify(meta))
+  stripParam('demo') // so a refresh keeps any check-ins you make
+}
