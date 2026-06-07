@@ -7,7 +7,7 @@ import StrengthMeter from './StrengthMeter.jsx'
 import CompletionRatePill from './CompletionRatePill.jsx'
 import WeekDots from './WeekDots.jsx'
 
-export default function HabitRow({ habit, onEdit }) {
+export default function HabitRow({ habit, onOpen }) {
   const { setCompletion, clearCompletion } = useHabitsContext()
   const { streaks, strength, week, today, todayState, todayValue, trailingMisses } = useHabitDerived(habit)
   const isCount = habit.type === 'quantitative'
@@ -32,10 +32,11 @@ export default function HabitRow({ habit, onEdit }) {
         <span className="row__icon" aria-hidden="true">
           {habit.icon}
         </span>
-        <button type="button" className="row__identity" onClick={() => onEdit(habit)}>
+        <button type="button" className="row__identity" onClick={() => onOpen(habit.id)} aria-label={`Open ${habit.name}`}>
           <span className="row__name">{habit.name}</span>
           {cue && <span className="row__cue">After {cue}</span>}
         </button>
+        <span className="row__chevron" aria-hidden="true">›</span>
         <StreakBadge streaks={streaks} dim={deemphasizeStreak} />
       </div>
 

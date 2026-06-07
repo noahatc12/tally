@@ -1,5 +1,5 @@
 import { HabitsProvider } from './context/HabitsContext.jsx'
-import TodayScreen from './components/TodayScreen.jsx'
+import RootView from './components/RootView.jsx'
 import CelebrationLayer from './components/CelebrationLayer.jsx'
 
 export default function App() {
@@ -7,7 +7,7 @@ export default function App() {
     <HabitsProvider>
       <div className="app">
         <div className="container">
-          <TodayScreen />
+          <RootView />
         </div>
       </div>
       <CelebrationLayer />

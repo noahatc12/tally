@@ -9,10 +9,9 @@ import EmptyState from './EmptyState.jsx'
 import QuoteBanner from './QuoteBanner.jsx'
 import HelpModal from './HelpModal.jsx'
 
-export default function TodayScreen() {
+export default function TodayScreen({ onOpenHabit }) {
   const { habits, completions } = useHabitsContext()
   const [formOpen, setFormOpen] = useState(false)
-  const [editing, setEditing] = useState(null)
   const [helpOpen, setHelpOpen] = useState(false)
 
   const today = todayKey()
@@ -29,14 +28,7 @@ export default function TodayScreen() {
     return { due, rest }
   }, [active, completions, today])
 
-  const openAdd = () => {
-    setEditing(null)
-    setFormOpen(true)
-  }
-  const openEdit = (habit) => {
-    setEditing(habit)
-    setFormOpen(true)
-  }
+  const openAdd = () => setFormOpen(true)
 
   return (
     <>
@@ -47,15 +39,15 @@ export default function TodayScreen() {
         <EmptyState onAdd={openAdd} onHelp={() => setHelpOpen(true)} />
       ) : (
         <main>
-          <HabitList title="Today" habits={ordered.due} onEdit={openEdit} emptyHint="Nothing due today. Enjoy it." />
+          <HabitList title="Today" habits={ordered.due} onOpen={onOpenHabit} emptyHint="Nothing due today. Enjoy it." />
           {ordered.rest.length > 0 && (
-            <HabitList title="Other" habits={ordered.rest} onEdit={openEdit} />
+            <HabitList title="Other" habits={ordered.rest} onOpen={onOpenHabit} />
           )}
         </main>
       )}
 
       {formOpen && (
-        <HabitFormModal habit={editing} existingHabits={active} onClose={() => setFormOpen(false)} />
+        <HabitFormModal habit={null} existingHabits={active} onClose={() => setFormOpen(false)} />
       )}
       {helpOpen && <HelpModal onClose={() => setHelpOpen(false)} />}
     </>

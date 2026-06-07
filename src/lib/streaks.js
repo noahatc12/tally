@@ -40,9 +40,9 @@ function runFromEvents(events) {
   return { current: run, longest }
 }
 
-// Chronological event tokens ('done'|'skip'|'miss'|'pending') for a quota habit's
-// weeks (pre-creation weeks dropped).
-export function weekEvents(habit, completions, today) {
+// Chronological { key, event } tokens for a quota habit's weeks (pre-creation weeks
+// dropped). `key` is the week-start day key, so callers can place each event in time.
+export function datedWeekEvents(habit, completions, today) {
   const created = createdKey(habit)
   if (diffDays(created, today) < 0) return []
   const firstWeek = startOfWeek(created)
@@ -51,24 +51,33 @@ export function weekEvents(habit, completions, today) {
   for (let wk = firstWeek; diffDays(wk, lastWeek) >= 0; wk = addDays(wk, 7)) {
     const { status } = evaluateWeek(habit, wk, completions, today)
     if (status === 'pre-creation') continue
-    if (status === 'met') events.push('done')
-    else if (status === 'unmet') events.push('miss')
-    else events.push('pending') // in-progress
+    if (status === 'met') events.push({ key: wk, event: 'done' })
+    else if (status === 'unmet') events.push({ key: wk, event: 'miss' })
+    else events.push({ key: wk, event: 'pending' }) // in-progress
   }
   return events
 }
 
-// Chronological event tokens for a per-day habit's due days.
-export function dayEvents(habit, completions, today) {
+// Chronological { key, event } tokens for a per-day habit's due days.
+export function datedDayEvents(habit, completions, today) {
   const created = createdKey(habit)
   if (diffDays(created, today) < 0) return []
   return eachDay(created, today)
     .filter((k) => isDue(habit, k, completions, today))
-    .map((k) => resolveDay(habit, k, completions, today))
+    .map((k) => ({ key: k, event: resolveDay(habit, k, completions, today) }))
 }
 
+// Dated events ({ key, event }) — the single source of truth. The token-only and
+// strength views derive from this so dates, streak runs, and the trend never drift.
+export function datedStreakEvents(habit, completions, today) {
+  return isQuota(habit)
+    ? datedWeekEvents(habit, completions, today)
+    : datedDayEvents(habit, completions, today)
+}
+
+// Chronological event tokens ('done'|'skip'|'miss'|'pending'), dates stripped.
 export function streakEvents(habit, completions, today) {
-  return isQuota(habit) ? weekEvents(habit, completions, today) : dayEvents(habit, completions, today)
+  return datedStreakEvents(habit, completions, today).map((e) => e.event)
 }
 
 export function computeStreaks(habit, completions, today) {

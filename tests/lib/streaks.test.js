@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { computeStreaks } from '../../src/lib/streaks.js'
+import { computeStreaks, datedStreakEvents, streakEvents } from '../../src/lib/streaks.js'
 import { habit, comp, runOf } from '../fixtures/sample.js'
 
 describe('streaks — forgiving rules', () => {
@@ -65,6 +65,23 @@ describe('streaks — forgiving rules', () => {
     const s = computeStreaks(h, c, '2026-06-05')
     expect(s.current).toBe(3)
     expect(s.longest).toBe(3)
+  })
+
+  it('datedStreakEvents tags only due days, and streakEvents is its tokens', () => {
+    // Mon/Wed/Fri habit: Tue/Thu are not due and must not appear.
+    const h = habit({ schedule: { kind: 'weekdays', weekdays: [1, 3, 5] } })
+    const c = comp([
+      ['2026-06-01', 'done'], // Mon
+      ['2026-06-03', 'skip'], // Wed
+      ['2026-06-05', 'done'], // Fri
+    ])
+    const dated = datedStreakEvents(h, c, '2026-06-05')
+    expect(dated).toEqual([
+      { key: '2026-06-01', event: 'done' },
+      { key: '2026-06-03', event: 'skip' },
+      { key: '2026-06-05', event: 'done' },
+    ])
+    expect(streakEvents(h, c, '2026-06-05')).toEqual(dated.map((e) => e.event))
   })
 
   it('timesPerWeek streaks count in weeks', () => {
