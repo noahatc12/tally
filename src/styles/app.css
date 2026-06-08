@@ -312,6 +312,16 @@
   color: var(--text-muted);
   font-size: 14px;
 }
+.habit-list__hint--lead {
+  margin-top: var(--space-5);
+}
+/* "Not due today" — present but visually receded. */
+.habit-list--muted {
+  opacity: 0.62;
+}
+.habit-list--muted .row {
+  box-shadow: none;
+}
 .habit-list__items {
   list-style: none;
   margin: 0;

@@ -9,6 +9,13 @@ import EmptyState from './EmptyState.jsx'
 import QuoteBanner from './QuoteBanner.jsx'
 import HelpModal from './HelpModal.jsx'
 
+const TOD_GROUPS = [
+  ['morning', 'Morning'],
+  ['afternoon', 'Afternoon'],
+  ['evening', 'Evening'],
+  ['anytime', 'Anytime'],
+]
+
 export default function TodayScreen({ onOpenHabit, onOpenOverview }) {
   const { habits, completions } = useHabitsContext()
   const [formOpen, setFormOpen] = useState(false)
@@ -17,17 +24,20 @@ export default function TodayScreen({ onOpenHabit, onOpenOverview }) {
   const today = todayKey()
   const active = useMemo(() => habits.filter((h) => !h.archived), [habits])
 
-  // Habits due today first, then the rest, so the day's work is at the top.
-  const ordered = useMemo(() => {
-    const due = []
+  // Group today's due habits by time of day; everything not due falls to a muted group
+  // at the bottom. If no habit uses a time-of-day, keep the simple single "Today" list.
+  const { groups, rest, grouped } = useMemo(() => {
+    const due = { morning: [], afternoon: [], evening: [], anytime: [] }
     const rest = []
     for (const h of active) {
-      if (isDue(h, today, completions, today)) due.push(h)
+      if (isDue(h, today, completions, today)) due[h.tod || 'anytime'].push(h)
       else rest.push(h)
     }
-    return { due, rest }
+    const grouped = due.morning.length + due.afternoon.length + due.evening.length > 0
+    return { groups: due, rest, grouped }
   }, [active, completions, today])
 
+  const dueCount = groups.morning.length + groups.afternoon.length + groups.evening.length + groups.anytime.length
   const openAdd = () => setFormOpen(true)
 
   return (
@@ -39,9 +49,19 @@ export default function TodayScreen({ onOpenHabit, onOpenOverview }) {
         <EmptyState onAdd={openAdd} onHelp={() => setHelpOpen(true)} />
       ) : (
         <main>
-          <HabitList title="Today" habits={ordered.due} onOpen={onOpenHabit} emptyHint="Nothing due today. Enjoy it." />
-          {ordered.rest.length > 0 && (
-            <HabitList title="Other" habits={ordered.rest} onOpen={onOpenHabit} />
+          {dueCount === 0 ? (
+            <p className="habit-list__hint habit-list__hint--lead">Nothing due today. Enjoy it.</p>
+          ) : grouped ? (
+            TOD_GROUPS.map(([key, label]) =>
+              groups[key].length > 0 ? (
+                <HabitList key={key} title={label} habits={groups[key]} onOpen={onOpenHabit} />
+              ) : null,
+            )
+          ) : (
+            <HabitList title="Today" habits={groups.anytime} onOpen={onOpenHabit} />
+          )}
+          {rest.length > 0 && (
+            <HabitList title="Not due today" habits={rest} onOpen={onOpenHabit} muted />
           )}
         </main>
       )}

@@ -26,9 +26,9 @@ function stateFor(off, phase) {
 }
 
 const DEMO = [
-  { id: 'demo_walk', name: 'Walk', iconName: 'Footprints', color: '#ff8a5b', phase: 0, cue: 'lunch', type: 'duration', goal: 30 },
-  { id: 'demo_workout', name: 'Strength training', iconName: 'Dumbbell', color: '#6aa9ff', phase: 2, cue: 'morning coffee' },
-  { id: 'demo_read', name: 'Read 10 pages', iconName: 'BookOpen', color: '#5fd08a', phase: 4, cue: 'lunch' },
+  { id: 'demo_walk', name: 'Walk', iconName: 'Footprints', color: '#ff8a5b', phase: 0, cue: 'lunch', type: 'duration', goal: 30, tod: 'afternoon' },
+  { id: 'demo_workout', name: 'Strength training', iconName: 'Dumbbell', color: '#6aa9ff', phase: 2, cue: 'morning coffee', tod: 'morning' },
+  { id: 'demo_read', name: 'Read 10 pages', iconName: 'BookOpen', color: '#5fd08a', phase: 4, cue: 'lunch', tod: 'evening' },
   { id: 'demo_water', name: 'Drink water', iconName: 'Droplet', color: '#7cd6f9', phase: 6, cue: 'waking up' },
 ]
 const DAYS = 371 // a full year so the whole heatmap is populated
@@ -44,6 +44,7 @@ function buildDemo() {
     name: h.name,
     color: h.color,
     iconName: h.iconName,
+    tod: h.tod || null,
     type: h.type || 'binary',
     target: h.type === 'duration' ? { amount: h.goal, unit: 'min' } : null,
     schedule: { kind: 'daily', weekdays: [1, 2, 3, 4, 5], timesPerWeek: 3, everyN: 2 },

@@ -22,6 +22,7 @@ function initialForm(habit, palette) {
     color: habit?.color || palette[0],
     icon: habit?.icon || HABIT_ICONS[0], // legacy emoji, kept for back-compat
     iconName: habit?.iconName ?? null, // Lucide icon key; null -> serif monogram
+    tod: habit?.tod || '', // '' = anytime
     type: habit?.type || 'binary',
     targetAmount: habit?.target?.amount || '',
     targetUnit: habit?.target?.unit || '',
@@ -69,6 +70,7 @@ export default function HabitFormModal({ habit, existingHabits, onClose }) {
       color: f.color,
       icon: f.icon,
       iconName: f.iconName,
+      tod: f.tod || null,
       type: f.type,
       target:
         f.type === 'quantitative' && f.targetAmount
@@ -157,6 +159,22 @@ export default function HabitFormModal({ habit, existingHabits, onClose }) {
                 aria-label="Custom color"
               />
             </label>
+          </div>
+        </div>
+
+        <div className="field">
+          <span className="field__label">When of day</span>
+          <div className="segmented segmented--wrap">
+            {[
+              ['', 'Anytime'],
+              ['morning', 'Morning'],
+              ['afternoon', 'Afternoon'],
+              ['evening', 'Evening'],
+            ].map(([v, l]) => (
+              <button key={v || 'any'} type="button" className={f.tod === v ? 'is-active' : ''} onClick={() => set({ tod: v })}>
+                {l}
+              </button>
+            ))}
           </div>
         </div>
 

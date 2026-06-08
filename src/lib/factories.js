@@ -41,6 +41,7 @@ export function createHabit(partial = {}, { id, createdAt } = {}) {
     color: partial.color ?? HABIT_COLORS[0],
     icon: partial.icon ?? HABIT_ICONS[0], // legacy emoji (kept for back-compat; UI now uses iconName)
     iconName: partial.iconName ?? null, // a HABIT_ICON_MAP key (Lucide); null -> serif monogram
+    tod: partial.tod ?? null, // time of day: 'morning' | 'afternoon' | 'evening' | null (anytime)
     type: partial.type ?? 'binary', // "binary" | "quantitative"
     target: partial.target ?? null, // quantitative: { amount, unit }
     schedule: partial.schedule ?? { kind: 'daily', weekdays: [1, 2, 3, 4, 5], timesPerWeek: 3, everyN: 2 },
