@@ -3,6 +3,7 @@ import { useHabitsContext } from '../context/habits-store.js'
 import { useScrollLock } from '../hooks/useScrollLock.js'
 import {
   PRESETS,
+  DIRECTIONS,
   CURATED_THEMES,
   FONT_OPTIONS,
   deriveTokens,
@@ -85,10 +86,11 @@ function ThemeEditor({ initial, onSave, onCancel }) {
 
 export default function ThemeModal({ onClose }) {
   useScrollLock()
-  const { meta, setTheme, setFont, addCustomTheme, updateCustomTheme, deleteCustomTheme } =
+  const { meta, setTheme, setLook, setFont, addCustomTheme, updateCustomTheme, deleteCustomTheme } =
     useHabitsContext()
   const [editing, setEditing] = useState(null) // { mode:'new'|'edit', theme }
   const active = meta?.theme || 'dark'
+  const activeDir = meta?.direction || 'A'
   const activeFont = meta?.font || 'default'
   const customThemes = meta?.customThemes || []
   // Show only themes matching the chosen mode (defaults to the active theme's mode).
@@ -124,6 +126,24 @@ export default function ThemeModal({ onClose }) {
           <ThemeEditor initial={editing.theme} onSave={onSave} onCancel={() => setEditing(null)} />
         ) : (
           <>
+            <h3 className="appearance__label">Look</h3>
+            <div className="look-grid">
+              {DIRECTIONS.map((d) => (
+                <button
+                  key={d.id}
+                  type="button"
+                  className={`look-chip${activeDir === d.id ? ' is-active' : ''}`}
+                  onClick={() => {
+                    setLook(d.id)
+                    setMode(d.id === 'A' ? 'light' : 'dark')
+                  }}
+                >
+                  <span className="look-chip__name">{d.name}</span>
+                  <span className="look-chip__tagline">{d.tagline}</span>
+                </button>
+              ))}
+            </div>
+
             <div className="appearance__row">
               <h3 className="appearance__label">Theme</h3>
               <div className="segmented">

@@ -4,6 +4,9 @@ import {
   contrastText,
   mix,
   applyTheme,
+  applyDirection,
+  applyFont,
+  resolveDirection,
   THEME_VARS,
   createCustomTheme,
 } from '../../src/lib/theme.js'
@@ -48,5 +51,29 @@ describe('theme — applyTheme', () => {
     const root = document.documentElement
     applyTheme({ theme: 'theme_missing', customThemes: [] }, root)
     expect(root.getAttribute('data-theme')).toBe('dark')
+  })
+})
+
+describe('theme — Looks (directions)', () => {
+  it('resolveDirection defaults to Ledger (A) and resolves known ids', () => {
+    expect(resolveDirection({}).id).toBe('A')
+    expect(resolveDirection({ direction: 'B' }).name).toBe('Bloom')
+    expect(resolveDirection({ direction: 'zzz' }).id).toBe('A') // unknown -> default
+  })
+
+  it('applyDirection writes the data-dir attribute', () => {
+    const root = document.documentElement
+    applyDirection({ direction: 'B' }, root)
+    expect(root.getAttribute('data-dir')).toBe('B')
+  })
+
+  it("default font follows the Look's native face; explicit font overrides", () => {
+    const root = document.documentElement
+    applyFont({ font: 'default', direction: 'B' }, root) // Bloom -> Bricolage
+    expect(root.style.getPropertyValue('--font-display')).toContain('Bricolage')
+    applyFont({ font: 'default', direction: 'A' }, root) // Ledger -> Newsreader
+    expect(root.style.getPropertyValue('--font-display')).toContain('Newsreader')
+    applyFont({ font: 'mono', direction: 'A' }, root) // explicit beats the Look
+    expect(root.style.getPropertyValue('--font-display')).toContain('Space Mono')
   })
 })

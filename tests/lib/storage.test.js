@@ -11,8 +11,22 @@ describe('storage', () => {
     expect(s.completions).toEqual({})
     expect(s.meta.schemaVersion).toBe(SCHEMA_VERSION)
     expect(s.meta.theme).toBe('light')
+    expect(s.meta.direction).toBe('A')
     expect(s.meta.customThemes).toEqual([])
     expect(s.meta.font).toBe('default')
+  })
+
+  it('v1->v2 migration maps a dark-theme user to the Nocturne Look (C)', () => {
+    const out = migrate({ habits: [], completions: {}, meta: { schemaVersion: 1, theme: 'dark' } })
+    expect(out.meta.schemaVersion).toBe(SCHEMA_VERSION)
+    expect(out.meta.direction).toBe('C')
+    expect(out.meta.theme).toBe('dark')
+  })
+
+  it('v1->v2 migration lands a light/curated user on the Ledger Look (A)', () => {
+    const out = migrate({ habits: [], completions: {}, meta: { schemaVersion: 1, theme: 'sand' } })
+    expect(out.meta.direction).toBe('A')
+    expect(out.meta.theme).toBe('sand')
   })
 
   it('backfills customThemes for pre-existing meta missing the field', () => {

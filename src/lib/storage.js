@@ -39,7 +39,14 @@ export function writeRaw(key, value) {
 // pure function of state. v1 is the baseline (no prior versions), so the chain is
 // currently a no-op that just stamps the current version.
 const MIGRATIONS = {
-  // 1: (state) => ({ ...state, meta: { ...state.meta, /* new field */ } }),
+  // v1 -> v2: introduce meta.direction (the "Look"). Map the two base presets to their
+  // matching Look — Nocturne (theme 'dark') is the night edition of Ledger -> C; everything
+  // else (Ledger / curated lights / custom) starts on Ledger -> A. The emptyMeta merge below
+  // would backfill 'A' on its own; this step exists so an existing dark user lands on C.
+  2: (state) => ({
+    ...state,
+    meta: { ...state.meta, direction: state.meta?.theme === 'dark' ? 'C' : 'A' },
+  }),
 }
 
 export function migrate(state) {

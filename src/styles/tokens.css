@@ -3,12 +3,12 @@
    data-theme attribute on <html>, set from meta.theme. */
 
 :root {
-  /* Ledger/Almanac identity: serif display + numerals (Newsreader), Inter for small UI labels.
-     --font-display/--font-body are also set at runtime by applyFont() from the Type picker;
-     --font-num stays serif regardless so hero/stat figures read as numerals. */
+  /* Ledger/Almanac identity. --font-display/--font-body are set at runtime by applyFont()
+     from the active Look + the Type picker; numerals share the display face so hero/stat
+     figures read in the same serif/grotesque. */
   --font-display: 'Newsreader', Georgia, serif;
   --font-body: 'Inter', system-ui, sans-serif;
-  --font-num: 'Newsreader', Georgia, serif;
+  --font-num: var(--font-display);
 
   --space-1: 4px;
   --space-2: 8px;
@@ -17,12 +17,32 @@
   --space-5: 24px;
   --space-6: 32px;
 
-  --radius-sm: 8px;
-  --radius-md: 12px;
-  --radius-lg: 18px;
+  /* Radius + card elevation are driven by the active Look (data-dir) below; these are
+     the Ledger/Nocturne (editorial) defaults so the app is correct before JS runs. */
+  --radius-sm: 3px;
+  --radius-md: 4px;
+  --radius-lg: 6px;
+  --card-shadow: none; /* flat editorial cards; Bloom elevates (below) */
 
   --maxw: 480px; /* mobile-first content column */
   --transition: 160ms ease;
+}
+
+/* ---- Per-Look structure (the "Looks" / Directions axis) ----
+   A Look owns shape + elevation. Colors come from the palette (data-theme) independently.
+   A (Ledger) & C (Nocturne) are sharp + flat editorial; B (Bloom) is soft + elevated. */
+:root[data-dir='A'],
+:root[data-dir='C'] {
+  --radius-sm: 3px;
+  --radius-md: 4px;
+  --radius-lg: 6px;
+  --card-shadow: none;
+}
+:root[data-dir='B'] {
+  --radius-sm: 12px;
+  --radius-md: 16px;
+  --radius-lg: 22px;
+  --card-shadow: var(--shadow);
 }
 
 /* Dark (default slot) — "Nocturne": the night edition of Ledger.

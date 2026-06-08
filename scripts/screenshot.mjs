@@ -43,7 +43,7 @@ const HABITS = [
 const DAYS = 371
 const walkMinutes = (off) => 20 + ((off * 7) % 35)
 
-function seed(theme) {
+function seed(theme, direction = 'A') {
   const createdAt = `${offsetKey(DAYS)}T08:00:00.000Z`
   const habits = HABITS.map((h) => ({
     id: h.id,
@@ -72,13 +72,13 @@ function seed(theme) {
   }
   const t = offsetKey(0)
   completions[t] = { ...(completions[t] || {}), h_walk: { state: 'done', value: 22 }, h_read: { state: 'done' } }
-  const meta = { schemaVersion: 1, points: 0, level: 0, badges: [], freezes: 0, theme, customThemes: [], font: 'default' }
+  const meta = { schemaVersion: 2, points: 0, level: 0, badges: [], freezes: 0, theme, direction, customThemes: [], font: 'default' }
   return { habits, completions, meta }
 }
 
-async function shoot(browser, { theme, width, height, label, action }) {
+async function shoot(browser, { theme, direction, width, height, label, action }) {
   const ctx = await browser.newContext({ viewport: { width, height }, deviceScaleFactor: 2 })
-  const data = seed(theme)
+  const data = seed(theme, direction)
   await ctx.addInitScript((d) => {
     localStorage.setItem('habits', JSON.stringify(d.habits))
     localStorage.setItem('completions', JSON.stringify(d.completions))
@@ -132,6 +132,13 @@ async function shoot(browser, { theme, width, height, label, action }) {
       }
     })
     console.log(`  ${label}: panelX=${m.panelX}px docX=${m.docX}px bodyLocked=${m.bodyLocked} bgMoved=${m.bgMoved}px`)
+  } else {
+    // Layout invariant on every non-modal surface: no horizontal overflow (a real-device
+    // sideways-pan bug is invisible in a screenshot). Especially matters at the 360px width.
+    const docX = await page.evaluate(
+      () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
+    )
+    console.log(`  ${label}: docX=${docX}px${docX > 0 ? '  <-- HORIZONTAL OVERFLOW' : ''}`)
   }
   const file = join(OUT, `${label}.png`)
   await page.screenshot({ path: file, fullPage: true })
@@ -140,16 +147,21 @@ async function shoot(browser, { theme, width, height, label, action }) {
 }
 
 const shots = [
-  { theme: 'dark', width: 390, height: 844, label: '01-today-dark-390' },
-  { theme: 'light', width: 390, height: 844, label: '02-today-light-390' },
-  { theme: 'dark', width: 360, height: 800, label: '03-today-dark-360' },
-  { theme: 'dark', width: 390, height: 844, label: '04-timer-running-dark-390', action: 'timer' },
+  // A = Ledger (light), C = Nocturne (dark) — structurally identical editorial Looks.
+  { theme: 'dark', direction: 'C', width: 390, height: 844, label: '01-today-nocturne-390' },
+  { theme: 'light', direction: 'A', width: 390, height: 844, label: '02-today-ledger-390' },
+  { theme: 'dark', direction: 'C', width: 360, height: 800, label: '03-today-nocturne-360' },
+  { theme: 'dark', direction: 'C', width: 390, height: 844, label: '04-timer-running-390', action: 'timer' },
   // Curated redesign palettes (step 2): verify explicit-token application + heat ramp.
-  { theme: 'ocean', width: 390, height: 844, label: '05-today-ocean-390' },
-  { theme: 'sage', width: 390, height: 844, label: '06-today-sage-390' },
-  { theme: 'ocean', width: 390, height: 844, label: '07-detail-ocean-390', action: 'detail' },
-  { theme: 'light', width: 390, height: 844, label: '08-theme-grid-light-390', action: 'theme' },
-  { theme: 'dark', width: 390, height: 844, label: '09-theme-grid-dark-390', action: 'theme' },
+  { theme: 'ocean', direction: 'C', width: 390, height: 844, label: '05-today-ocean-390' },
+  { theme: 'sage', direction: 'A', width: 390, height: 844, label: '06-today-sage-390' },
+  { theme: 'ocean', direction: 'C', width: 390, height: 844, label: '07-detail-ocean-390', action: 'detail' },
+  { theme: 'light', direction: 'A', width: 390, height: 844, label: '08-appearance-look-390', action: 'theme' },
+  { theme: 'dark', direction: 'C', width: 390, height: 844, label: '09-theme-grid-dark-390', action: 'theme' },
+  // Step 3: B = Bloom — soft 20px radius, elevated cards, Bricolage Grotesque, plum palette.
+  { theme: 'bloom', direction: 'B', width: 390, height: 844, label: '10-today-bloom-390' },
+  { theme: 'bloom', direction: 'B', width: 360, height: 800, label: '11-today-bloom-360' },
+  { theme: 'bloom', direction: 'B', width: 390, height: 844, label: '12-detail-bloom-390', action: 'detail' },
 ]
 
 const browser = await chromium.launch()

@@ -11,6 +11,32 @@ export const PRESETS = [
   { id: 'light', name: 'Light' },
 ]
 
+// The three "Looks" (Directions) — the top-level identity axis above palettes. A Look owns
+// STRUCTURE (radius + card elevation via the data-dir attribute in tokens.css) and the native
+// display face; it also seeds a signature palette. The palette (meta.theme) stays independently
+// changeable afterward. A and C share the editorial structure (serif, sharp, flat) and differ
+// only by their default palette (light Ledger vs dark Nocturne); B (Bloom) is the soft/elevated
+// grotesque outlier. `font` is used by applyFont when meta.font === 'default'.
+export const DIRECTIONS = [
+  { id: 'A', name: 'Ledger', tagline: 'Paper & ink. Editorial calm.', defaultTheme: 'light',
+    font: "'Newsreader', Georgia, serif" },
+  { id: 'B', name: 'Bloom', tagline: 'Soft & organic. Strength grows like a seed.', defaultTheme: 'bloom',
+    font: "'Bricolage Grotesque', system-ui, sans-serif" },
+  { id: 'C', name: 'Nocturne', tagline: 'The night edition of Ledger. Quiet and matte.', defaultTheme: 'dark',
+    font: "'Newsreader', Georgia, serif" },
+]
+
+// Resolve meta.direction to its Look definition (defaults to Ledger).
+export function resolveDirection(meta) {
+  return DIRECTIONS.find((d) => d.id === (meta?.direction || 'A')) || DIRECTIONS[0]
+}
+
+// Apply the active Look: set data-dir, which drives per-Look radius + card elevation in
+// tokens.css. Fonts are handled by applyFont (it reads the Look for the 'default' face).
+export function applyDirection(meta, root = document.documentElement) {
+  root.setAttribute('data-dir', resolveDirection(meta).id)
+}
+
 // Seed colors used as the starting point when creating a theme "from" a preset.
 export const PRESET_SEED = {
   // Nocturne (the dark Ledger) and Ledger (light) base colors — must match tokens.css.
@@ -67,6 +93,10 @@ export const CURATED_THEMES = [
   { id: 'bark', name: 'Bark', dark: true, bg: '#181210', surface: '#211915', text: '#efe5da', accent: '#b08152',
     surface2: '#2c211b', textMuted: '#a89381', border: '#382a20', accentContrast: '#181210', danger: '#d27358',
     heat: ['#231914', '#3d2a1d', '#5e4129', '#855b38', '#b08152'] },
+  // Bloom — the signature palette of the Bloom Look (dusk plum + coral). Selectable on its own too.
+  { id: 'bloom', name: 'Bloom', dark: true, bg: '#171121', surface: '#221a2e', text: '#f4eef7', accent: '#ef9079',
+    surface2: '#2c2339', textMuted: '#b0a2bd', border: '#372d46', accentContrast: '#2a1620', danger: '#e57a6c',
+    heat: ['#241b30', '#4d3a4a', '#84525a', '#bd6a62', '#ef9079'] },
   // ---- Monochrome · light ----
   { id: 'ash', name: 'Ash', dark: false, bg: '#eceae7', surface: '#f6f5f3', text: '#2a2a28', accent: '#4a4a46',
     surface2: '#dededa', textMuted: '#76746f', border: '#d4d2cd', accentContrast: '#f6f5f3', danger: '#9a5444',
@@ -223,8 +253,17 @@ export const FONT_OPTIONS = [
   { id: 'mono', name: 'Mono', display: "'Space Mono', ui-monospace, monospace", body: "'Inter', system-ui, sans-serif" },
 ]
 
+// Apply the Type picker. 'default' (the first option) means "follow the active Look's native
+// display face" — so Bloom reads in Bricolage, Ledger/Nocturne in Newsreader — with Inter body.
+// Any explicit choice overrides both. --font-num follows --font-display via tokens.css.
 export function applyFont(meta, root = document.documentElement) {
-  const opt = FONT_OPTIONS.find((f) => f.id === (meta?.font || 'default')) || FONT_OPTIONS[0]
+  const fontId = meta?.font || 'default'
+  if (fontId === 'default') {
+    root.style.setProperty('--font-display', resolveDirection(meta).font)
+    root.style.setProperty('--font-body', "'Inter', system-ui, sans-serif")
+    return
+  }
+  const opt = FONT_OPTIONS.find((f) => f.id === fontId) || FONT_OPTIONS[0]
   root.style.setProperty('--font-display', opt.display)
   root.style.setProperty('--font-body', opt.body)
 }

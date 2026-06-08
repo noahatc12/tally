@@ -1,7 +1,7 @@
 // Pure constructors / defaults. Kept pure: id and createdAt can be injected so tests
 // are deterministic; they default to crypto.randomUUID() / now in real use.
 
-export const SCHEMA_VERSION = 1
+export const SCHEMA_VERSION = 2
 
 export const HABIT_COLORS = [
   '#C7F94B', // lime (dark accent)
@@ -58,8 +58,9 @@ export function emptyMeta() {
     level: 0,
     badges: [],
     freezes: 0,
-    theme: 'light', // first-run default = Ledger (light). 'dark' = Nocturne | a custom theme id
+    direction: 'A', // the "Look": A=Ledger (light serif) | B=Bloom (plum grotesque) | C=Nocturne (dark serif)
+    theme: 'light', // first-run default = Ledger (light). 'dark' = Nocturne | a curated/custom theme id
     customThemes: [], // [{ id, name, bg, surface, text, accent }]
-    font: 'default', // a FONT_OPTIONS id
+    font: 'default', // a FONT_OPTIONS id; 'default' = follow the Look's native display face
   }
 }

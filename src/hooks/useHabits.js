@@ -5,7 +5,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { loadAll, saveHabits, saveCompletions, saveMeta, saveTimers } from '../lib/storage.js'
 import { createHabit, emptyMeta } from '../lib/factories.js'
-import { createCustomTheme } from '../lib/theme.js'
+import { createCustomTheme, DIRECTIONS } from '../lib/theme.js'
 
 export function useHabits() {
   // Load once via a lazy initializer (loadAll is called a single time at mount).
@@ -162,6 +162,13 @@ export function useHabits() {
     setMeta((m) => ({ ...(m || emptyMeta()), theme }))
   }, [])
 
+  // Switching Look sets the structure (direction) AND seeds its signature palette; the user
+  // can recolor afterward via setTheme. Picking "Bloom" should look like Bloom out of the box.
+  const setLook = useCallback((direction) => {
+    const dir = DIRECTIONS.find((d) => d.id === direction) || DIRECTIONS[0]
+    setMeta((m) => ({ ...(m || emptyMeta()), direction: dir.id, theme: dir.defaultTheme }))
+  }, [])
+
   const addCustomTheme = useCallback((partial) => {
     const t = createCustomTheme(partial)
     setMeta((m) => ({ ...m, customThemes: [...(m.customThemes || []), t], theme: t.id }))
@@ -204,6 +211,7 @@ export function useHabits() {
     startTimer,
     stopTimer,
     setTheme,
+    setLook,
     setFont,
     addCustomTheme,
     updateCustomTheme,
