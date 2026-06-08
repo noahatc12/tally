@@ -219,9 +219,13 @@
   gap: 6px;
   flex-wrap: wrap;
 }
+/* Start/Stop takes its own full-width row; the small chips (+5 / +15 / edit / skip)
+   wrap onto a tidy second row — five controls never fit one row on a phone. */
 .timer__primary {
-  flex: 1;
-  min-width: 130px;
+  flex: 1 1 100%;
+}
+.timer__chip {
+  flex: 1 1 auto;
 }
 .timer__chip {
   border: 1px solid var(--border);

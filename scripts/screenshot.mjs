@@ -136,9 +136,10 @@ async function shoot(browser, { theme, width, height, label, action }) {
 }
 
 const shots = [
-  { theme: 'dark', width: 390, height: 844, label: '01-edit-top-dark-390', action: 'edit' },
-  { theme: 'dark', width: 390, height: 844, label: '02-edit-scrolled-dark-390', action: 'edit-scrolled' },
-  { theme: 'light', width: 390, height: 844, label: '03-edit-top-light-390', action: 'edit' },
+  { theme: 'dark', width: 390, height: 844, label: '01-today-dark-390' },
+  { theme: 'light', width: 390, height: 844, label: '02-today-light-390' },
+  { theme: 'dark', width: 360, height: 800, label: '03-today-dark-360' },
+  { theme: 'dark', width: 390, height: 844, label: '04-timer-running-dark-390', action: 'timer' },
 ]
 
 const browser = await chromium.launch()
