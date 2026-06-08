@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useHabitsContext } from '../context/habits-store.js'
 import { todayKey, fromKey } from '../lib/dates.js'
 import ThemeModal from './ThemeModal.jsx'
+import TallyMark from './TallyMark.jsx'
 
 const DATE_FMT = { weekday: 'long', month: 'long', day: 'numeric' }
 
@@ -15,14 +16,13 @@ export default function Header({ onAdd, onHelp, onOverview }) {
   const greeting = hour < 12 ? 'Good morning' : hour < 18 ? 'Good afternoon' : 'Good evening'
 
   return (
-    <header className="header">
-      <div className="header__top">
-        <div>
-          <p className="header__greeting">{greeting}</p>
-          <h1 className="header__title">tally</h1>
-          <p className="header__date">{dateLabel}</p>
+    <header className="masthead">
+      <div className="masthead__top">
+        <div className="masthead__brand">
+          <p className="masthead__kicker">{greeting}</p>
+          <h1 className="masthead__word">tally</h1>
         </div>
-        <div className="header__actions">
+        <div className="masthead__actions">
           {onOverview && (
             <button
               type="button"
@@ -57,7 +57,19 @@ export default function Header({ onAdd, onHelp, onOverview }) {
           </button>
         </div>
       </div>
-      {activeCount > 0 && <p className="header__sub">{activeCount} active</p>}
+
+      {/* tally-mark rule: two hairlines flanking the brand's five-stroke mark */}
+      <div className="masthead__rule" aria-hidden="true">
+        <span className="masthead__hair" />
+        <TallyMark count={5} height={16} width={2} />
+        <span className="masthead__hair" />
+      </div>
+
+      <p className="masthead__meta">
+        {dateLabel}
+        {activeCount > 0 && <span className="masthead__count"> · {activeCount} active</span>}
+      </p>
+
       {themeOpen && <ThemeModal onClose={() => setThemeOpen(false)} />}
     </header>
   )

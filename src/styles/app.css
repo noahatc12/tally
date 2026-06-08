@@ -40,56 +40,103 @@
 }
 
 /* ---------- header ---------- */
-.header {
+/* ---------- masthead (editorial header) ---------- */
+.masthead {
   padding: var(--space-3) 0 var(--space-4);
 }
-.header__top {
+.masthead__top {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
   gap: var(--space-3);
 }
-.header__title {
-  font-size: 18px;
-  font-weight: 500;
-  letter-spacing: 0;
-  color: var(--text-muted);
+.masthead__brand {
+  min-width: 0;
 }
-.header__greeting {
+.masthead__kicker {
   margin: 0;
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 600;
-  letter-spacing: 0.02em;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
   color: var(--accent);
 }
-.header__date {
+.masthead__word {
   margin: 2px 0 0;
-  color: var(--text-muted);
-  font-size: 14px;
+  font-family: var(--font-display);
+  font-size: 34px;
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: -0.01em;
+  color: var(--text);
 }
-.header__actions {
+.masthead__actions {
   display: flex;
+  align-items: flex-start;
   gap: var(--space-2);
+  flex: none;
 }
-.header__sub {
-  margin: var(--space-3) 0 0;
+/* tally-mark rule: a hairline either side of the brand's five-stroke mark */
+.masthead__rule {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin-top: var(--space-3);
+  color: color-mix(in srgb, var(--text) 30%, transparent);
+}
+.masthead__hair {
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+.masthead__meta {
+  margin: var(--space-2) 0 0;
   color: var(--text-muted);
-  font-size: 13px;
+  font-size: 13.5px;
+}
+
+/* ---------- tally-mark motif (brand signature) ---------- */
+.tallymark {
+  display: inline-flex;
+  align-items: flex-end;
+  gap: 7px;
+}
+.tallymark__grp {
+  position: relative;
+  display: inline-flex;
+  gap: 3px;
+  height: var(--tm-h, 18px);
+}
+.tallymark__stroke {
+  width: var(--tm-w, 2px);
+  height: 100%;
+  background: currentColor;
+  border-radius: 2px;
+}
+.tallymark__grp.struck::after {
+  content: '';
+  position: absolute;
+  left: -3px;
+  right: -3px;
+  top: 50%;
+  height: var(--tm-w, 2px);
+  background: currentColor;
+  border-radius: 2px;
+  transform: rotate(-22deg);
+  transform-origin: center;
 }
 
 /* ---------- daily quote ---------- */
 .quote {
-  margin-top: var(--space-2);
-  padding: var(--space-4);
-  background: transparent;
-  border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
+  margin-top: var(--space-3);
+  padding: var(--space-2) 0;
 }
 .quote__text {
   margin: 0;
   font-family: var(--font-display);
-  font-size: 16px;
-  line-height: 1.45;
+  font-style: italic;
+  font-size: 18px;
+  line-height: 1.4;
   color: var(--text);
 }
 .quote__author {
@@ -279,7 +326,6 @@
   /* faint wash of the habit's own color so each card has a distinct hue */
   background: color-mix(in srgb, var(--row-accent) 5%, var(--surface));
   border: 1px solid var(--border);
-  border-left: 3px solid var(--row-accent, var(--accent));
   border-radius: var(--radius-lg);
   padding: var(--space-4);
   box-shadow: var(--card-shadow); /* flat for Ledger/Nocturne; elevated for Bloom */
@@ -1209,25 +1255,12 @@
   color: var(--text-muted);
   margin-bottom: var(--space-3);
 }
-.heatmap__body {
-  display: flex;
-  align-items: flex-start;
-}
-.heatmap__gutter {
-  flex: none;
-}
-.heatmap__scroll {
-  flex: 1;
-  min-width: 0;
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
-  padding-bottom: 4px;
-}
 .heatmap__svg {
   display: block;
+  width: 100%;
+  height: auto;
 }
-.heatmap__month,
-.heatmap__dow {
+.heatmap__month {
   fill: var(--text-muted);
   font-size: 9px;
   font-family: var(--font-body);
@@ -1245,6 +1278,18 @@
   width: 12px;
   height: 12px;
   border-radius: 2.5px;
+}
+
+/* Framed "engraved" plates around the trend + heatmap — the editorial Looks (Ledger A,
+   Nocturne C) frame data like a printed almanac plate; Bloom (B) leaves them open. */
+:root[data-dir='A'] .trend,
+:root[data-dir='C'] .trend,
+:root[data-dir='A'] .heatmap,
+:root[data-dir='C'] .heatmap {
+  border: 1px solid color-mix(in srgb, var(--text) 14%, transparent);
+  border-radius: var(--radius-md);
+  padding: var(--space-3);
+  background: color-mix(in srgb, var(--accent) 3%, var(--surface));
 }
 
 /* ---------- overview / dashboard ---------- */
@@ -1318,7 +1363,6 @@
   gap: var(--space-3);
   background: color-mix(in srgb, var(--row-accent) 5%, var(--surface));
   border: 1px solid var(--border);
-  border-left: 3px solid var(--row-accent);
   border-radius: var(--radius-md);
   padding: var(--space-3);
   color: inherit;

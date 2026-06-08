@@ -33,7 +33,7 @@ export default function TodayScreen({ onOpenHabit, onOpenOverview }) {
   return (
     <>
       <Header onAdd={openAdd} onHelp={() => setHelpOpen(true)} onOverview={active.length > 0 ? onOpenOverview : null} />
-      <QuoteBanner />
+      {active.length > 0 && <QuoteBanner />}
 
       {active.length === 0 ? (
         <EmptyState onAdd={openAdd} onHelp={() => setHelpOpen(true)} />
