@@ -18,42 +18,72 @@ export const PRESET_SEED = {
   light: { bg: '#f3ede1', surface: '#faf7ef', text: '#211c14', accent: '#9e3b2d' },
 }
 
-// Curated preset palettes (researched for contrast + cohesion). Each defines the four
-// base colors PLUS a matching set of habit colors that look good on that theme. The
-// rest of the token set is derived. Applied like custom themes (inline vars) but
-// built-in: not editable or deletable.
-// Each theme suggests a generous, cohesive set of habit colors (its accent family +
-// complementary hues + neutrals like tan/grey).
+// Curated palettes — the Claude Design "Ledger/Almanac" redesign library. Each carries
+// the full hand-tuned token set (bg/surface/surface-2/text/text-muted/border/accent/
+// accent-contrast/danger) + a 5-step heat ramp (bg -> accent), copied verbatim from the
+// handoff's directions.jsx PALETTES. Top-level bg/surface/text/accent are kept for the
+// theme grid swatches, resolveColors, and the editor seed; the rest is applied explicitly
+// by applyTheme (see curatedTokens). Built-in: not editable or deletable. Habit colors are
+// not per-theme here — they fall back to BASE_PALETTES by mode until tonal-ink lands.
 export const CURATED_THEMES = [
-  // Dark
-  { id: 'midnight', name: 'Midnight', bg: '#0b1020', surface: '#141b2e', text: '#e6eaf2', accent: '#6aa9ff',
-    palette: ['#6aa9ff', '#7cd6f9', '#3fb6c9', '#5fd08a', '#9ae25b', '#c792ea', '#9aa9ff', '#e2b85b', '#ff8a5b', '#e25b8c', '#b3a895', '#8a93a3'] },
-  { id: 'forest', name: 'Forest', bg: '#0e1410', surface: '#16201a', text: '#e7efe8', accent: '#5fd08a',
-    palette: ['#5fd08a', '#9ae25b', '#3fb6c9', '#7cd6f9', '#e2b85b', '#cf9b5b', '#e28c5b', '#c792ea', '#6aa9ff', '#b0937a', '#8f9e7e', '#9a948a'] },
-  { id: 'plum', name: 'Plum', bg: '#140f1a', surface: '#1e1726', text: '#ece6f2', accent: '#c792ea',
-    palette: ['#c792ea', '#e28cc9', '#9aa9ff', '#7cd6f9', '#6aa9ff', '#5fd08a', '#e2b85b', '#ff8a5b', '#e25b8c', '#b3a895', '#9a8aa8', '#8a8a8a'] },
-  { id: 'ember', name: 'Ember', bg: '#140f0d', surface: '#211915', text: '#f1e9e3', accent: '#ff8a5b',
-    palette: ['#ff8a5b', '#f9c14b', '#e2b85b', '#e2725b', '#e25b8c', '#c792ea', '#5fd08a', '#9ae25b', '#6aa9ff', '#b0937a', '#c2b39a', '#9a948a'] },
-  { id: 'slate', name: 'Slate', bg: '#0f1417', surface: '#192026', text: '#e4eaee', accent: '#3fb6c9',
-    palette: ['#3fb6c9', '#6aa9ff', '#7cd6f9', '#5fd08a', '#9ae25b', '#c792ea', '#e2b85b', '#ff8a5b', '#e25b8c', '#a89f94', '#8f9e92', '#8a8a8a'] },
-  // Dark — muted / neutral
-  { id: 'charcoal', name: 'Charcoal', bg: '#121212', surface: '#1c1c1c', text: '#e6e6e6', accent: '#9a948a',
-    palette: ['#b3a895', '#9a948a', '#8f9e92', '#b0937a', '#8a93a3', '#c2bcae', '#6aa9ff', '#5fd08a', '#c792ea', '#e2b85b', '#e2725b', '#7d7d7d'] },
-  { id: 'mocha', name: 'Mocha', bg: '#16110d', surface: '#211913', text: '#efe6da', accent: '#b08968',
-    palette: ['#b08968', '#a89270', '#c2b39a', '#8f9e7e', '#9a8a76', '#7e8a9a', '#e2b85b', '#cf9b5b', '#c792ea', '#5fd08a', '#6aa9ff', '#9a948a'] },
-  // Light — muted / neutral
-  { id: 'stone', name: 'Stone', bg: '#f4f4f2', surface: '#ffffff', text: '#232323', accent: '#6f6f6f',
-    palette: ['#7d7d7d', '#a8997f', '#7e8f7e', '#8a7c69', '#7d8a9a', '#9c8a8a', '#3f94b6', '#2e9e6b', '#c8763c', '#9a6bcb', '#c95b7a', '#5ba8e2'] },
-  { id: 'clay', name: 'Clay', bg: '#f2ece1', surface: '#fffdf9', text: '#2a241c', accent: '#a87f54',
-    palette: ['#a87f54', '#8a9a7d', '#7d8a9a', '#b07d6b', '#9a8aa8', '#6f6f6f', '#2e9e6b', '#c8763c', '#3f94b6', '#d5577e', '#a8997f', '#7e8f7e'] },
-  { id: 'sand', name: 'Sand', bg: '#f6f1e7', surface: '#ffffff', text: '#2a2722', accent: '#c8763c',
-    palette: ['#c8763c', '#a8843c', '#7aa95b', '#3f94b6', '#b5638c', '#c95b5b', '#9a6bcb', '#2e9e6b', '#a8997f', '#8a7c69', '#7e8f7e', '#7d7d7d'] },
-  { id: 'mint', name: 'Mint', bg: '#f1f7f4', surface: '#ffffff', text: '#1e2622', accent: '#2e9e6b',
-    palette: ['#2e9e6b', '#3f94b6', '#7aa95b', '#c8763c', '#9a6bcb', '#c95b7a', '#5ba8e2', '#a8843c', '#7e8f7e', '#a8997f', '#8a7c69', '#7d7d7d'] },
-  { id: 'sky', name: 'Sky', bg: '#eef4fb', surface: '#ffffff', text: '#1b2430', accent: '#2f6fed',
-    palette: ['#2f6fed', '#3f94b6', '#5ba8e2', '#2e9e6b', '#7aa95b', '#c8763c', '#9a6bcb', '#c95b7a', '#c95b5b', '#a8997f', '#7e8f7e', '#7d7d7d'] },
-  { id: 'rose', name: 'Rose', bg: '#fbf1f3', surface: '#ffffff', text: '#2a1f23', accent: '#d5577e',
-    palette: ['#d5577e', '#c95b5b', '#9a6bcb', '#3f94b6', '#2e9e6b', '#7aa95b', '#c8763c', '#b98ce2', '#5ba8e2', '#a8997f', '#8a7c69', '#7d7d7d'] },
+  // ---- Nature · light ----
+  { id: 'sand', name: 'Sand', dark: false, bg: '#f2ece0', surface: '#fbf6ec', text: '#2a2218', accent: '#bd6a3c',
+    surface2: '#eadfca', textMuted: '#786a54', border: '#ddcfb6', accentContrast: '#fbf6ec', danger: '#b0492f',
+    heat: ['#e7dcc6', '#d8b793', '#c89065', '#b3683f', '#8f4a2c'] },
+  { id: 'birch', name: 'Birch', dark: false, bg: '#f4f1ea', surface: '#fcfaf4', text: '#2b2823', accent: '#a98b5e',
+    surface2: '#e7e1d4', textMuted: '#7c7568', border: '#e0d9ca', accentContrast: '#fcfaf4', danger: '#ad5a40',
+    heat: ['#e9e1d0', '#d8cbb0', '#c2ad86', '#a98b5e', '#876c43'] },
+  { id: 'stone', name: 'Stone', dark: false, bg: '#eceae5', surface: '#f6f5f1', text: '#2c2b29', accent: '#5f6f6a',
+    surface2: '#dddad2', textMuted: '#76746e', border: '#d2cfc7', accentContrast: '#f6f5f1', danger: '#a05544',
+    heat: ['#dedbd3', '#b9bdb2', '#8e9a8c', '#647568', '#3f4f44'] },
+  { id: 'fog', name: 'Fog', dark: false, bg: '#e7ebee', surface: '#f4f6f8', text: '#262c30', accent: '#5b7f93',
+    surface2: '#d6dde2', textMuted: '#6c757b', border: '#cdd5db', accentContrast: '#f4f6f8', danger: '#a85c4e',
+    heat: ['#dde3e8', '#bcc9d2', '#94aab8', '#6a8a9c', '#48697d'] },
+  { id: 'clay', name: 'Clay', dark: false, bg: '#f0e7df', surface: '#faf3ec', text: '#2c2017', accent: '#b25a3e',
+    surface2: '#e6d6c8', textMuted: '#7d6555', border: '#dcc7b4', accentContrast: '#faf3ec', danger: '#9e3f2c',
+    heat: ['#e6d6c8', '#d3a98e', '#c07e5e', '#a85a3e', '#823f29'] },
+  { id: 'sage', name: 'Sage', dark: false, bg: '#e9ece3', surface: '#f4f6ef', text: '#272b24', accent: '#6f8a5b',
+    surface2: '#d9ded0', textMuted: '#6e7568', border: '#cfd5c5', accentContrast: '#f4f6ef', danger: '#a3573f',
+    heat: ['#dde2d4', '#c0c9ad', '#9aac80', '#7a8f5b', '#5a6e3f'] },
+  // ---- Nature · dark ----
+  { id: 'charcoal', name: 'Charcoal', dark: true, bg: '#18181a', surface: '#212123', text: '#e9e7e3', accent: '#c89060',
+    surface2: '#2b2b2e', textMuted: '#9a978f', border: '#34343a', accentContrast: '#18181a', danger: '#d4705f',
+    heat: ['#222225', '#46403a', '#6e5b46', '#9a7a52', '#c89060'] },
+  { id: 'slate', name: 'Slate', dark: true, bg: '#14181d', surface: '#1d232b', text: '#e4e8ed', accent: '#7c93b0',
+    surface2: '#272f39', textMuted: '#909aa6', border: '#2c343f', accentContrast: '#14181d', danger: '#d67a6c',
+    heat: ['#1c222b', '#2f3b49', '#45576b', '#5f7790', '#7c93b0'] },
+  { id: 'ocean', name: 'Ocean', dark: true, bg: '#0e1820', surface: '#15222c', text: '#e3ecf0', accent: '#5fb0bb',
+    surface2: '#1d2d38', textMuted: '#8aa0ab', border: '#263844', accentContrast: '#0e1820', danger: '#d77a6a',
+    heat: ['#16242e', '#274350', '#356c79', '#499aa3', '#62c2c7'] },
+  { id: 'pine', name: 'Pine', dark: true, bg: '#101813', surface: '#16211a', text: '#e3ece4', accent: '#5fa372',
+    surface2: '#1e2c23', textMuted: '#8ba093', border: '#26342b', accentContrast: '#101813', danger: '#d57a64',
+    heat: ['#16201a', '#23362a', '#345040', '#477059', '#5fa372'] },
+  { id: 'ember', name: 'Ember', dark: true, bg: '#1a1310', surface: '#231a15', text: '#efe4da', accent: '#cf7f4f',
+    surface2: '#2e221b', textMuted: '#a8907f', border: '#372a20', accentContrast: '#1a1310', danger: '#d96a55',
+    heat: ['#241912', '#43291a', '#6e3f23', '#9c5b30', '#cf7f4f'] },
+  { id: 'heather', name: 'Heather', dark: true, bg: '#16141c', surface: '#1f1c27', text: '#ebe7f0', accent: '#9a86b8',
+    surface2: '#282431', textMuted: '#a39db0', border: '#332e3f', accentContrast: '#16141c', danger: '#d27a86',
+    heat: ['#1f1b27', '#352e44', '#4f4564', '#6f6090', '#9a86b8'] },
+  { id: 'bark', name: 'Bark', dark: true, bg: '#181210', surface: '#211915', text: '#efe5da', accent: '#b08152',
+    surface2: '#2c211b', textMuted: '#a89381', border: '#382a20', accentContrast: '#181210', danger: '#d27358',
+    heat: ['#231914', '#3d2a1d', '#5e4129', '#855b38', '#b08152'] },
+  // ---- Monochrome · light ----
+  { id: 'ash', name: 'Ash', dark: false, bg: '#eceae7', surface: '#f6f5f3', text: '#2a2a28', accent: '#4a4a46',
+    surface2: '#dededa', textMuted: '#76746f', border: '#d4d2cd', accentContrast: '#f6f5f3', danger: '#9a5444',
+    heat: ['#dedcd7', '#bcbab4', '#929089', '#65635d', '#3c3a35'] },
+  { id: 'sepia', name: 'Sepia', dark: false, bg: '#efe8dd', surface: '#f8f2e8', text: '#2b231a', accent: '#6b5436',
+    surface2: '#e3d8c6', textMuted: '#7c6f5d', border: '#dccdb4', accentContrast: '#f8f2e8', danger: '#9a5a3f',
+    heat: ['#e6dcc8', '#cdb999', '#b0926a', '#8a6c45', '#5e472a'] },
+  // ---- Monochrome · dark ----
+  { id: 'graphite', name: 'Graphite', dark: true, bg: '#161616', surface: '#1e1e1e', text: '#e8e8e6', accent: '#cfcfca',
+    surface2: '#282828', textMuted: '#9a9a96', border: '#333333', accentContrast: '#161616', danger: '#c77a6a',
+    heat: ['#222222', '#3c3c3c', '#5e5e5e', '#8c8c8a', '#cfcfca'] },
+  { id: 'carbon', name: 'Carbon', dark: true, bg: '#0e0e0f', surface: '#161617', text: '#e6e6e8', accent: '#a8a8ae',
+    surface2: '#1f1f21', textMuted: '#8c8c90', border: '#28282b', accentContrast: '#0e0e0f', danger: '#cf6f60',
+    heat: ['#1c1c1e', '#3a3a3d', '#5c5c60', '#828287', '#a8a8ae'] },
+  { id: 'steel', name: 'Steel', dark: true, bg: '#121518', surface: '#1a1e22', text: '#e3e7ea', accent: '#9fb0bd',
+    surface2: '#242a30', textMuted: '#8a939b', border: '#2c333a', accentContrast: '#121518', danger: '#cf7d6e',
+    heat: ['#1d2227', '#333d45', '#4f5e69', '#71848f', '#9fb0bd'] },
 ]
 
 // Habit-color palettes for the two built-in base themes.
@@ -97,6 +127,11 @@ export const THEME_VARS = [
   '--danger',
   '--shadow',
   '--heat-empty',
+  '--heat-0',
+  '--heat-1',
+  '--heat-2',
+  '--heat-3',
+  '--heat-4',
 ]
 
 function hexToRgb(hex) {
@@ -147,7 +182,35 @@ export function deriveTokens({ bg, surface, text, accent }) {
     '--accent-contrast': contrastText(accent),
     '--danger': dark ? '#f4796b' : '#c0492f',
     '--shadow': dark ? '0 8px 24px rgba(0,0,0,0.45)' : '0 6px 20px rgba(0,0,0,0.1)',
-    '--heat-empty': mix(surface, text, 0.06),
+    // 5-step heat ramp bg -> accent (matches the curated palettes' explicit ramps).
+    '--heat-0': mix(bg, accent, 0.08),
+    '--heat-1': mix(bg, accent, 0.3),
+    '--heat-2': mix(bg, accent, 0.52),
+    '--heat-3': mix(bg, accent, 0.76),
+    '--heat-4': accent,
+    '--heat-empty': mix(bg, accent, 0.08), // = --heat-0, for the existing color-mix heatmap
+  }
+}
+
+// The full CSS-variable map for a curated palette (explicit, hand-tuned values + ramp).
+export function curatedTokens(t) {
+  return {
+    '--bg': t.bg,
+    '--surface': t.surface,
+    '--surface-2': t.surface2,
+    '--text': t.text,
+    '--text-muted': t.textMuted,
+    '--border': t.border,
+    '--accent': t.accent,
+    '--accent-contrast': t.accentContrast,
+    '--danger': t.danger,
+    '--shadow': t.dark ? '0 8px 24px rgba(0,0,0,0.45)' : '0 6px 20px rgba(0,0,0,0.1)',
+    '--heat-0': t.heat[0],
+    '--heat-1': t.heat[1],
+    '--heat-2': t.heat[2],
+    '--heat-3': t.heat[3],
+    '--heat-4': t.heat[4],
+    '--heat-empty': t.heat[0],
   }
 }
 
@@ -193,6 +256,8 @@ export function applyTheme(meta, root = document.documentElement) {
     return
   }
   root.setAttribute('data-theme', 'custom')
-  const tokens = deriveTokens(t)
+  // Curated palettes carry an explicit hand-tuned token set (have a heat ramp);
+  // user custom themes store only 4 colors and derive the rest.
+  const tokens = t.heat ? curatedTokens(t) : deriveTokens(t)
   for (const [k, val] of Object.entries(tokens)) root.style.setProperty(k, val)
 }

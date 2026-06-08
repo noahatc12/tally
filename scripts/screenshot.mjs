@@ -98,6 +98,10 @@ async function shoot(browser, { theme, width, height, label, action }) {
     await page.locator('button[aria-label="Overview"]').click()
     await page.locator('.overview').waitFor()
     await page.locator('.heatmap__svg').first().waitFor()
+  } else if (action === 'theme') {
+    await page.locator('button[aria-label="Themes"]').click()
+    await page.locator('.theme-grid').waitFor()
+    await page.waitForTimeout(300)
   } else if (action === 'edit') {
     await page.locator('.row__identity').first().click()
     await page.locator('.detail').waitFor()
@@ -140,6 +144,12 @@ const shots = [
   { theme: 'light', width: 390, height: 844, label: '02-today-light-390' },
   { theme: 'dark', width: 360, height: 800, label: '03-today-dark-360' },
   { theme: 'dark', width: 390, height: 844, label: '04-timer-running-dark-390', action: 'timer' },
+  // Curated redesign palettes (step 2): verify explicit-token application + heat ramp.
+  { theme: 'ocean', width: 390, height: 844, label: '05-today-ocean-390' },
+  { theme: 'sage', width: 390, height: 844, label: '06-today-sage-390' },
+  { theme: 'ocean', width: 390, height: 844, label: '07-detail-ocean-390', action: 'detail' },
+  { theme: 'light', width: 390, height: 844, label: '08-theme-grid-light-390', action: 'theme' },
+  { theme: 'dark', width: 390, height: 844, label: '09-theme-grid-dark-390', action: 'theme' },
 ]
 
 const browser = await chromium.launch()
