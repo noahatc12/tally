@@ -1,7 +1,8 @@
-import { useState } from 'react'
+import { useState, createElement } from 'react'
 import { useHabitsContext } from '../context/habits-store.js'
 import { useScrollLock } from '../hooks/useScrollLock.js'
 import { HABIT_ICONS } from '../lib/factories.js'
+import { HABIT_ICON_NAMES, iconComponent } from '../lib/icons.js'
 import { resolvePalette } from '../lib/theme.js'
 
 const WEEKDAYS = [
@@ -19,7 +20,8 @@ function initialForm(habit, palette) {
   return {
     name: habit?.name || '',
     color: habit?.color || palette[0],
-    icon: habit?.icon || HABIT_ICONS[0],
+    icon: habit?.icon || HABIT_ICONS[0], // legacy emoji, kept for back-compat
+    iconName: habit?.iconName ?? null, // Lucide icon key; null -> serif monogram
     type: habit?.type || 'binary',
     targetAmount: habit?.target?.amount || '',
     targetUnit: habit?.target?.unit || '',
@@ -66,6 +68,7 @@ export default function HabitFormModal({ habit, existingHabits, onClose }) {
       name: f.name.trim(),
       color: f.color,
       icon: f.icon,
+      iconName: f.iconName,
       type: f.type,
       target:
         f.type === 'quantitative' && f.targetAmount
@@ -108,25 +111,28 @@ export default function HabitFormModal({ habit, existingHabits, onClose }) {
 
         <div className="field">
           <span className="field__label">Icon</span>
-          <div className="chips">
-            {HABIT_ICONS.map((ic) => (
+          <div className="chips chips--icons">
+            <button
+              type="button"
+              className={`chip chip--icon${!f.iconName ? ' is-active' : ''}`}
+              onClick={() => set({ iconName: null })}
+              aria-label="Monogram (first letter)"
+              title="Monogram"
+            >
+              <span className="habit-monogram">{(f.name || 'A').trim().charAt(0).toUpperCase() || 'A'}</span>
+            </button>
+            {HABIT_ICON_NAMES.map((name) => (
               <button
-                key={ic}
+                key={name}
                 type="button"
-                className={`chip${f.icon === ic ? ' is-active' : ''}`}
-                onClick={() => set({ icon: ic })}
+                className={`chip chip--icon${f.iconName === name ? ' is-active' : ''}`}
+                onClick={() => set({ iconName: name })}
+                aria-label={name}
+                title={name}
               >
-                {ic}
+                {createElement(iconComponent(name), { size: 20, strokeWidth: 2.1, 'aria-hidden': 'true' })}
               </button>
             ))}
-            <input
-              className="chip chip--input"
-              value={HABIT_ICONS.includes(f.icon) ? '' : f.icon}
-              onChange={(e) => set({ icon: e.target.value.slice(0, 8) || f.icon })}
-              placeholder="＋"
-              aria-label="Type any emoji"
-              inputMode="text"
-            />
           </div>
         </div>
 
@@ -297,7 +303,7 @@ export default function HabitFormModal({ habit, existingHabits, onClose }) {
                 <option value="">None</option>
                 {anchorOptions.map((h) => (
                   <option key={h.id} value={h.id}>
-                    {h.icon} {h.name}
+                    {h.name}
                   </option>
                 ))}
               </select>

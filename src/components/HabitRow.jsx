@@ -7,6 +7,7 @@ import StreakBadge from './StreakBadge.jsx'
 import StrengthMeter from './StrengthMeter.jsx'
 import CompletionRatePill from './CompletionRatePill.jsx'
 import WeekDots from './WeekDots.jsx'
+import HabitIcon from './HabitIcon.jsx'
 
 export default function HabitRow({ habit, onOpen }) {
   const { setCompletion, clearCompletion } = useHabitsContext()
@@ -32,7 +33,7 @@ export default function HabitRow({ habit, onOpen }) {
     >
       <div className="row__main">
         <span className="row__icon" aria-hidden="true">
-          {habit.icon}
+          <HabitIcon habit={habit} size={22} />
         </span>
         <button type="button" className="row__identity" onClick={() => onOpen(habit.id)} aria-label={`Open ${habit.name}`}>
           <span className="row__name">{habit.name}</span>

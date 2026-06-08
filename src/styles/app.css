@@ -345,9 +345,15 @@
   place-items: center;
   font-size: 24px;
   line-height: 1;
+  color: var(--row-accent);
   background: color-mix(in srgb, var(--row-accent) 16%, var(--surface));
   border: 1px solid color-mix(in srgb, var(--row-accent) 32%, transparent);
   transition: transform var(--transition);
+}
+/* Serif monogram fallback (no Lucide icon chosen). */
+.habit-monogram {
+  font-family: var(--font-display);
+  font-weight: 600;
 }
 .row.is-done-today .row__icon {
   transform: scale(1.05);
@@ -818,6 +824,18 @@
   background: var(--surface-2);
   outline: 2px solid var(--accent);
 }
+/* Lucide icon picker: a compact, scrollable grid of square chips. */
+.chips--icons {
+  max-height: 190px;
+  overflow-y: auto;
+  padding: 2px;
+}
+.chip--icon {
+  color: var(--text-muted);
+}
+.chip--icon.is-active {
+  color: var(--accent);
+}
 .swatch {
   width: 36px;
   height: 36px;
@@ -1132,6 +1150,7 @@
   place-items: center;
   font-size: 28px;
   line-height: 1;
+  color: var(--row-accent);
   background: color-mix(in srgb, var(--row-accent) 16%, var(--surface));
   border: 1px solid color-mix(in srgb, var(--row-accent) 32%, transparent);
 }
@@ -1370,10 +1389,12 @@
   text-align: left;
 }
 .overview__row-icon {
-  font-size: 22px;
+  font-size: 18px;
   flex: none;
   width: 32px;
-  text-align: center;
+  display: grid;
+  place-items: center;
+  color: var(--row-accent);
 }
 .overview__row-name {
   flex: 1;

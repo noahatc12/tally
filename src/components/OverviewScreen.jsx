@@ -10,6 +10,7 @@ import { computeStrength, strengthSeries } from '../lib/strength.js'
 import { todaySummary } from '../lib/stats.js'
 import AggregateHeatmap from './AggregateHeatmap.jsx'
 import Sparkline from './Sparkline.jsx'
+import HabitIcon from './HabitIcon.jsx'
 
 export default function OverviewScreen({ onBack, onOpenHabit }) {
   const { habits, completions } = useHabitsContext()
@@ -82,7 +83,7 @@ export default function OverviewScreen({ onBack, onOpenHabit }) {
                 onClick={() => onOpenHabit(habit.id)}
               >
                 <span className="overview__row-icon" aria-hidden="true">
-                  {habit.icon}
+                  <HabitIcon habit={habit} size={18} />
                 </span>
                 <span className="overview__row-name">{habit.name}</span>
                 <Sparkline series={series} color={habit.color} />

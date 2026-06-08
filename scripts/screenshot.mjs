@@ -35,10 +35,10 @@ function stateFor(off, phase) {
 }
 
 const HABITS = [
-  { id: 'h_walk', name: 'Walk', icon: '🚶', color: '#ff8a5b', phase: 0, type: 'duration', goal: 30 },
-  { id: 'h_workout', name: 'Strength training', icon: '💪', color: '#6aa9ff', phase: 2 },
-  { id: 'h_read', name: 'Read 10 pages', icon: '📖', color: '#5fd08a', phase: 4 },
-  { id: 'h_water', name: 'Drink water', icon: '💧', color: '#7cd6f9', phase: 6 },
+  { id: 'h_walk', name: 'Walk', iconName: 'Footprints', color: '#ff8a5b', phase: 0, type: 'duration', goal: 30 },
+  { id: 'h_workout', name: 'Strength training', iconName: 'Dumbbell', color: '#6aa9ff', phase: 2 },
+  { id: 'h_read', name: 'Read 10 pages', iconName: 'BookOpen', color: '#5fd08a', phase: 4 },
+  { id: 'h_water', name: 'Drink water', iconName: 'Droplet', color: '#7cd6f9', phase: 6 },
 ]
 const DAYS = 371
 const walkMinutes = (off) => 20 + ((off * 7) % 35)
@@ -49,7 +49,7 @@ function seed(theme, direction = 'A') {
     id: h.id,
     name: h.name,
     color: h.color,
-    icon: h.icon,
+    iconName: h.iconName,
     type: h.type || 'binary',
     target: h.type === 'duration' ? { amount: h.goal, unit: 'min' } : null,
     schedule: { kind: 'daily', weekdays: [1, 2, 3, 4, 5], timesPerWeek: 3, everyN: 2 },
@@ -162,6 +162,9 @@ const shots = [
   { theme: 'bloom', direction: 'B', width: 390, height: 844, label: '10-today-bloom-390' },
   { theme: 'bloom', direction: 'B', width: 360, height: 800, label: '11-today-bloom-360' },
   { theme: 'bloom', direction: 'B', width: 390, height: 844, label: '12-detail-bloom-390', action: 'detail' },
+  // Step 4b: Lucide icon picker in the edit form.
+  { theme: 'light', direction: 'A', width: 390, height: 844, label: '13-form-icons-390', action: 'edit' },
+  { theme: 'sage', direction: 'A', width: 390, height: 844, label: '14-overview-390', action: 'overview' },
 ]
 
 const browser = await chromium.launch()

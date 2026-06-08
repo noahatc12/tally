@@ -4,9 +4,9 @@ import { resolvePalette } from '../lib/theme.js'
 // A small, friendly starter set. The timeline copy is honest: ~66 days, not 21.
 // Colors are assigned from the active theme's palette at seed time.
 const EXAMPLES = [
-  { name: 'Strength training', icon: '💪', schedule: { kind: 'timesPerWeek', timesPerWeek: 3 }, minimumVersion: '1 set', plan: { cue: 'morning coffee', time: '', place: '' } },
-  { name: 'Read', icon: '📖', schedule: { kind: 'daily' }, minimumVersion: 'one page', plan: { cue: 'getting into bed', time: '', place: '' } },
-  { name: 'Drink water', icon: '💧', type: 'quantitative', target: { amount: 8, unit: 'glasses' }, schedule: { kind: 'daily' } },
+  { name: 'Strength training', iconName: 'Dumbbell', schedule: { kind: 'timesPerWeek', timesPerWeek: 3 }, minimumVersion: '1 set', plan: { cue: 'morning coffee', time: '', place: '' } },
+  { name: 'Read', iconName: 'BookOpen', schedule: { kind: 'daily' }, minimumVersion: 'one page', plan: { cue: 'getting into bed', time: '', place: '' } },
+  { name: 'Drink water', iconName: 'Droplet', type: 'quantitative', target: { amount: 8, unit: 'glasses' }, schedule: { kind: 'daily' } },
 ]
 
 export default function EmptyState({ onAdd, onHelp }) {

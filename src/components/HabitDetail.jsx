@@ -11,6 +11,7 @@ import { formatDuration } from '../lib/duration.js'
 import TrendChart from './TrendChart.jsx'
 import HeatmapGrid from './HeatmapGrid.jsx'
 import HabitFormModal from './HabitFormModal.jsx'
+import HabitIcon from './HabitIcon.jsx'
 
 const WD = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
 
@@ -77,7 +78,7 @@ export default function HabitDetail({ habit, onBack }) {
 
       <div className="detail__head">
         <span className="detail__icon" aria-hidden="true">
-          {habit.icon}
+          <HabitIcon habit={habit} size={26} />
         </span>
         <div className="detail__heading">
           <h1 className="detail__name">{habit.name}</h1>
