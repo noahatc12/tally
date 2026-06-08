@@ -671,11 +671,12 @@
   position: sticky;
   bottom: 0;
   z-index: 1;
-  /* Span the panel's side padding (negative side margins) and sit flush to its bottom
-     edge (zero vertical margin). The footer's own bottom padding supplies the breathing
-     room + safe-area inset the panel gave up. */
-  margin: 0 calc(-1 * var(--space-4));
-  padding: var(--space-3) var(--space-4) calc(var(--space-3) + env(safe-area-inset-bottom));
+  /* Content width only — NO negative side margins (those overflow the panel and let it
+     pan sideways). The footer sits flush to the panel's bottom (panel has no bottom
+     padding) and supplies its own bottom padding + safe-area. The solid background
+     still fully covers the form scrolling beneath it, since the form is inset the same. */
+  padding-top: var(--space-3);
+  padding-bottom: calc(var(--space-3) + env(safe-area-inset-bottom));
   background: var(--bg);
   border-top: 1px solid var(--border);
 }

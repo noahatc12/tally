@@ -113,6 +113,16 @@ async function shoot(browser, { theme, width, height, label, action }) {
     await page.waitForTimeout(300)
   }
   await page.waitForTimeout(350) // settle transitions/fonts
+  if (action && action.startsWith('edit')) {
+    const overflow = await page.evaluate(() => {
+      const panel = document.querySelector('.modal__panel')
+      return {
+        panelX: panel ? panel.scrollWidth - panel.clientWidth : -1,
+        docX: document.documentElement.scrollWidth - document.documentElement.clientWidth,
+      }
+    })
+    console.log(`  overflow ${label}: panelX=${overflow.panelX}px docX=${overflow.docX}px`)
+  }
   const file = join(OUT, `${label}.png`)
   await page.screenshot({ path: file, fullPage: true })
   console.log(`saved ${file}`)
