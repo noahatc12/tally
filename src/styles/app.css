@@ -645,6 +645,7 @@
   max-width: var(--maxw);
   max-height: 92vh;
   overflow-y: auto;
+  overscroll-behavior: contain; /* don't chain scroll to the page behind the modal */
   padding: var(--space-4);
   /* The sticky footer owns the bottom inset (incl. safe area), so the panel does not
      pad its own bottom — otherwise sticky bottom:0 pins above that padding = a gap. */

@@ -1,7 +1,10 @@
 // A friendly quick-start guide for people new to the app. Pure content — explains the
 // habit types, schedules, the three daily states, and the optional stickiness fields.
 
+import { useScrollLock } from '../hooks/useScrollLock.js'
+
 export default function HelpModal({ onClose }) {
+  useScrollLock()
   return (
     <div className="modal" role="dialog" aria-modal="true" aria-label="How it works">
       <div className="modal__backdrop" onClick={onClose} />

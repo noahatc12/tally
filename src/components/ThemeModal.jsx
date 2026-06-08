@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useHabitsContext } from '../context/habits-store.js'
+import { useScrollLock } from '../hooks/useScrollLock.js'
 import {
   PRESETS,
   CURATED_THEMES,
@@ -83,6 +84,7 @@ function ThemeEditor({ initial, onSave, onCancel }) {
 }
 
 export default function ThemeModal({ onClose }) {
+  useScrollLock()
   const { meta, setTheme, setFont, addCustomTheme, updateCustomTheme, deleteCustomTheme } =
     useHabitsContext()
   const [editing, setEditing] = useState(null) // { mode:'new'|'edit', theme }

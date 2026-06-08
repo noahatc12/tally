@@ -114,14 +114,20 @@ async function shoot(browser, { theme, width, height, label, action }) {
   }
   await page.waitForTimeout(350) // settle transitions/fonts
   if (action && action.startsWith('edit')) {
-    const overflow = await page.evaluate(() => {
+    const m = await page.evaluate(() => {
       const panel = document.querySelector('.modal__panel')
+      // Try to scroll the page behind the modal; a locked body should not move.
+      const before = window.scrollY
+      window.scrollTo(0, 800)
+      const moved = window.scrollY - before
       return {
         panelX: panel ? panel.scrollWidth - panel.clientWidth : -1,
         docX: document.documentElement.scrollWidth - document.documentElement.clientWidth,
+        bodyLocked: document.body.style.position === 'fixed',
+        bgMoved: moved,
       }
     })
-    console.log(`  overflow ${label}: panelX=${overflow.panelX}px docX=${overflow.docX}px`)
+    console.log(`  ${label}: panelX=${m.panelX}px docX=${m.docX}px bodyLocked=${m.bodyLocked} bgMoved=${m.bgMoved}px`)
   }
   const file = join(OUT, `${label}.png`)
   await page.screenshot({ path: file, fullPage: true })

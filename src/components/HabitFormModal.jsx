@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useHabitsContext } from '../context/habits-store.js'
+import { useScrollLock } from '../hooks/useScrollLock.js'
 import { HABIT_ICONS } from '../lib/factories.js'
 import { resolvePalette } from '../lib/theme.js'
 
@@ -35,6 +36,7 @@ function initialForm(habit, palette) {
 }
 
 export default function HabitFormModal({ habit, existingHabits, onClose }) {
+  useScrollLock()
   const { meta, addHabit, updateHabit, archiveHabit, deleteHabit } = useHabitsContext()
   const palette = resolvePalette(meta?.theme || 'dark', meta?.customThemes || [])
   const [f, setF] = useState(() => initialForm(habit, palette))
