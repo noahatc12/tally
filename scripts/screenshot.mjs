@@ -98,6 +98,19 @@ async function shoot(browser, { theme, width, height, label, action }) {
     await page.locator('button[aria-label="Overview"]').click()
     await page.locator('.overview').waitFor()
     await page.locator('.heatmap__svg').first().waitFor()
+  } else if (action === 'edit') {
+    await page.locator('.row__identity').first().click()
+    await page.locator('.detail').waitFor()
+    await page.getByRole('button', { name: 'Edit' }).click()
+    await page.locator('.modal__panel').waitFor()
+    await page.waitForTimeout(300)
+  } else if (action === 'edit-scrolled') {
+    await page.locator('.row__identity').first().click()
+    await page.locator('.detail').waitFor()
+    await page.getByRole('button', { name: 'Edit' }).click()
+    await page.locator('.modal__panel').waitFor()
+    await page.locator('.modal__panel').evaluate((el) => el.scrollTo(0, el.scrollHeight / 2))
+    await page.waitForTimeout(300)
   }
   await page.waitForTimeout(350) // settle transitions/fonts
   const file = join(OUT, `${label}.png`)
@@ -107,12 +120,9 @@ async function shoot(browser, { theme, width, height, label, action }) {
 }
 
 const shots = [
-  { theme: 'dark', width: 390, height: 844, label: '01-overview-dark-390', action: 'overview' },
-  { theme: 'light', width: 390, height: 844, label: '02-overview-light-390', action: 'overview' },
-  { theme: 'dark', width: 1280, height: 900, label: '03-overview-dark-1280', action: 'overview' },
-  { theme: 'dark', width: 390, height: 844, label: '04-timer-running-dark-390', action: 'timer' },
-  { theme: 'dark', width: 390, height: 844, label: '05-detail-walk-dark-390', action: 'detail' },
-  { theme: 'midnight', width: 390, height: 844, label: '06-overview-midnight-390', action: 'overview' },
+  { theme: 'dark', width: 390, height: 844, label: '01-edit-top-dark-390', action: 'edit' },
+  { theme: 'dark', width: 390, height: 844, label: '02-edit-scrolled-dark-390', action: 'edit-scrolled' },
+  { theme: 'light', width: 390, height: 844, label: '03-edit-top-light-390', action: 'edit' },
 ]
 
 const browser = await chromium.launch()
