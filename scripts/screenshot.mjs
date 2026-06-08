@@ -109,7 +109,7 @@ async function shoot(browser, { theme, width, height, label, action }) {
     await page.locator('.detail').waitFor()
     await page.getByRole('button', { name: 'Edit' }).click()
     await page.locator('.modal__panel').waitFor()
-    await page.locator('.modal__panel').evaluate((el) => el.scrollTo(0, el.scrollHeight / 2))
+    await page.locator('.modal__panel').evaluate((el) => el.scrollTo(0, el.scrollHeight))
     await page.waitForTimeout(300)
   }
   await page.waitForTimeout(350) // settle transitions/fonts
