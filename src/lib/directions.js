@@ -135,6 +135,31 @@ const TYPEFACE = {
   bricolage: "'Bricolage Grotesque', system-ui, sans-serif",
 }
 
+// Map our persisted meta to the tweak object resolveTweaks expects. During the port we
+// only persist a subset; the rest take sensible defaults (auto / native).
+export function metaToTweaks(meta = {}) {
+  const theme = meta.theme || 'light'
+  const palette = PALETTES[theme] ? theme : 'auto' // base presets / unknown -> direction-native
+  return {
+    direction: meta.direction || 'A',
+    palette,
+    accent: meta.accent || 'auto',
+    ink: meta.ink || 'color',
+    completed: meta.completed || 'soften',
+    density: meta.density || 'regular',
+    radius: meta.radius || 'regular',
+    typeface: meta.typeface || 'auto',
+    motion: meta.motion || 'calm',
+    heatmap: meta.heatmap || 'auto',
+    cardStyle: meta.cardStyle || 'auto',
+    customBg: meta.customBg || '#14181d',
+    customSurface: meta.customSurface || '#1d232b',
+    customText: meta.customText || '#e4e8ed',
+    customAccent: meta.customAccent || '#7c93b0',
+    customDark: meta.customDark ?? true,
+  }
+}
+
 // Fold tweaks -> { vars, attrs, dir, dark, heat }
 export function resolveTweaks(t) {
   const dir = DIRECTIONS[t.direction] || DIRECTIONS.A

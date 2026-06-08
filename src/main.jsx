@@ -2,6 +2,8 @@ import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import './styles/global.css'
 import './styles/app.css'
+import './styles/tally.css'
+import './styles/tally-app.css'
 import App from './App.jsx'
 import { maybeSeedDemo } from './dev/seed.js'
 
