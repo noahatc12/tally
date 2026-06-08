@@ -58,7 +58,7 @@ export function emptyMeta() {
     level: 0,
     badges: [],
     freezes: 0,
-    theme: 'dark', // 'dark' | 'light' | a custom theme id
+    theme: 'light', // first-run default = Ledger (light). 'dark' = Nocturne | a custom theme id
     customThemes: [], // [{ id, name, bg, surface, text, accent }]
     font: 'default', // a FONT_OPTIONS id
   }

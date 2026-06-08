@@ -10,7 +10,7 @@ describe('storage', () => {
     expect(s.habits).toEqual([])
     expect(s.completions).toEqual({})
     expect(s.meta.schemaVersion).toBe(SCHEMA_VERSION)
-    expect(s.meta.theme).toBe('dark')
+    expect(s.meta.theme).toBe('light')
     expect(s.meta.customThemes).toEqual([])
     expect(s.meta.font).toBe('default')
   })

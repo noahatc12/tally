@@ -13,8 +13,9 @@ export const PRESETS = [
 
 // Seed colors used as the starting point when creating a theme "from" a preset.
 export const PRESET_SEED = {
-  dark: { bg: '#0e0f12', surface: '#16181d', text: '#e8e8ea', accent: '#474747' },
-  light: { bg: '#faf7f2', surface: '#ffffff', text: '#1f1b16', accent: '#e2725b' },
+  // Nocturne (the dark Ledger) and Ledger (light) base colors — must match tokens.css.
+  dark: { bg: '#16110d', surface: '#1f1812', text: '#efe6d5', accent: '#d98c5f' },
+  light: { bg: '#f3ede1', surface: '#faf7ef', text: '#211c14', accent: '#9e3b2d' },
 }
 
 // Curated preset palettes (researched for contrast + cohesion). Each defines the four
@@ -152,7 +153,7 @@ export function deriveTokens({ bg, surface, text, accent }) {
 
 // Selectable font pairings (loaded in index.html). Each sets the display + body vars.
 export const FONT_OPTIONS = [
-  { id: 'default', name: 'Grotesk', display: "'Space Grotesk', system-ui, sans-serif", body: "'Inter', system-ui, sans-serif" },
+  { id: 'default', name: 'Newsreader', display: "'Newsreader', Georgia, serif", body: "'Inter', system-ui, sans-serif" },
   { id: 'serif', name: 'Editorial', display: "'Fraunces', Georgia, serif", body: "'Inter', system-ui, sans-serif" },
   { id: 'rounded', name: 'Rounded', display: "'Quicksand', system-ui, sans-serif", body: "'Nunito Sans', system-ui, sans-serif" },
   { id: 'classic', name: 'Classic', display: "'Poppins', system-ui, sans-serif", body: "'Inter', system-ui, sans-serif" },

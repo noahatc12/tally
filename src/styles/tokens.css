@@ -3,8 +3,12 @@
    data-theme attribute on <html>, set from meta.theme. */
 
 :root {
-  --font-display: 'Space Grotesk', system-ui, sans-serif;
+  /* Ledger/Almanac identity: serif display + numerals (Newsreader), Inter for small UI labels.
+     --font-display/--font-body are also set at runtime by applyFont() from the Type picker;
+     --font-num stays serif regardless so hero/stat figures read as numerals. */
+  --font-display: 'Newsreader', Georgia, serif;
   --font-body: 'Inter', system-ui, sans-serif;
+  --font-num: 'Newsreader', Georgia, serif;
 
   --space-1: 4px;
   --space-2: 8px;
@@ -21,33 +25,46 @@
   --transition: 160ms ease;
 }
 
-/* Dark (default) — clean & professional */
+/* Dark (default slot) — "Nocturne": the night edition of Ledger.
+   Newsreader serif + tally motif, inked on warm dark with a muted ember accent. */
 :root,
 :root[data-theme='dark'] {
-  --bg: #0e0f12;
-  --surface: #16181d;
-  --surface-2: #1e2127;
-  --text: #e8e8ea;
-  --text-muted: #9aa0aa;
-  --border: #262a31;
-  --accent: #474747;
-  --accent-contrast: #ffffff; /* text on top of the accent */
-  --danger: #f4796b;
+  --bg: #16110d;
+  --surface: #1f1812;
+  --surface-2: #2a2019;
+  --text: #efe6d5;
+  --text-muted: #a8967e;
+  --border: #352a20;
+  --accent: #d98c5f;
+  --accent-contrast: #16110d; /* text on top of the accent */
+  --danger: #d4705f;
   --shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
-  --heat-empty: #1b1e24;
+  /* 5-step heat ramp (bg -> accent); --heat-empty mirrors --heat-0 for the
+     existing color-mix heatmap until components consume the explicit ramp. */
+  --heat-0: #221a12;
+  --heat-1: #4a3320;
+  --heat-2: #7a4a2a;
+  --heat-3: #ab6238;
+  --heat-4: #d98c5f;
+  --heat-empty: #221a12;
 }
 
-/* Light — warm minimal */
+/* Light (and first-run default) — "Ledger": serif, paper + oxblood ink, hairline rules. */
 :root[data-theme='light'] {
-  --bg: #faf7f2;
-  --surface: #ffffff;
-  --surface-2: #f3ede3;
-  --text: #1f1b16;
-  --text-muted: #6b6258;
-  --border: #e7dfd3;
-  --accent: #e2725b;
-  --accent-contrast: #ffffff;
-  --danger: #c0492f;
+  --bg: #f3ede1;
+  --surface: #faf7ef;
+  --surface-2: #ece2cf;
+  --text: #211c14;
+  --text-muted: #75694f;
+  --border: #dccdb1;
+  --accent: #9e3b2d;
+  --accent-contrast: #faf7ef;
+  --danger: #a8432f;
   --shadow: 0 6px 20px rgba(31, 27, 22, 0.08);
-  --heat-empty: #efe8dc;
+  --heat-0: #e7dcc6;
+  --heat-1: #d6b393;
+  --heat-2: #c4855f;
+  --heat-3: #a85740;
+  --heat-4: #86322a;
+  --heat-empty: #e7dcc6;
 }
