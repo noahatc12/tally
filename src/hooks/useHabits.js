@@ -186,6 +186,24 @@ export function useHabits() {
     setMeta((m) => ({ ...(m || emptyMeta()), font }))
   }, [])
 
+  // Redesign "tune the personality" axes (resolved by directions.js resolveTweaks):
+  // accent override, tonal vs colourful habit ink, completed-habit display, display face.
+  const setAccent = useCallback((accent) => {
+    setMeta((m) => ({ ...(m || emptyMeta()), accent }))
+  }, [])
+
+  const setInk = useCallback((ink) => {
+    setMeta((m) => ({ ...(m || emptyMeta()), ink }))
+  }, [])
+
+  const setCompleted = useCallback((completed) => {
+    setMeta((m) => ({ ...(m || emptyMeta()), completed }))
+  }, [])
+
+  const setTypeface = useCallback((typeface) => {
+    setMeta((m) => ({ ...(m || emptyMeta()), typeface }))
+  }, [])
+
   const deleteCustomTheme = useCallback((id) => {
     setMeta((m) => ({
       ...m,
@@ -213,6 +231,10 @@ export function useHabits() {
     setTheme,
     setLook,
     setFont,
+    setAccent,
+    setInk,
+    setCompleted,
+    setTypeface,
     addCustomTheme,
     updateCustomTheme,
     deleteCustomTheme,
