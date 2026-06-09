@@ -11,6 +11,7 @@ import { useHabitsContext } from '../context/habits-store.js'
 import { useScrollLock } from '../hooks/useScrollLock.js'
 import { DIRECTIONS, PALETTES, ACCENT_SWATCHES } from '../lib/directions.js'
 import { luminance } from '../lib/theme.js'
+import { buildDemoData } from '../dev/seed.js'
 
 // Looks in the prototype's order: the two editions of the hand-set look, then the soft alternate.
 const LOOKS = [
@@ -71,7 +72,7 @@ export default function ThemeModal({ onClose }) {
   useScrollLock()
   const {
     meta, setLook, setTheme, setAccent, setInk, setCompleted, setTypeface,
-    addCustomTheme, updateCustomTheme, deleteCustomTheme,
+    addCustomTheme, updateCustomTheme, deleteCustomTheme, loadDemo,
   } = useHabitsContext()
   const [editing, setEditing] = useState(null) // null | { mode:'new'|'edit', theme }
 
@@ -235,6 +236,11 @@ export default function ThemeModal({ onClose }) {
                     onClick={() => setTypeface(k)}>{l}</button>
                 ))}
               </div>
+            </div>
+
+            <div className="sheet__sec">
+              <button type="button" className="btnp" onClick={() => loadDemo(buildDemoData())}>Reset demo data</button>
+              <p className="minihint">Your habits &amp; check-ins are saved on this device. This replaces them with a fresh randomized example set.</p>
             </div>
 
             <div style={{ height: 4 }} />

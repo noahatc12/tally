@@ -204,6 +204,26 @@ export function useHabits() {
     setMeta((m) => ({ ...(m || emptyMeta()), typeface }))
   }, [])
 
+  // First-run wizard prefs (name / reminder) and the onboarded gate.
+  const setName = useCallback((name) => {
+    setMeta((m) => ({ ...(m || emptyMeta()), name }))
+  }, [])
+
+  const setReminders = useCallback((reminders) => {
+    setMeta((m) => ({ ...(m || emptyMeta()), reminders }))
+  }, [])
+
+  const setOnboarded = useCallback((onboarded = true) => {
+    setMeta((m) => ({ ...(m || emptyMeta()), onboarded }))
+  }, [])
+
+  // Replace the whole habit set + history (wizard "Example data" / Appearance "Reset demo").
+  const loadDemo = useCallback(({ habits: hs, completions: cs }) => {
+    setHabits(hs)
+    setCompletions(cs)
+    setTimers({})
+  }, [])
+
   const deleteCustomTheme = useCallback((id) => {
     setMeta((m) => ({
       ...m,
@@ -235,6 +255,10 @@ export function useHabits() {
     setInk,
     setCompleted,
     setTypeface,
+    setName,
+    setReminders,
+    setOnboarded,
+    loadDemo,
     addCustomTheme,
     updateCustomTheme,
     deleteCustomTheme,

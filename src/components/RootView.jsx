@@ -8,11 +8,12 @@ import TallyShell from './tally/TallyShell.jsx'
 import TallyToday from './tally/TallyToday.jsx'
 import TallyDetail from './tally/TallyDetail.jsx'
 import TallyOverview from './tally/TallyOverview.jsx'
-import TallyOnboarding from './tally/TallyOnboarding.jsx'
+import SetupWizard from './SetupWizard.jsx'
 import ShareCard from './ShareCard.jsx'
+import { buildDemoData, STARTERS, toStarterPayload } from '../dev/seed.js'
 
 export default function RootView() {
-  const { habits } = useHabitsContext()
+  const { habits, meta, addHabit, setName, setReminders, setOnboarded, loadDemo } = useHabitsContext()
   const [route, setRoute] = useState({ name: 'today' })
   const [shareOpen, setShareOpen] = useState(false)
 
@@ -21,9 +22,20 @@ export default function RootView() {
   const openShare = () => setShareOpen(true)
   const share = shareOpen ? <ShareCard onClose={() => setShareOpen(false)} /> : null
 
-  // No habits yet (first run, or all archived/deleted) → the onboarding/empty state.
-  if (!habits.some((h) => !h.archived)) {
-    return <TallyShell><TallyOnboarding /></TallyShell>
+  // Persist the wizard's choices, seed example data or the chosen starters, then mark onboarded
+  // (finishing with zero starters is allowed → lands on an empty Today).
+  const finishSetup = ({ name, reminders, reminderTime, exampleData, starters }) => {
+    if (name) setName(name)
+    setReminders({ on: reminders, time: reminderTime })
+    if (exampleData) loadDemo(buildDemoData())
+    else STARTERS.filter((s) => starters.includes(s.id)).forEach((s) => addHabit(toStarterPayload(s)))
+    setOnboarded(true)
+  }
+
+  // First run (no habits AND not yet onboarded) → the setup wizard. Once onboarded, an empty
+  // habit set just shows Today's empty state instead of re-opening the wizard.
+  if (!habits.some((h) => !h.archived) && !meta?.onboarded) {
+    return <TallyShell><SetupWizard onFinish={finishSetup} /></TallyShell>
   }
 
   if (route.name === 'detail') {

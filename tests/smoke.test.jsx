@@ -3,21 +3,26 @@ import { render, screen, fireEvent } from '@testing-library/react'
 import App from '../src/App.jsx'
 
 // Renders the whole app in jsdom — catches import/runtime/render crashes that pure
-// unit tests don't, without needing a browser. With no habits the app shows the
-// onboarding screen; picking starters and tapping the CTA seeds them, then Today renders.
+// unit tests don't, without needing a browser. With no habits the app shows the setup
+// wizard; advancing to the starters step (Start fresh is the default), picking starters,
+// and tapping "Start tracking" seeds them, then Today renders.
 
 describe('App smoke', () => {
   beforeEach(() => localStorage.clear())
 
   const startWith = (names) => {
+    // Click "Continue" through Welcome → Look → Theme → Demo → Preferences to the starters step.
+    while (screen.queryByText('Pick a few to start') == null) {
+      fireEvent.click(screen.getByText('Continue'))
+    }
     names.forEach((n) => fireEvent.click(screen.getByText(n)))
-    fireEvent.click(screen.getByText(new RegExp(`Start tracking ${names.length} habit`)))
+    fireEvent.click(screen.getByText(/Start tracking/))
   }
 
-  it('renders the brand and the onboarding empty state', () => {
+  it('renders the setup wizard on first run', () => {
     render(<App />)
     expect(screen.getByText('tally')).toBeInTheDocument()
-    expect(screen.getByText('Pick a few to start')).toBeInTheDocument()
+    expect(screen.getByText('Continue')).toBeInTheDocument()
   })
 
   it('a single tap secures the day for a count habit (forgiving target)', () => {

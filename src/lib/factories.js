@@ -68,5 +68,8 @@ export function emptyMeta() {
     ink: 'color', // 'color' = each habit's own colour | 'tonal' = distinct shades of the theme accent
     completed: 'soften', // how a done habit looks on Today: soften | collapse | drawer | none (Keep)
     typeface: 'auto', // 'auto' = follow the Look | serif | grotesk | bricolage (overrides --font-display)
+    name: '', // the user's name, collected by the setup wizard; personalizes the greeting
+    reminders: { on: false, time: '08:00' }, // stored daily-reminder pref (scheduling wired later)
+    onboarded: false, // true once the setup wizard finishes; gates first-run vs the empty Today
   }
 }

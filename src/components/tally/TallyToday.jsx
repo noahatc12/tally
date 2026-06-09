@@ -132,7 +132,7 @@ export default function TallyToday({ onOpenHabit, onOpenOverview }) {
     <div className="screen">
       <header className="thead rise">
         <div>
-          <p className="thead__greeting">{greeting()}</p>
+          <p className="thead__greeting">{greeting()}{meta?.name ? `, ${meta.name}` : ''}</p>
           <div className="thead__brand"><h1 className="thead__word">tally</h1></div>
           <p className="thead__date">{dateLabel}</p>
         </div>
