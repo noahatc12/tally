@@ -1,7 +1,7 @@
 // Pure constructors / defaults. Kept pure: id and createdAt can be injected so tests
 // are deterministic; they default to crypto.randomUUID() / now in real use.
 
-export const SCHEMA_VERSION = 2
+export const SCHEMA_VERSION = 3
 
 export const HABIT_COLORS = [
   '#C7F94B', // lime (dark accent)

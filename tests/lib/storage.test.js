@@ -36,6 +36,39 @@ describe('storage', () => {
     expect(s.meta.theme).toBe('light')
   })
 
+  it('v2->v3 backfills iconName from the legacy emoji (and tod defaults to null)', () => {
+    const out = migrate({ habits: [{ id: 'a', name: 'Lift', icon: '💪' }], completions: {}, meta: { schemaVersion: 2 } })
+    expect(out.habits[0].iconName).toBe('Dumbbell')
+    expect(out.habits[0].tod).toBeNull()
+  })
+
+  it('v2->v3 keeps an explicit iconName over the emoji map', () => {
+    const out = migrate({ habits: [{ id: 'a', name: 'Lift', icon: '💪', iconName: 'Flame' }], completions: {}, meta: { schemaVersion: 2 } })
+    expect(out.habits[0].iconName).toBe('Flame')
+  })
+
+  it('v2->v3 converts an anchor stored by habit id to the referenced name', () => {
+    const out = migrate({
+      habits: [{ id: 'a', name: 'Coffee' }, { id: 'b', name: 'Stretch', anchor: 'a' }],
+      completions: {}, meta: { schemaVersion: 2 },
+    })
+    expect(out.habits[1].anchor).toBe('Coffee')
+  })
+
+  it('v2->v3 leaves an anchor that is already a name untouched', () => {
+    const out = migrate({ habits: [{ id: 'b', name: 'Stretch', anchor: 'morning coffee' }], completions: {}, meta: { schemaVersion: 2 } })
+    expect(out.habits[0].anchor).toBe('morning coffee')
+  })
+
+  it('v2->v3 remaps a dropped theme id to its closest survivor', () => {
+    expect(migrate({ habits: [], completions: {}, meta: { schemaVersion: 2, theme: 'forest' } }).meta.theme).toBe('pine')
+    expect(migrate({ habits: [], completions: {}, meta: { schemaVersion: 2, theme: 'steel' } }).meta.theme).toBe('slatemono')
+  })
+
+  it('v2->v3 leaves a surviving theme id unchanged', () => {
+    expect(migrate({ habits: [], completions: {}, meta: { schemaVersion: 2, theme: 'sand' } }).meta.theme).toBe('sand')
+  })
+
   it('degrades to null on corrupt JSON rather than throwing', () => {
     localStorage.setItem(KEYS.habits, '{not valid json')
     expect(readRaw(KEYS.habits)).toBeNull()

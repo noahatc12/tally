@@ -35,9 +35,27 @@ export function writeRaw(key, value) {
   }
 }
 
-// Ordered migration chain. Each step upgrades state from version N to N+1 and is a
-// pure function of state. v1 is the baseline (no prior versions), so the chain is
-// currently a no-op that just stamps the current version.
+// Best-effort emoji -> Lucide iconName, so habits created before the icon picker keep a
+// glyph instead of dropping to a monogram. Unmapped emoji fall through to the monogram.
+const EMOJI_TO_ICON = {
+  '💪': 'Dumbbell', '📖': 'BookOpen', '🧘': 'Sparkles', '💧': 'Droplet', '🏃': 'Footprints',
+  '🥗': 'Salad', '😴': 'Moon', '🧹': 'Brush', '✍️': 'PenLine', '🎯': 'Target', '🎸': 'Guitar',
+  '💰': 'Wallet', '🧠': 'Brain', '🦷': 'Smile', '🚭': 'Cigarette', '☕': 'Coffee', '🌱': 'Sprout',
+  '🛏️': 'BedDouble', '📱': 'Phone', '🧴': 'Bath', '🐕': 'Dog', '🙏': 'Hand', '🎨': 'Palette',
+  '🧺': 'WashingMachine', '⏰': 'AlarmClock', '📵': 'Phone', '🥦': 'Carrot', '🚴': 'Bike',
+  '🏊': 'Waves', '⛰️': 'Mountain', '📓': 'NotebookPen', '🎹': 'Music',
+}
+
+// Themes the redesign (step 2) dropped, remapped to the perceptually-closest survivor by
+// hue + mode. 'steel' is the theme.js id for the palette the engine keys as 'slatemono';
+// remap so a Steel pick made via the old modal renders instead of falling back to Native.
+const THEME_REMAP = {
+  forest: 'pine', midnight: 'slate', mint: 'sage', mocha: 'bark',
+  plum: 'heather', rose: 'clay', sky: 'fog', steel: 'slatemono',
+}
+
+// Ordered migration chain. Each step upgrades state from version N to N+1 and is a pure
+// function of state.
 const MIGRATIONS = {
   // v1 -> v2: introduce meta.direction (the "Look"). Map the two base presets to their
   // matching Look — Nocturne (theme 'dark') is the night edition of Ledger -> C; everything
@@ -47,6 +65,21 @@ const MIGRATIONS = {
     ...state,
     meta: { ...state.meta, direction: state.meta?.theme === 'dark' ? 'C' : 'A' },
   }),
+  // v2 -> v3: the faithful redesign. Backfill iconName from the legacy emoji, ensure tod
+  // exists, convert anchors stored by habit-id to the referenced habit's name (Detail now
+  // renders "after <name>"), and remap any theme id the redesign dropped to a close survivor.
+  3: (state) => {
+    const habits = (state.habits || []).map((h) => {
+      const patch = {}
+      if (!h.iconName && h.icon && EMOJI_TO_ICON[h.icon]) patch.iconName = EMOJI_TO_ICON[h.icon]
+      if (h.tod === undefined) patch.tod = null
+      return Object.keys(patch).length ? { ...h, ...patch } : h
+    })
+    const nameById = new Map(habits.map((h) => [h.id, h.name]))
+    const repaired = habits.map((h) => (h.anchor && nameById.has(h.anchor) ? { ...h, anchor: nameById.get(h.anchor) } : h))
+    const theme = THEME_REMAP[state.meta?.theme] || state.meta?.theme
+    return { ...state, habits: repaired, meta: { ...state.meta, theme } }
+  },
 }
 
 export function migrate(state) {
