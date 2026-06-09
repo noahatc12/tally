@@ -86,6 +86,16 @@ for (const s of shots) {
   const ovX = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)
   if (ovX > 0) throw new Error(`[${s.label} overview] horizontal overflow: ${ovX}px`)
   await page.screenshot({ path: `${OUT}/port-overview-${s.label}.png` })
+
+  // Year-in-review ShareCard (✦ from Overview) — scroll-locked, no overflow.
+  await page.locator('.iconbtn[title="Year in review"]').click()
+  await page.waitForTimeout(400)
+  const shareX = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)
+  if (shareX > 0) throw new Error(`[${s.label} share] horizontal overflow: ${shareX}px`)
+  await page.screenshot({ path: `${OUT}/port-share-${s.label}.png` })
+  await page.locator('.share__close').click()
+  await page.waitForTimeout(300)
+
   await page.getByText('‹ Today').click()
   await page.waitForTimeout(300)
 

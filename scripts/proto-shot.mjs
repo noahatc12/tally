@@ -27,6 +27,14 @@ await page.waitForTimeout(600)
 await page.screenshot({ path: `${OUT}/proto-overview.png`, fullPage: true })
 console.log('saved proto-overview.png')
 
+// Year-in-review ShareCard (✦ from Overview).
+await page.locator('.iconbtn[title="Year in review"]').click()
+await page.waitForTimeout(600)
+await page.screenshot({ path: `${OUT}/proto-share.png`, fullPage: true })
+console.log('saved proto-share.png')
+await page.locator('.share__close').click()
+await page.waitForTimeout(300)
+
 // Back to Today, then the Help sheet (?) and the New-habit form (+ New).
 await page.getByText('‹ Today').click()
 await page.waitForTimeout(400)

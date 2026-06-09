@@ -154,6 +154,31 @@ export function aggregateYearGrid(habits, completions, today = todayKey(), weeks
   return { cells, months: base.months, cols: base.cols }
 }
 
+// Year-in-review aggregate for the ShareCard: total check-ins, distinct active days, best
+// streak across all habits, and perfect days (every due-or-missed habit done that day).
+// Ported from the prototype's yearStats, walking real keys back from today.
+export function yearStats(habits, completions, today = todayKey(), days = 365) {
+  let totalDone = 0
+  let perfect = 0
+  let bestStreak = 0
+  const activeDays = new Set()
+  for (let off = days; off >= 1; off--) {
+    const key = addDays(today, -off)
+    const day = completions[key]
+    if (!day) continue
+    let dDone = 0
+    let dTotal = 0
+    for (const h of habits) {
+      const st = day[h.id]?.state
+      if (st === 'done') { totalDone++; dDone++; dTotal++; activeDays.add(key) }
+      else if (st === 'missed') dTotal++
+    }
+    if (dTotal > 0 && dDone === dTotal) perfect++
+  }
+  for (const h of habits) bestStreak = Math.max(bestStreak, longestStreak(h, completions, today))
+  return { totalDone, activeDays: activeDays.size, bestStreak, perfect }
+}
+
 export function valueTotals(habit, completions, today = todayKey()) {
   const created = habit.createdAt.slice(0, 10)
   const all = libValueTotals(habit, completions, created, today)
