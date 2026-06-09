@@ -19,4 +19,12 @@ await page.waitForTimeout(600)
 await page.screenshot({ path: `${OUT}/proto-detail.png`, fullPage: true })
 console.log('saved proto-detail.png')
 
+// Back to Today, then into the Overview screen (▦ header button) and shoot it.
+await page.getByText('‹ Today').click()
+await page.waitForTimeout(400)
+await page.locator('.iconbtn[title="Overview"]').click()
+await page.waitForTimeout(600)
+await page.screenshot({ path: `${OUT}/proto-overview.png`, fullPage: true })
+console.log('saved proto-overview.png')
+
 await browser.close()

@@ -79,7 +79,15 @@ for (const s of shots) {
     await page.getByText('‹ Today').click()
     await page.waitForTimeout(300)
   }
-  console.log(`saved ${s.label} (today + detail + detail-count, overflow 0)`)
+
+  // Overview (▦ header button).
+  await page.locator('.iconbtn[title="Overview"]').click()
+  await page.waitForTimeout(500)
+  const ovX = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)
+  if (ovX > 0) throw new Error(`[${s.label} overview] horizontal overflow: ${ovX}px`)
+  await page.screenshot({ path: `${OUT}/port-overview-${s.label}.png` })
+
+  console.log(`saved ${s.label} (today + detail + detail-count + overview, overflow 0)`)
   await ctx.close()
 }
 await browser.close()
