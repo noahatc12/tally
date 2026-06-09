@@ -1,227 +1,215 @@
+// Appearance sheet, ported to the handoff's bottom-sheet idiom (modals.jsx ThemeSheet) —
+// .sheet chrome, .seg segmented controls, .themegrid palette cards, .swrow accent swatches.
+// Wired to this app's real store: Look → setLook, the theme grid → setTheme (Native / a curated
+// palette / a saved custom theme), Accent → setAccent, Habit ink → setInk, Completed → setCompleted,
+// Type → setTypeface. Saved custom themes are KEPT (create / edit / delete) and resolve through the
+// token engine's custom path; the prototype's net-new behaviours (tonal ink, completed-habit modes,
+// custom accent) are added on top.
+
 import { useState } from 'react'
 import { useHabitsContext } from '../context/habits-store.js'
 import { useScrollLock } from '../hooks/useScrollLock.js'
-import {
-  PRESETS,
-  DIRECTIONS,
-  CURATED_THEMES,
-  FONT_OPTIONS,
-  deriveTokens,
-  resolveColors,
-  isDarkTheme,
-  luminance,
-} from '../lib/theme.js'
+import { DIRECTIONS, PALETTES, ACCENT_SWATCHES } from '../lib/directions.js'
 
-const COLOR_FIELDS = [
+// Looks in the prototype's order: the two editions of the hand-set look, then the soft alternate.
+const LOOKS = [
+  { id: 'A', name: 'Ledger' },
+  { id: 'C', name: 'Nocturne' },
+  { id: 'B', name: 'Bloom' },
+]
+
+const EDITOR_FIELDS = [
   { key: 'bg', label: 'Background' },
-  { key: 'surface', label: 'Surface' },
+  { key: 'surface', label: 'Surface / cards' },
   { key: 'text', label: 'Text' },
   { key: 'accent', label: 'Accent' },
 ]
 
-// Live preview of a theme-in-progress: derive the full token set and apply it as
-// inline vars on a wrapper so the mini card renders exactly like the real app.
-function ThemePreview({ colors }) {
-  const tokens = deriveTokens(colors)
+function ColorRow({ label, value, onChange }) {
   return (
-    <div className="theme-preview" style={tokens}>
-      <div className="theme-preview__row">
-        <span className="theme-preview__icon">💪</span>
-        <span className="theme-preview__name">Strength training</span>
-        <span className="theme-preview__streak">🔥 5</span>
-      </div>
-      <div className="theme-preview__bar">
-        <div className="theme-preview__fill" />
-      </div>
-      <button type="button" className="theme-preview__btn">
-        Done
-      </button>
-    </div>
+    <label className="crow">
+      <span className="crow__l">{label}</span>
+      <span className="crow__hex">{value}</span>
+      <input type="color" value={value} onChange={(e) => onChange(e.target.value)} aria-label={label} />
+    </label>
   )
 }
 
+// Create / edit a saved custom theme: name + the four colours the rest of the palette derives
+// from (surface tints, borders, muted text, heat ramp — handled by the token engine).
 function ThemeEditor({ initial, onSave, onCancel }) {
   const [form, setForm] = useState(initial)
   const set = (patch) => setForm((p) => ({ ...p, ...patch }))
 
   return (
-    <div className="theme-editor">
-      <label className="field">
-        <span className="field__label">Name</span>
-        <input
-          className="field__input"
-          value={form.name}
-          onChange={(e) => set({ name: e.target.value })}
-          placeholder="My theme"
-        />
-      </label>
-
-      {COLOR_FIELDS.map((c) => (
-        <div className="color-row" key={c.key}>
-          <span className="color-row__label">{c.label}</span>
-          <span className="color-row__hex">{form[c.key]}</span>
-          <input
-            type="color"
-            className="color-row__input"
-            value={form[c.key]}
-            onChange={(e) => set({ [c.key]: e.target.value })}
-            aria-label={c.label}
-          />
-        </div>
-      ))}
-
-      <ThemePreview colors={form} />
-
-      <div className="modal__foot">
-        <button type="button" className="btn btn--accent btn--block" onClick={() => onSave(form)}>
-          Save theme
-        </button>
-        <button type="button" className="btn btn--ghost" onClick={onCancel}>
-          Cancel
-        </button>
+    <>
+      <div className="sheet__sec">
+        <span className="flabel">Name</span>
+        <input className="input" value={form.name} placeholder="My theme" onChange={(e) => set({ name: e.target.value })} autoFocus />
       </div>
-    </div>
+
+      <div className="sheet__sec">
+        <span className="flabel">Custom colours</span>
+        <div className="cedit">
+          {EDITOR_FIELDS.map((c) => (
+            <ColorRow key={c.key} label={c.label} value={form[c.key]} onChange={(v) => set({ [c.key]: v })} />
+          ))}
+        </div>
+        <p className="minihint">Surface tints, borders, muted text and the heatmap ramp derive automatically from these four.</p>
+      </div>
+
+      <div className="sheet__foot">
+        <button type="button" className="btnp" onClick={onCancel}>Cancel</button>
+        <button type="button" className="btnp btnp--accent" disabled={!form.name.trim()} onClick={() => onSave(form)}>Save theme</button>
+      </div>
+    </>
   )
 }
 
 export default function ThemeModal({ onClose }) {
   useScrollLock()
-  const { meta, setTheme, setLook, setFont, addCustomTheme, updateCustomTheme, deleteCustomTheme } =
-    useHabitsContext()
-  const [editing, setEditing] = useState(null) // { mode:'new'|'edit', theme }
-  const active = meta?.theme || 'dark'
-  const activeDir = meta?.direction || 'A'
-  const activeFont = meta?.font || 'default'
+  const {
+    meta, setLook, setTheme, setAccent, setInk, setCompleted, setTypeface,
+    addCustomTheme, updateCustomTheme, deleteCustomTheme,
+  } = useHabitsContext()
+  const [editing, setEditing] = useState(null) // null | { mode:'new'|'edit', theme }
+
   const customThemes = meta?.customThemes || []
-  // Show only themes matching the chosen mode (defaults to the active theme's mode).
-  const [mode, setMode] = useState(isDarkTheme(active, customThemes) ? 'dark' : 'light')
-  const inMode = (bg) => (luminance(bg) < 0.5 ? 'dark' : 'light') === mode
+  const dirTokens = (DIRECTIONS[meta?.direction || 'A'] || DIRECTIONS.A).tokens
+
+  // What the theme grid considers selected: a known palette or a saved theme, else Native.
+  const rawSel = meta?.theme || 'auto'
+  const currentSel = (PALETTES[rawSel] && rawSel !== 'auto') || customThemes.some((t) => t.id === rawSel) ? rawSel : 'auto'
+  const activeSaved = customThemes.find((t) => t.id === currentSel)
+
+  // The cards: Native (the Look's own palette) + the curated library + the user's saved themes.
+  const paletteCards = [
+    { id: 'auto', label: 'Native' },
+    ...Object.keys(PALETTES).filter((k) => k !== 'auto' && k !== 'custom').map((k) => ({ id: k, label: PALETTES[k].label })),
+    ...customThemes.map((t) => ({ id: t.id, label: t.name })),
+  ]
+
+  const swatchFor = (id) => {
+    if (id === 'auto') return { bg: dirTokens['--bg'], surf: dirTokens['--surface'], acc: dirTokens['--accent'], text: dirTokens['--text'] }
+    const saved = customThemes.find((t) => t.id === id)
+    if (saved) return { bg: saved.bg, surf: saved.surface, acc: saved.accent, text: saved.text }
+    const p = PALETTES[id].tokens
+    return { bg: p['--bg'], surf: p['--surface'], acc: p['--accent'], text: p['--text'] }
+  }
 
   const startNew = () => {
-    const seed = resolveColors(active, customThemes)
-    setEditing({ mode: 'new', theme: { name: 'My theme', bg: seed.bg, surface: seed.surface, text: seed.text, accent: seed.accent } })
+    const s = swatchFor(currentSel)
+    setEditing({ mode: 'new', theme: { name: 'My theme', bg: s.bg, surface: s.surf, text: s.text, accent: s.acc } })
   }
+  const startEdit = (t) => setEditing({ mode: 'edit', theme: { id: t.id, name: t.name, bg: t.bg, surface: t.surface, text: t.text, accent: t.accent } })
 
   const onSave = (form) => {
     if (editing.mode === 'new') addCustomTheme(form)
-    else {
-      updateCustomTheme(editing.theme.id, form)
-      setTheme(editing.theme.id)
-    }
+    else { updateCustomTheme(editing.theme.id, form); setTheme(editing.theme.id) }
     setEditing(null)
   }
 
+  const accentIsCustom = meta?.accent && meta.accent !== 'auto' && !ACCENT_SWATCHES.some((a) => a.id === meta.accent)
+
   return (
-    <div className="modal" role="dialog" aria-modal="true" aria-label="Appearance">
-      <div className="modal__backdrop" onClick={onClose} />
-      <div className="modal__panel">
-        <div className="modal__head">
-          <h2>{editing ? (editing.mode === 'new' ? 'New theme' : 'Edit theme') : 'Appearance'}</h2>
-          <button type="button" className="btn btn--ghost btn--icon" onClick={onClose} aria-label="Close">
-            ✕
-          </button>
+    <div className="sheet" role="dialog" aria-modal="true" aria-label="Appearance">
+      <div className="sheet__scrim" onClick={onClose} />
+      <div className="sheet__panel">
+        <div className="sheet__grab" />
+        <div className="sheet__head">
+          <span className="sheet__title">{editing ? (editing.mode === 'new' ? 'New theme' : 'Edit theme') : 'Appearance'}</span>
+          <button type="button" className="sheet__x" onClick={onClose} aria-label="Close">✕</button>
         </div>
 
         {editing ? (
           <ThemeEditor initial={editing.theme} onSave={onSave} onCancel={() => setEditing(null)} />
         ) : (
           <>
-            <h3 className="appearance__label">Look</h3>
-            <div className="look-grid">
-              {DIRECTIONS.map((d) => (
-                <button
-                  key={d.id}
-                  type="button"
-                  className={`look-chip${activeDir === d.id ? ' is-active' : ''}`}
-                  onClick={() => {
-                    setLook(d.id)
-                    setMode(d.id === 'A' ? 'light' : 'dark')
-                  }}
-                >
-                  <span className="look-chip__name">{d.name}</span>
-                  <span className="look-chip__tagline">{d.tagline}</span>
-                </button>
-              ))}
+            <div className="sheet__sec">
+              <span className="flabel">Look</span>
+              <div className="seg">
+                {LOOKS.map((l) => (
+                  <button key={l.id} type="button" className={'seg__btn' + (meta?.direction === l.id ? ' is-on' : '')}
+                    onClick={() => setLook(l.id)}>{l.name}</button>
+                ))}
+              </div>
+              <p className="minihint">Ledger &amp; Nocturne are the day and night editions of the same hand-set look; Bloom is the soft alternate.</p>
             </div>
 
-            <div className="appearance__row">
-              <h3 className="appearance__label">Theme</h3>
-              <div className="segmented">
-                <button type="button" className={mode === 'dark' ? 'is-active' : ''} onClick={() => setMode('dark')}>
-                  Dark
-                </button>
-                <button type="button" className={mode === 'light' ? 'is-active' : ''} onClick={() => setMode('light')}>
-                  Light
-                </button>
+            <div className="sheet__sec">
+              <span className="flabel">Theme</span>
+              <div className="themegrid">
+                {paletteCards.map((p) => {
+                  const s = swatchFor(p.id)
+                  const on = currentSel === p.id
+                  return (
+                    <button key={p.id} type="button" className={'themecard' + (on ? ' is-on' : '')}
+                      onClick={() => setTheme(p.id)} style={{ background: s.surf, borderColor: on ? undefined : s.bg }}>
+                      <span className="themecard__sw" style={{ background: s.bg }}>
+                        <span className="themecard__dot" style={{ background: s.acc }} />
+                        <span className="themecard__line" style={{ background: `color-mix(in srgb, ${s.text} 30%, transparent)` }} />
+                      </span>
+                      <span className="themecard__name" style={{ color: s.text }}>{p.label}</span>
+                    </button>
+                  )
+                })}
+              </div>
+              <div className="sheet__foot" style={{ marginTop: 10 }}>
+                <button type="button" className="btnp" onClick={startNew}>+ New theme</button>
+                {activeSaved && <button type="button" className="btnp" onClick={() => startEdit(activeSaved)}>Edit</button>}
+                {activeSaved && <button type="button" className="btnp btnp--danger" onClick={() => deleteCustomTheme(activeSaved.id)}>Delete</button>}
               </div>
             </div>
-            <div className="theme-grid">
-              {PRESETS.filter((p) => p.id === mode).map((p) => (
-                <button
-                  key={p.id}
-                  type="button"
-                  className={`theme-chip${active === p.id ? ' is-active' : ''}`}
-                  onClick={() => setTheme(p.id)}
-                >
-                  {p.name}
-                </button>
-              ))}
-              {CURATED_THEMES.filter((t) => inMode(t.bg)).map((t) => (
-                <button
-                  key={t.id}
-                  type="button"
-                  className={`theme-chip${active === t.id ? ' is-active' : ''}`}
-                  onClick={() => setTheme(t.id)}
-                  style={{ background: t.surface, color: t.text, borderColor: t.bg }}
-                >
-                  <span className="theme-chip__dot" style={{ background: t.accent }} />
-                  {t.name}
-                </button>
-              ))}
-              {customThemes.filter((t) => inMode(t.bg)).map((t) => (
-                <div key={t.id} className={`theme-chip theme-chip--custom${active === t.id ? ' is-active' : ''}`}>
-                  <button type="button" className="theme-chip__select" onClick={() => setTheme(t.id)}>
-                    <span className="theme-chip__dot" style={{ background: t.accent }} />
-                    {t.name}
-                  </button>
-                  <button
-                    type="button"
-                    className="theme-chip__mini"
-                    aria-label={`Edit ${t.name}`}
-                    onClick={() => setEditing({ mode: 'edit', theme: { ...t } })}
-                  >
-                    ✎
-                  </button>
-                  <button
-                    type="button"
-                    className="theme-chip__mini"
-                    aria-label={`Delete ${t.name}`}
-                    onClick={() => deleteCustomTheme(t.id)}
-                  >
-                    🗑
-                  </button>
-                </div>
-              ))}
-            </div>
-            <button type="button" className="btn btn--accent btn--block" onClick={startNew}>
-              + Create theme
-            </button>
 
-            <h3 className="appearance__label">Font</h3>
-            <div className="font-grid">
-              {FONT_OPTIONS.map((fnt) => (
-                <button
-                  key={fnt.id}
-                  type="button"
-                  className={`font-chip${activeFont === fnt.id ? ' is-active' : ''}`}
-                  style={{ fontFamily: fnt.display }}
-                  onClick={() => setFont(fnt.id)}
-                  aria-label={`Font: ${fnt.name}`}
-                >
-                  Momentum
-                </button>
-              ))}
+            <div className="sheet__sec">
+              <span className="flabel">Accent</span>
+              <div className="swrow">
+                {ACCENT_SWATCHES.map((a) => {
+                  const on = (meta?.accent || 'auto') === a.id
+                  if (a.id === 'auto') {
+                    return <button key="auto" type="button" className={'sw sw--auto' + (on ? ' is-on' : '')} onClick={() => setAccent('auto')} title="Auto">A</button>
+                  }
+                  return <button key={a.id} type="button" className={'sw' + (on ? ' is-on' : '')} style={{ background: a.id }} onClick={() => setAccent(a.id)} title={a.label} />
+                })}
+                <label className={'sw sw--pick' + (accentIsCustom ? ' is-on' : '')} style={accentIsCustom ? { background: meta.accent } : undefined} title="Any accent">
+                  <input type="color" value={/^#[0-9a-fA-F]{6}$/.test(meta?.accent) ? meta.accent : '#9e3b2d'} onChange={(e) => setAccent(e.target.value)} />
+                </label>
+              </div>
             </div>
+
+            <div className="sheet__sec">
+              <span className="flabel">Habit ink</span>
+              <div className="seg">
+                {[['color', 'Colourful'], ['tonal', 'Tonal']].map(([k, l]) => (
+                  <button key={k} type="button" className={'seg__btn' + ((meta?.ink || 'color') === k ? ' is-on' : '')}
+                    onClick={() => setInk(k)}>{l}</button>
+                ))}
+              </div>
+              <p className="minihint">Tonal renders each habit as a distinct shade of the theme accent. Calmest with the monochrome themes.</p>
+            </div>
+
+            <div className="sheet__sec">
+              <span className="flabel">Completed habits</span>
+              <div className="seg">
+                {[['soften', 'Soften'], ['collapse', 'Collapse'], ['drawer', 'Drawer'], ['none', 'Keep']].map(([k, l]) => (
+                  <button key={k} type="button" className={'seg__btn' + ((meta?.completed || 'soften') === k ? ' is-on' : '')}
+                    onClick={() => setCompleted(k)}>{l}</button>
+                ))}
+              </div>
+              <p className="minihint">How a habit looks once you finish it today. Soften fades it and sinks it down; Collapse shrinks it to a line; Drawer tucks them away.</p>
+            </div>
+
+            <div className="sheet__sec">
+              <span className="flabel">Type</span>
+              <div className="seg">
+                {[['auto', 'Default'], ['serif', 'Serif'], ['grotesk', 'Grotesk'], ['bricolage', 'Rounded']].map(([k, l]) => (
+                  <button key={k} type="button" className={'seg__btn' + ((meta?.typeface || 'auto') === k ? ' is-on' : '')}
+                    onClick={() => setTypeface(k)}>{l}</button>
+                ))}
+              </div>
+            </div>
+
+            <div style={{ height: 4 }} />
           </>
         )}
       </div>

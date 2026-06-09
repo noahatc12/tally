@@ -7,12 +7,14 @@
 import { useMemo } from 'react'
 import { useHabitsContext } from '../../context/habits-store.js'
 import { todayKey, aggToday, aggregateYearGrid, strengthOf, trendSeries } from '../../lib/proto-adapters.js'
+import { buildInkMap } from '../../lib/directions.js'
 import { Glyph, YearHeatmap, Sparkline } from './widgets.jsx'
 
 export default function TallyOverview({ onBack, onOpenHabit, onShare }) {
-  const { habits, completions } = useHabitsContext()
+  const { habits, completions, meta } = useHabitsContext()
   const today = todayKey()
   const active = useMemo(() => habits.filter((h) => !h.archived), [habits])
+  const inkMap = useMemo(() => buildInkMap(habits, meta?.ink), [habits, meta?.ink])
 
   const agg = useMemo(() => aggToday(active, completions, today), [active, completions, today])
   const grid = useMemo(() => aggregateYearGrid(active, completions, today), [active, completions, today])
@@ -35,10 +37,13 @@ export default function TallyOverview({ onBack, onOpenHabit, onShare }) {
         <div className="daystat__meta">
           <span className="daystat__label"><b>{agg.done}</b> of <b>{agg.total}</b> done today</span>
           <div className="daystat__dots">
-            {agg.items.map((it) => (
-              <span key={it.habit.id} className={'daystat__dot' + (it.isDone ? ' is-done' : it.isMiss ? ' is-miss' : '')}
-                style={{ borderColor: it.habit.color, background: it.isDone ? it.habit.color : 'transparent' }} />
-            ))}
+            {agg.items.map((it) => {
+              const c = inkMap[it.habit.id] || it.habit.color
+              return (
+                <span key={it.habit.id} className={'daystat__dot' + (it.isDone ? ' is-done' : it.isMiss ? ' is-miss' : '')}
+                  style={{ borderColor: c, background: it.isDone ? c : 'transparent' }} />
+              )
+            })}
           </div>
         </div>
       </div>
@@ -53,10 +58,10 @@ export default function TallyOverview({ onBack, onOpenHabit, onShare }) {
         <ul className="overview__list">
           {rows.map(({ habit, strength, series }) => (
             <li key={habit.id}>
-              <button className="ovrow" type="button" style={{ '--c': habit.color }} onClick={() => onOpenHabit(habit.id)}>
+              <button className="ovrow" type="button" style={{ '--c': inkMap[habit.id] || habit.color }} onClick={() => onOpenHabit(habit.id)}>
                 <span className="ovrow__ic"><Glyph habit={habit} size={18} /></span>
                 <span className="ovrow__name">{habit.name}</span>
-                <Sparkline series={series} color={habit.color} />
+                <Sparkline series={series} color={inkMap[habit.id] || habit.color} />
                 <span className="ovrow__str">{strength}</span>
                 <span className="ovrow__chev">›</span>
               </button>

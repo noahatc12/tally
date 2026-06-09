@@ -5,6 +5,8 @@
 // inline CSS-variable map, `attrs` the data-* attributes that drive tally.css personality.
 // Math/structure copied as-is so the look matches the prototype exactly.
 
+import { luminance } from './theme.js'
+
 export const DIRECTIONS = {
   A: {
     id: 'A', name: 'Ledger',
@@ -138,8 +140,17 @@ const TYPEFACE = {
 // Map our persisted meta to the tweak object resolveTweaks expects. During the port we
 // only persist a subset; the rest take sensible defaults (auto / native).
 export function metaToTweaks(meta = {}) {
-  const theme = meta.theme || 'light'
-  const palette = PALETTES[theme] ? theme : 'auto' // base presets / unknown -> direction-native
+  const sel = meta.theme || 'auto'
+  // A saved custom theme stores only 4 colours; resolve it through the custom path so
+  // resolveTweaks derives the rest (surface-2/muted/border/heat), exactly like the
+  // prototype's inline "Custom". A named curated palette resolves directly; anything
+  // else (auto / light / dark / unknown id) falls back to the Look's native palette.
+  const saved = (meta.customThemes || []).find((th) => th.id === sel)
+  let palette = 'auto'
+  let custom = null
+  if (sel === 'custom') palette = 'custom'
+  else if (saved) { palette = 'custom'; custom = saved }
+  else if (PALETTES[sel] && sel !== 'auto') palette = sel
   return {
     direction: meta.direction || 'A',
     palette,
@@ -152,11 +163,11 @@ export function metaToTweaks(meta = {}) {
     motion: meta.motion || 'calm',
     heatmap: meta.heatmap || 'auto',
     cardStyle: meta.cardStyle || 'auto',
-    customBg: meta.customBg || '#14181d',
-    customSurface: meta.customSurface || '#1d232b',
-    customText: meta.customText || '#e4e8ed',
-    customAccent: meta.customAccent || '#7c93b0',
-    customDark: meta.customDark ?? true,
+    customBg: custom?.bg || meta.customBg || '#14181d',
+    customSurface: custom?.surface || meta.customSurface || '#1d232b',
+    customText: custom?.text || meta.customText || '#e4e8ed',
+    customAccent: custom?.accent || meta.customAccent || '#7c93b0',
+    customDark: custom ? luminance(custom.bg) < 0.5 : (meta.customDark ?? true),
   }
 }
 
@@ -214,7 +225,21 @@ export function resolveTweaks(t) {
     'data-habitcolor': dir.habitColor ? 'on' : 'off',
     'data-motion': t.motion || 'calm',
     'data-dark': dark ? 'on' : 'off',
+    'data-completed': t.completed || 'soften',
   }
 
   return { vars, attrs, dir, dark, heat }
+}
+
+// Tonal ink: distinct shades of the live theme accent so every habit matches the active
+// palette (resolves per theme via color-mix, like the prototype). buildInkMap returns the
+// per-habit ink colour the screens apply as the --habit / --c var; in 'color' mode it's just
+// the habit's own stored colour. Index over the FULL habit list so a habit's shade is stable
+// across Today / Detail / Overview.
+const INK_SH = [100, 74, 56, 42, 32, 24, 18, 14]
+export const inkShade = (i) => `color-mix(in srgb, var(--accent) ${INK_SH[i % INK_SH.length]}%, var(--surface))`
+
+export function buildInkMap(habits = [], ink = 'color') {
+  const tonal = ink === 'tonal'
+  return Object.fromEntries(habits.map((h, i) => [h.id, tonal ? inkShade(i) : h.color]))
 }

@@ -103,7 +103,30 @@ for (const s of shots) {
   await page.locator('.sheet__x').click()
   await page.waitForTimeout(200)
 
-  console.log(`saved ${s.label} (today + detail + detail-count + overview + help + form, overflow 0)`)
+  // Appearance sheet (◑) — full Look/Theme/Accent/Ink/Completed/Type sheet; scroll-locked.
+  await page.locator('.iconbtn[title="Appearance"]').click()
+  await page.waitForTimeout(400)
+  const themeX = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)
+  if (themeX > 0) throw new Error(`[${s.label} theme] horizontal overflow: ${themeX}px`)
+  await page.locator('.sheet__panel').screenshot({ path: `${OUT}/port-theme-${s.label}.png` })
+
+  // Net-new behaviours: Tonal ink + Collapse, then Drawer — set in the sheet, view Today behind.
+  await page.locator('.seg__btn', { hasText: 'Tonal' }).click()
+  await page.waitForTimeout(150)
+  await page.locator('.seg__btn', { hasText: 'Collapse' }).click()
+  await page.waitForTimeout(150)
+  await page.locator('.sheet__x').click()
+  await page.waitForTimeout(400)
+  await page.screenshot({ path: `${OUT}/port-today-tonal-collapse-${s.label}.png` })
+  await page.locator('.iconbtn[title="Appearance"]').click()
+  await page.waitForTimeout(300)
+  await page.locator('.seg__btn', { hasText: 'Drawer' }).click()
+  await page.waitForTimeout(150)
+  await page.locator('.sheet__x').click()
+  await page.waitForTimeout(400)
+  await page.screenshot({ path: `${OUT}/port-today-drawer-${s.label}.png` })
+
+  console.log(`saved ${s.label} (today + detail + detail-count + overview + help + form + theme + tonal/collapse/drawer, overflow 0)`)
   await ctx.close()
 }
 

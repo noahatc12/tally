@@ -64,5 +64,9 @@ export function emptyMeta() {
     theme: 'light', // first-run default = Ledger (light). 'dark' = Nocturne | a curated/custom theme id
     customThemes: [], // [{ id, name, bg, surface, text, accent }]
     font: 'default', // a FONT_OPTIONS id; 'default' = follow the Look's native display face
+    accent: 'auto', // 'auto' = palette accent | an ACCENT_SWATCHES id or a custom #hex (overrides --accent)
+    ink: 'color', // 'color' = each habit's own colour | 'tonal' = distinct shades of the theme accent
+    completed: 'soften', // how a done habit looks on Today: soften | collapse | drawer | none (Keep)
+    typeface: 'auto', // 'auto' = follow the Look | serif | grotesk | bricolage (overrides --font-display)
   }
 }

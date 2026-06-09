@@ -9,6 +9,7 @@ import {
   todayKey, toUiHabit, recordOf, strengthOf, streakOf, weekStates, weekRate,
   trailingMisses, aggToday, isDue,
 } from '../../lib/proto-adapters.js'
+import { buildInkMap } from '../../lib/directions.js'
 import {
   Glyph, TallyMark, ProgressRing, StrengthMeter, StreakBadge, WeekDots,
   ThreeState, CountControl, TimerControl,
@@ -30,7 +31,7 @@ function greeting() {
   return h < 12 ? 'Good morning' : h < 18 ? 'Good afternoon' : 'Good evening'
 }
 
-function HabitCard({ habit, completions, today, onOpen }) {
+function HabitCard({ habit, completions, today, onOpen, ink, softened, compact }) {
   const { setCompletion, clearCompletion, setValue } = useHabitsContext()
   const ui = toUiHabit(habit)
   const rec = recordOf(completions, habit.id, today)
@@ -47,8 +48,22 @@ function HabitCard({ habit, completions, today, onOpen }) {
   const setState = (st) => (st === state ? clearCompletion(habit.id, today) : setCompletion(habit.id, today, st))
   const onSetValue = (v) => setValue(habit.id, today, v, ui.goal)
 
+  // Collapse mode: a finished habit shrinks to a single slim line (still tappable to open).
+  if (compact) {
+    return (
+      <li className="hcard hcard--slim is-done rise" style={{ '--habit': ink || habit.color }}>
+        <button className="hcard__slim" type="button" onClick={() => onOpen(habit.id)}>
+          <span className="hcard__icon hcard__icon--sm" aria-hidden="true"><Glyph habit={habit} size={17} /></span>
+          <span className="hcard__name slim__name">{habit.name}</span>
+          <span className="slim__check">✓</span>
+          {streak > 0 && <StreakBadge n={streak} dim />}
+        </button>
+      </li>
+    )
+  }
+
   return (
-    <li className={'hcard rise' + (isDone ? ' is-done' : '')} style={{ '--habit': habit.color }}>
+    <li className={'hcard rise' + (isDone ? ' is-done' : '') + (softened ? ' hcard--soft' : '')} style={{ '--habit': ink || habit.color }}>
       <div className="hcard__main">
         <span className="hcard__icon" aria-hidden="true"><Glyph habit={habit} size={22} /></span>
         <button className="hcard__id" type="button" onClick={() => onOpen(habit.id)}>
@@ -82,19 +97,33 @@ function HabitCard({ habit, completions, today, onOpen }) {
 }
 
 export default function TallyToday({ onOpenHabit, onOpenOverview }) {
-  const { habits, completions } = useHabitsContext()
+  const { habits, completions, meta } = useHabitsContext()
   const [formOpen, setFormOpen] = useState(false)
   const [helpOpen, setHelpOpen] = useState(false)
   const [themeOpen, setThemeOpen] = useState(false)
+  const [drawerOpen, setDrawerOpen] = useState(false)
   const today = todayKey()
+
+  const inkMap = useMemo(() => buildInkMap(habits, meta?.ink), [habits, meta?.ink])
+  const completedMode = meta?.completed || 'soften'
 
   const active = useMemo(() => habits.filter((h) => !h.archived), [habits])
   const due = useMemo(() => active.filter((h) => isDue(h, today, completions)), [active, completions, today])
   const notDue = useMemo(() => active.filter((h) => !isDue(h, today, completions)), [active, completions, today])
   const agg = useMemo(() => aggToday(due, completions, today), [due, completions, today])
 
+  // Completed-habit display: 'drawer' tucks finished habits into a collapsible section;
+  // 'soften'/'collapse' keep them in place but sink them to the bottom of their group (and
+  // restyle the card); 'none' (Keep) leaves order untouched.
+  const isDoneToday = (h) => recordOf(completions, h.id, today)?.state === 'done'
+  const drawerMode = completedMode === 'drawer'
+  const visibleDue = drawerMode ? due.filter((h) => !isDoneToday(h)) : due
+  const doneDrawer = drawerMode ? due.filter(isDoneToday) : []
+  const sortG = (items) => (completedMode === 'none' || drawerMode) ? items
+    : [...items.filter((h) => !isDoneToday(h)), ...items.filter(isDoneToday)]
+
   const groups = TOD_ORDER
-    .map((tod) => ({ tod, items: due.filter((h) => (h.tod || 'anytime') === tod) }))
+    .map((tod) => ({ tod, items: sortG(visibleDue.filter((h) => (h.tod || 'anytime') === tod)) }))
     .filter((g) => g.items.length)
 
   const dateLabel = new Date().toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric' })
@@ -134,10 +163,13 @@ export default function TallyToday({ onOpenHabit, onOpenOverview }) {
           <div className="daystat__meta">
             <span className="daystat__label"><b>{agg.done}</b> of <b>{agg.total}</b> done today</span>
             <div className="daystat__dots">
-              {agg.items.map((it) => (
-                <span key={it.habit.id} className={'daystat__dot' + (it.isDone ? ' is-done' : it.isMiss ? ' is-miss' : '')}
-                  style={{ borderColor: it.habit.color, background: it.isDone ? it.habit.color : 'transparent' }} />
-              ))}
+              {agg.items.map((it) => {
+                const c = inkMap[it.habit.id] || it.habit.color
+                return (
+                  <span key={it.habit.id} className={'daystat__dot' + (it.isDone ? ' is-done' : it.isMiss ? ' is-miss' : '')}
+                    style={{ borderColor: c, background: it.isDone ? c : 'transparent' }} />
+                )
+              })}
             </div>
           </div>
         </div>
@@ -148,7 +180,10 @@ export default function TallyToday({ onOpenHabit, onOpenOverview }) {
           <div className="group__label">{TOD[g.tod].label}<span className="group__count">{g.items.length}</span></div>
           <ul className="cards">
             {g.items.map((h) => (
-              <HabitCard key={h.id} habit={h} completions={completions} today={today} onOpen={onOpenHabit} />
+              <HabitCard key={h.id} habit={h} completions={completions} today={today} onOpen={onOpenHabit}
+                ink={inkMap[h.id]}
+                softened={completedMode === 'soften' && isDoneToday(h)}
+                compact={completedMode === 'collapse' && isDoneToday(h)} />
             ))}
           </ul>
         </section>
@@ -159,9 +194,25 @@ export default function TallyToday({ onOpenHabit, onOpenOverview }) {
           <div className="group__label">Not due today<span className="group__count">{notDue.length}</span></div>
           <ul className="cards">
             {notDue.map((h) => (
-              <HabitCard key={h.id} habit={h} completions={completions} today={today} onOpen={onOpenHabit} />
+              <HabitCard key={h.id} habit={h} completions={completions} today={today} onOpen={onOpenHabit} ink={inkMap[h.id]} />
             ))}
           </ul>
+        </section>
+      )}
+
+      {doneDrawer.length > 0 && (
+        <section className="group">
+          <button className="drawer__head" type="button" onClick={() => setDrawerOpen((o) => !o)}>
+            <span>Done today</span><span className="group__count">{doneDrawer.length}</span>
+            <span className="drawer__chev">{drawerOpen ? '▾' : '▸'}</span>
+          </button>
+          {drawerOpen && (
+            <ul className="cards" style={{ marginTop: 12 }}>
+              {doneDrawer.map((h) => (
+                <HabitCard key={h.id} habit={h} completions={completions} today={today} onOpen={onOpenHabit} ink={inkMap[h.id]} compact />
+              ))}
+            </ul>
+          )}
         </section>
       )}
 

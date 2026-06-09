@@ -41,6 +41,32 @@ await page.waitForTimeout(500)
 await page.screenshot({ path: `${OUT}/proto-form.png`, fullPage: true })
 console.log('saved proto-form.png')
 
+// Appearance sheet (◑) — the full Look/Theme/Accent/Ink/Completed/Type sheet.
+await page.locator('.sheet__x').click().catch(() => {})
+await page.waitForTimeout(200)
+await page.locator('.iconbtn[title="Appearance"]').click()
+await page.waitForTimeout(500)
+await page.locator('.sheet__panel').screenshot({ path: `${OUT}/proto-theme.png` })
+console.log('saved proto-theme.png')
+
+// Net-new behaviours: Tonal ink + Collapse, then Drawer — set in the sheet, view Today behind.
+await page.locator('.seg__btn', { hasText: 'Tonal' }).click()
+await page.waitForTimeout(150)
+await page.locator('.seg__btn', { hasText: 'Collapse' }).click()
+await page.waitForTimeout(150)
+await page.locator('.sheet__x').click()
+await page.waitForTimeout(400)
+await page.screenshot({ path: `${OUT}/proto-today-tonal-collapse.png`, fullPage: true })
+console.log('saved proto-today-tonal-collapse.png')
+await page.locator('.iconbtn[title="Appearance"]').click()
+await page.waitForTimeout(300)
+await page.locator('.seg__btn', { hasText: 'Drawer' }).click()
+await page.waitForTimeout(150)
+await page.locator('.sheet__x').click()
+await page.waitForTimeout(400)
+await page.screenshot({ path: `${OUT}/proto-today-drawer.png`, fullPage: true })
+console.log('saved proto-today-drawer.png')
+
 // Onboarding: open the tweaks panel (host activate message) and flip the firstRun switch.
 await page.locator('.sheet__x').click().catch(() => {})
 await page.waitForTimeout(200)

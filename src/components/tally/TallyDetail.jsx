@@ -10,6 +10,7 @@ import {
   todayKey, dateFromKey, toUiHabit, strengthOf, streakOf, longestStreak, weekRate,
   weekStates, yearGrid, trendSeries, valueTotals, formatDuration, schedLabel,
 } from '../../lib/proto-adapters.js'
+import { buildInkMap } from '../../lib/directions.js'
 import { Glyph, TrendChart, YearHeatmap } from './widgets.jsx'
 import HabitFormModal from '../HabitFormModal.jsx'
 
@@ -17,10 +18,11 @@ import HabitFormModal from '../HabitFormModal.jsx'
 const NEXT = { done: 'skip', skip: 'missed', missed: null }
 
 export default function TallyDetail({ habit, onBack, onShare }) {
-  const { habits, completions, setCompletion, clearCompletion } = useHabitsContext()
+  const { habits, completions, meta, setCompletion, clearCompletion } = useHabitsContext()
   const [editing, setEditing] = useState(false)
   const today = todayKey()
   const ui = toUiHabit(habit)
+  const ink = buildInkMap(habits, meta?.ink)[habit.id] || habit.color
 
   const strength = strengthOf(habit, completions, today)
   const streak = streakOf(habit, completions, today)
@@ -51,7 +53,7 @@ export default function TallyDetail({ habit, onBack, onShare }) {
   const activeHabits = habits.filter((h) => !h.archived)
 
   return (
-    <div className="screen detail" style={{ '--habit': habit.color }}>
+    <div className="screen detail" style={{ '--habit': ink }}>
       <div className="detail__bar rise">
         <button className="backbtn" type="button" onClick={onBack}>‹ Today</button>
         <div style={{ display: 'flex', gap: 8 }}>
