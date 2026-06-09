@@ -12,4 +12,11 @@ await page.goto('http://localhost:4180/Tally.html', { waitUntil: 'networkidle' }
 await page.waitForTimeout(2500) // babel compile + render
 await page.screenshot({ path: `${OUT}/proto-full.png`, fullPage: true })
 console.log('saved proto-full.png')
+
+// Navigate into a habit's Detail screen (click the first card's identity button) and shoot it.
+await page.locator('.hcard__id').first().click()
+await page.waitForTimeout(600)
+await page.screenshot({ path: `${OUT}/proto-detail.png`, fullPage: true })
+console.log('saved proto-detail.png')
+
 await browser.close()

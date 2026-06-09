@@ -4,10 +4,10 @@
 
 import { useState } from 'react'
 import { useHabitsContext } from '../context/habits-store.js'
-import HabitDetail from './HabitDetail.jsx'
 import OverviewScreen from './OverviewScreen.jsx'
 import TallyShell from './tally/TallyShell.jsx'
 import TallyToday from './tally/TallyToday.jsx'
+import TallyDetail from './tally/TallyDetail.jsx'
 
 // Transitional: the Today screen is the faithfully-ported one (under the .tally root);
 // detail/overview are still the pre-port screens in the old shell until they're ported too.
@@ -28,7 +28,14 @@ export default function RootView() {
 
   if (route.name === 'detail') {
     const habit = habits.find((h) => h.id === route.id && !h.archived)
-    if (habit) return <OldShell><HabitDetail habit={habit} onBack={goToday} /></OldShell>
+    // onShare → ShareCard is ported in step 5; the button stays for layout parity until then.
+    if (habit) {
+      return (
+        <TallyShell>
+          <TallyDetail habit={habit} onBack={goToday} onShare={() => {}} />
+        </TallyShell>
+      )
+    }
   }
 
   if (route.name === 'overview') {

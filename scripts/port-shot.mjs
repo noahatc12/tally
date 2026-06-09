@@ -51,12 +51,13 @@ function seed(theme, direction) {
 
 const browser = await chromium.launch()
 const shots = [
-  { theme: 'light', direction: 'A', label: 'port-today-ledger' },
-  { theme: 'dark', direction: 'C', label: 'port-today-nocturne' },
-  { theme: 'bloom', direction: 'B', label: 'port-today-bloom' },
+  { theme: 'light', direction: 'A', label: 'ledger', width: 402 },
+  { theme: 'dark', direction: 'C', label: 'nocturne', width: 402 },
+  { theme: 'bloom', direction: 'B', label: 'bloom', width: 402 },
+  { theme: 'light', direction: 'A', label: 'ledger-360', width: 360 }, // narrowest-width overflow check
 ]
 for (const s of shots) {
-  const ctx = await browser.newContext({ viewport: { width: 402, height: 1700 }, deviceScaleFactor: 2 })
+  const ctx = await browser.newContext({ viewport: { width: s.width, height: 1700 }, deviceScaleFactor: 2 })
   const data = seed(s.theme, s.direction)
   await ctx.addInitScript((d) => {
     localStorage.setItem('habits', JSON.stringify(d.habits))
@@ -66,8 +67,19 @@ for (const s of shots) {
   const page = await ctx.newPage()
   await page.goto(BASE, { waitUntil: 'networkidle' })
   await page.waitForTimeout(700)
-  await page.screenshot({ path: `${OUT}/${s.label}.png` })
-  console.log(`saved ${s.label}`)
+  await page.screenshot({ path: `${OUT}/port-today-${s.label}.png` })
+
+  // Detail: a binary habit (Meditate) then a count habit (Drink water → totals row).
+  for (const [name, tag] of [['Meditate', 'detail'], ['Drink water', 'detail-count']]) {
+    await page.getByText(name, { exact: true }).first().click()
+    await page.waitForTimeout(500)
+    const docX = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)
+    if (docX > 0) throw new Error(`[${s.label} ${tag}] horizontal overflow: ${docX}px`)
+    await page.screenshot({ path: `${OUT}/port-${tag}-${s.label}.png` })
+    await page.getByText('‹ Today').click()
+    await page.waitForTimeout(300)
+  }
+  console.log(`saved ${s.label} (today + detail + detail-count, overflow 0)`)
   await ctx.close()
 }
 await browser.close()
