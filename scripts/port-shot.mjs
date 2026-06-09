@@ -51,9 +51,9 @@ function seed(theme, direction) {
 
 const browser = await chromium.launch()
 const shots = [
-  { theme: 'light', direction: 'A', label: 'ledger', width: 402 },
-  { theme: 'dark', direction: 'C', label: 'nocturne', width: 402 },
-  { theme: 'bloom', direction: 'B', label: 'bloom', width: 402 },
+  { theme: 'light', direction: 'A', label: 'ledger', width: 390 },
+  { theme: 'dark', direction: 'C', label: 'nocturne', width: 390 },
+  { theme: 'bloom', direction: 'B', label: 'bloom', width: 390 },
   { theme: 'light', direction: 'A', label: 'ledger-360', width: 360 }, // narrowest-width overflow check
 ]
 for (const s of shots) {
@@ -161,5 +161,28 @@ for (const o of [
   await page.screenshot({ path: `${OUT}/port-onboarding-${o.label}.png` })
   console.log(`saved onboarding ${o.label} (overflow 0)`)
   await ctx.close()
+}
+
+// First-run setup wizard: empty habits + not onboarded → SetupWizard. Click through each step.
+for (const w of [{ label: 'ledger', direction: 'A', theme: 'light' }, { label: '360', direction: 'A', theme: 'light', width: 360 }]) {
+  const wctx = await browser.newContext({ viewport: { width: w.width || 390, height: 1700 }, deviceScaleFactor: 2 })
+  await wctx.addInitScript((m) => {
+    localStorage.setItem('habits', JSON.stringify([]))
+    localStorage.setItem('completions', JSON.stringify({}))
+    localStorage.setItem('meta', JSON.stringify(m)) // no `onboarded` → wizard shows
+  }, { schemaVersion: 3, direction: w.direction, theme: w.theme, customThemes: [], font: 'default' })
+  const wpage = await wctx.newPage()
+  await wpage.goto(BASE, { waitUntil: 'networkidle' })
+  await wpage.waitForTimeout(700)
+  await wpage.screenshot({ path: `${OUT}/port-wiz-0welcome-${w.label}.png` })
+  for (const s of ['1look', '2theme', '3demo', '4about', '5starters']) {
+    await wpage.locator('.wiz__next').click()
+    await wpage.waitForTimeout(450)
+    const wx = await wpage.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)
+    if (wx > 0) throw new Error(`[wizard ${s} ${w.label}] horizontal overflow: ${wx}px`)
+    await wpage.screenshot({ path: `${OUT}/port-wiz-${s}-${w.label}.png` })
+  }
+  console.log(`saved wizard ${w.label} (welcome+look+theme+demo+about+starters, overflow 0)`)
+  await wctx.close()
 }
 await browser.close()
