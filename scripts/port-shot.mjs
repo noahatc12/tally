@@ -86,8 +86,24 @@ for (const s of shots) {
   const ovX = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)
   if (ovX > 0) throw new Error(`[${s.label} overview] horizontal overflow: ${ovX}px`)
   await page.screenshot({ path: `${OUT}/port-overview-${s.label}.png` })
+  await page.getByText('‹ Today').click()
+  await page.waitForTimeout(300)
 
-  console.log(`saved ${s.label} (today + detail + detail-count + overview, overflow 0)`)
+  // Help sheet (?) and New-habit form (+ New) — body must be scroll-locked while open.
+  await page.locator('.iconbtn[title="How it works"]').click()
+  await page.waitForTimeout(400)
+  await page.screenshot({ path: `${OUT}/port-help-${s.label}.png` })
+  await page.locator('.sheet__x').click()
+  await page.waitForTimeout(300)
+  await page.locator('.iconbtn--accent').click()
+  await page.waitForTimeout(400)
+  const formX = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)
+  if (formX > 0) throw new Error(`[${s.label} form] horizontal overflow: ${formX}px`)
+  await page.screenshot({ path: `${OUT}/port-form-${s.label}.png` })
+  await page.locator('.sheet__x').click()
+  await page.waitForTimeout(200)
+
+  console.log(`saved ${s.label} (today + detail + detail-count + overview + help + form, overflow 0)`)
   await ctx.close()
 }
 await browser.close()

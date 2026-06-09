@@ -27,4 +27,18 @@ await page.waitForTimeout(600)
 await page.screenshot({ path: `${OUT}/proto-overview.png`, fullPage: true })
 console.log('saved proto-overview.png')
 
+// Back to Today, then the Help sheet (?) and the New-habit form (+ New).
+await page.getByText('‹ Today').click()
+await page.waitForTimeout(400)
+await page.locator('.iconbtn[title="How it works"]').click()
+await page.waitForTimeout(500)
+await page.screenshot({ path: `${OUT}/proto-help.png`, fullPage: true })
+console.log('saved proto-help.png')
+await page.locator('.sheet__x').click()
+await page.waitForTimeout(300)
+await page.locator('.iconbtn--accent').click()
+await page.waitForTimeout(500)
+await page.screenshot({ path: `${OUT}/proto-form.png`, fullPage: true })
+console.log('saved proto-form.png')
+
 await browser.close()

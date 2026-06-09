@@ -1,3 +1,9 @@
+// Create / edit a habit. Ported to the handoff's bottom-sheet style (modals.jsx
+// HabitFormSheet) — .sheet chrome, .seg segmented controls, .swrow swatches, .iconpick
+// grid, .btnp buttons — while keeping this app's real store wiring and field model:
+// type stays binary | quantitative | duration, color stays a per-theme hex palette, and
+// the extra fields (Anytime, duration-minute presets) are preserved in the sheet idiom.
+
 import { useState, createElement } from 'react'
 import { useHabitsContext } from '../context/habits-store.js'
 import { useScrollLock } from '../hooks/useScrollLock.js'
@@ -5,15 +11,8 @@ import { HABIT_ICONS } from '../lib/factories.js'
 import { HABIT_ICON_NAMES, iconComponent } from '../lib/icons.js'
 import { resolvePalette } from '../lib/theme.js'
 
-const WEEKDAYS = [
-  { v: 0, l: 'Su' },
-  { v: 1, l: 'Mo' },
-  { v: 2, l: 'Tu' },
-  { v: 3, l: 'We' },
-  { v: 4, l: 'Th' },
-  { v: 5, l: 'Fr' },
-  { v: 6, l: 'Sa' },
-]
+// single-letter weekday seg, matching the prototype
+const WEEKDAYS = [['S', 0], ['M', 1], ['T', 2], ['W', 3], ['T', 4], ['F', 5], ['S', 6]]
 
 function initialForm(habit, palette) {
   const s = habit?.schedule || {}
@@ -34,7 +33,7 @@ function initialForm(habit, palette) {
     time: habit?.plan?.time || '',
     place: habit?.plan?.place || '',
     minimumVersion: habit?.minimumVersion || '',
-    anchor: habit?.anchor || '',
+    anchor: habit?.anchor || '', // stored by name, so Detail can render "after <name>"
   }
 }
 
@@ -89,264 +88,167 @@ export default function HabitFormModal({ habit, existingHabits, onClose }) {
   }
 
   const anchorOptions = (existingHabits || []).filter((h) => h.id !== habit?.id)
+  const measured = f.type === 'quantitative' || f.type === 'duration'
 
   return (
-    <div className="modal" role="dialog" aria-modal="true" aria-label={isEdit ? 'Edit habit' : 'New habit'}>
-      <div className="modal__backdrop" onClick={onClose} />
-      <form className="modal__panel" onSubmit={onSubmit}>
-        <div className="modal__head">
-          <h2>{isEdit ? 'Edit habit' : 'New habit'}</h2>
-          <button type="button" className="btn btn--ghost btn--icon" onClick={onClose} aria-label="Close">
-            ✕
-          </button>
+    <div className="sheet" role="dialog" aria-modal="true" aria-label={isEdit ? 'Edit habit' : 'New habit'}>
+      <div className="sheet__scrim" onClick={onClose} />
+      <form className="sheet__panel" onSubmit={onSubmit}>
+        <div className="sheet__grab" />
+        <div className="sheet__head">
+          <span className="sheet__title">{isEdit ? 'Edit habit' : 'New habit'}</span>
+          <button type="button" className="sheet__x" onClick={onClose} aria-label="Close">✕</button>
         </div>
 
-        <label className="field">
-          <span className="field__label">Name</span>
-          <input
-            className="field__input"
-            value={f.name}
-            onChange={(e) => set({ name: e.target.value })}
-            placeholder="e.g. Strength training"
-          />
-        </label>
+        <div className="sheet__sec">
+          <span className="flabel">Name</span>
+          <input className="input" value={f.name} placeholder="e.g. Read 10 pages"
+            onChange={(e) => set({ name: e.target.value })} autoFocus />
+        </div>
 
-        <div className="field">
-          <span className="field__label">Icon</span>
-          <div className="chips chips--icons">
-            <button
-              type="button"
-              className={`chip chip--icon${!f.iconName ? ' is-active' : ''}`}
-              onClick={() => set({ iconName: null })}
-              aria-label="Monogram (first letter)"
-              title="Monogram"
-            >
-              <span className="habit-monogram">{(f.name || 'A').trim().charAt(0).toUpperCase() || 'A'}</span>
+        <div className="sheet__sec">
+          <span className="flabel">Ink</span>
+          <div className="swrow swrow--grid">
+            {palette.map((c) => (
+              <button key={c} type="button" className={'sw' + (f.color.toLowerCase() === c.toLowerCase() ? ' is-on' : '')}
+                style={{ background: c }} onClick={() => set({ color: c })} aria-label={`Colour ${c}`} />
+            ))}
+            <label className={'sw sw--pick' + (!palette.some((c) => c.toLowerCase() === f.color.toLowerCase()) ? ' is-on' : '')}
+              style={!palette.some((c) => c.toLowerCase() === f.color.toLowerCase()) ? { background: f.color } : undefined} title="Any colour">
+              <input type="color" value={/^#[0-9a-fA-F]{6}$/.test(f.color) ? f.color : '#8a7ba2'} onChange={(e) => set({ color: e.target.value })} />
+            </label>
+          </div>
+        </div>
+
+        <div className="sheet__sec">
+          <span className="flabel">Icon</span>
+          <div className="iconpick">
+            <button type="button" className={'iconpick__b' + (!f.iconName ? ' is-on' : '')} onClick={() => set({ iconName: null })} title="Monogram">
+              <span className="iconpick__mono">{(f.name.trim()[0] || 'A').toUpperCase()}</span>
             </button>
             {HABIT_ICON_NAMES.map((name) => (
-              <button
-                key={name}
-                type="button"
-                className={`chip chip--icon${f.iconName === name ? ' is-active' : ''}`}
-                onClick={() => set({ iconName: name })}
-                aria-label={name}
-                title={name}
-              >
+              <button key={name} type="button" className={'iconpick__b' + (f.iconName === name ? ' is-on' : '')} onClick={() => set({ iconName: name })} title={name}>
                 {createElement(iconComponent(name), { size: 20, strokeWidth: 2.1, 'aria-hidden': 'true' })}
               </button>
             ))}
           </div>
         </div>
 
-        <div className="field">
-          <span className="field__label">Color</span>
-          <div className="chips">
-            {palette.map((c) => (
-              <button
-                key={c}
-                type="button"
-                className={`swatch${f.color.toLowerCase() === c.toLowerCase() ? ' is-active' : ''}`}
-                style={{ background: c }}
-                onClick={() => set({ color: c })}
-                aria-label={`Color ${c}`}
-              />
-            ))}
-            <label className="swatch swatch--custom" title="Custom color">
-              <input
-                type="color"
-                value={f.color}
-                onChange={(e) => set({ color: e.target.value })}
-                aria-label="Custom color"
-              />
-            </label>
-          </div>
-        </div>
-
-        <div className="field">
-          <span className="field__label">When of day</span>
-          <div className="segmented segmented--wrap">
-            {[
-              ['', 'Anytime'],
-              ['morning', 'Morning'],
-              ['afternoon', 'Afternoon'],
-              ['evening', 'Evening'],
-            ].map(([v, l]) => (
-              <button key={v || 'any'} type="button" className={f.tod === v ? 'is-active' : ''} onClick={() => set({ tod: v })}>
-                {l}
-              </button>
+        <div className="sheet__sec">
+          <span className="flabel">When of day</span>
+          <div className="seg">
+            {[['', 'Anytime'], ['morning', 'Morning'], ['afternoon', 'Afternoon'], ['evening', 'Evening']].map(([v, l]) => (
+              <button key={v || 'any'} type="button" className={'seg__btn' + (f.tod === v ? ' is-on' : '')} onClick={() => set({ tod: v })}>{l}</button>
             ))}
           </div>
         </div>
 
-        <div className="field">
-          <span className="field__label">Type</span>
-          <div className="segmented segmented--wrap">
-            <button type="button" className={f.type === 'binary' ? 'is-active' : ''} onClick={() => set({ type: 'binary' })}>
-              Yes / no
-            </button>
-            <button
-              type="button"
-              className={f.type === 'quantitative' ? 'is-active' : ''}
-              onClick={() => set({ type: 'quantitative' })}
-            >
-              Measured
-            </button>
-            <button
-              type="button"
-              className={f.type === 'duration' ? 'is-active' : ''}
-              onClick={() => set({ type: 'duration', targetAmount: f.targetAmount || 30 })}
-            >
-              Timed
-            </button>
+        <div className="sheet__sec">
+          <span className="flabel">Track as</span>
+          <div className="seg">
+            {[['binary', 'Yes / no'], ['quantitative', 'Count'], ['duration', 'Timer']].map(([k, l]) => (
+              <button key={k} type="button" className={'seg__btn' + (f.type === k ? ' is-on' : '')}
+                onClick={() => set({ type: k, targetAmount: k === 'duration' ? (f.targetAmount || 30) : f.targetAmount })}>{l}</button>
+            ))}
           </div>
+          {measured && (
+            <>
+              <div className="row2" style={{ marginTop: 10 }}>
+                <div>
+                  <span className="flabel">Daily goal</span>
+                  <input className="input" type="number" min="1" value={f.targetAmount}
+                    onChange={(e) => set({ targetAmount: e.target.value })} placeholder={f.type === 'duration' ? '30' : '8'} />
+                </div>
+                <div>
+                  <span className="flabel">Unit</span>
+                  <input className="input" value={f.type === 'duration' ? 'min' : f.targetUnit} disabled={f.type === 'duration'}
+                    placeholder="glasses" onChange={(e) => set({ targetUnit: e.target.value })} />
+                </div>
+              </div>
+              {f.type === 'duration' && (
+                <div className="seg" style={{ marginTop: 10 }}>
+                  {[10, 15, 20, 30, 45, 60].map((m) => (
+                    <button key={m} type="button" className={'seg__btn' + (Number(f.targetAmount) === m ? ' is-on' : '')}
+                      style={{ minWidth: 0, padding: 0 }} onClick={() => set({ targetAmount: m })}>{m}m</button>
+                  ))}
+                </div>
+              )}
+            </>
+          )}
         </div>
 
-        {f.type === 'quantitative' && (
-          <div className="field--row">
-            <label className="field">
-              <span className="field__label">Amount</span>
-              <input
-                className="field__input"
-                type="number"
-                min="1"
-                value={f.targetAmount}
-                onChange={(e) => set({ targetAmount: e.target.value })}
-                placeholder="8"
-              />
-            </label>
-            <label className="field">
-              <span className="field__label">Unit</span>
-              <input
-                className="field__input"
-                value={f.targetUnit}
-                onChange={(e) => set({ targetUnit: e.target.value })}
-                placeholder="glasses"
-              />
-            </label>
-          </div>
-        )}
-
-        {f.type === 'duration' && (
-          <div className="field">
-            <span className="field__label">Daily goal (minutes)</span>
-            <input
-              className="field__input"
-              type="number"
-              min="1"
-              inputMode="numeric"
-              value={f.targetAmount}
-              onChange={(e) => set({ targetAmount: e.target.value })}
-              placeholder="30"
-            />
-            <div className="chips chips--days">
-              {[10, 15, 20, 30, 45, 60].map((m) => (
-                <button
-                  key={m}
-                  type="button"
-                  className={`chip${Number(f.targetAmount) === m ? ' is-active' : ''}`}
-                  onClick={() => set({ targetAmount: m })}
-                >
-                  {m}m
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
-
-        <div className="field">
-          <span className="field__label">Schedule</span>
-          <div className="segmented segmented--wrap">
-            {[
-              ['daily', 'Daily'],
-              ['weekdays', 'Days'],
-              ['timesPerWeek', '×/week'],
-              ['everyNDays', 'Every N'],
-            ].map(([k, l]) => (
-              <button key={k} type="button" className={f.scheduleKind === k ? 'is-active' : ''} onClick={() => set({ scheduleKind: k })}>
-                {l}
-              </button>
+        <div className="sheet__sec">
+          <span className="flabel">Schedule</span>
+          <div className="seg">
+            {[['daily', 'Every day'], ['weekdays', 'Weekdays'], ['everyNDays', 'Every N'], ['timesPerWeek', '× / week']].map(([k, l]) => (
+              <button key={k} type="button" className={'seg__btn' + (f.scheduleKind === k ? ' is-on' : '')} onClick={() => set({ scheduleKind: k })}>{l}</button>
             ))}
           </div>
           {f.scheduleKind === 'weekdays' && (
-            <div className="chips chips--days">
-              {WEEKDAYS.map((d) => (
-                <button
-                  key={d.v}
-                  type="button"
-                  className={`chip${f.weekdays.includes(d.v) ? ' is-active' : ''}`}
-                  onClick={() => toggleWeekday(d.v)}
-                >
-                  {d.l}
-                </button>
+            <div className="seg" style={{ marginTop: 10 }}>
+              {WEEKDAYS.map(([l, d], i) => (
+                <button key={i} type="button" className={'seg__btn' + (f.weekdays.includes(d) ? ' is-on' : '')}
+                  style={{ minWidth: 0, padding: 0 }} onClick={() => toggleWeekday(d)}>{l}</button>
               ))}
             </div>
           )}
-          {f.scheduleKind === 'timesPerWeek' && (
-            <label className="inline">
-              <input type="number" min="1" max="7" value={f.timesPerWeek} onChange={(e) => set({ timesPerWeek: e.target.value })} className="field__input field__input--sm" />
-              times per week
-            </label>
-          )}
           {f.scheduleKind === 'everyNDays' && (
-            <label className="inline">
-              every
-              <input type="number" min="1" value={f.everyN} onChange={(e) => set({ everyN: e.target.value })} className="field__input field__input--sm" />
-              days
-            </label>
-          )}
-        </div>
-
-        <div className="plan">
-          <p className="plan__legend">Make it stick</p>
-          <label className="field">
-            <span className="field__label">Minimum version (the 2-minute floor)</span>
-            <input className="field__input" value={f.minimumVersion} onChange={(e) => set({ minimumVersion: e.target.value })} placeholder="e.g. one set / one page" />
-          </label>
-          <label className="field">
-            <span className="field__label">Cue: “after …”</span>
-            <input className="field__input" value={f.cue} onChange={(e) => set({ cue: e.target.value })} placeholder="morning coffee" />
-          </label>
-          <label className="field">
-            <span className="field__label">Time</span>
-            <input className="field__input" type="time" value={f.time} onChange={(e) => set({ time: e.target.value })} />
-          </label>
-          <label className="field">
-            <span className="field__label">Place</span>
-            <input className="field__input" value={f.place} onChange={(e) => set({ place: e.target.value })} placeholder="home gym" />
-          </label>
-          {anchorOptions.length > 0 && (
-            <label className="field">
-              <span className="field__label">Stack onto (anchor habit)</span>
-              <select className="field__input" value={f.anchor} onChange={(e) => set({ anchor: e.target.value })}>
-                <option value="">None</option>
-                {anchorOptions.map((h) => (
-                  <option key={h.id} value={h.id}>
-                    {h.name}
-                  </option>
-                ))}
-              </select>
-            </label>
-          )}
-        </div>
-
-        <div className="modal__foot">
-          <button type="submit" className="btn btn--accent btn--block">
-            {isEdit ? 'Save changes' : 'Add habit'}
-          </button>
-          {isEdit && (
-            <div className="modal__danger">
-              <button type="button" className="btn btn--ghost" onClick={() => { archiveHabit(habit.id); onClose() }}>
-                Archive
-              </button>
-              <button
-                type="button"
-                className="btn btn--danger"
-                onClick={() => { if (confirm(`Delete “${habit.name}” and its history?`)) { deleteHabit(habit.id); onClose() } }}
-              >
-                Delete
-              </button>
+            <div style={{ marginTop: 10 }}>
+              <span className="flabel">Every how many days</span>
+              <input className="input" type="number" min="1" value={f.everyN} onChange={(e) => set({ everyN: e.target.value })} />
             </div>
           )}
+          {f.scheduleKind === 'timesPerWeek' && (
+            <div style={{ marginTop: 10 }}>
+              <span className="flabel">Times per week</span>
+              <input className="input" type="number" min="1" max="7" value={f.timesPerWeek} onChange={(e) => set({ timesPerWeek: e.target.value })} />
+            </div>
+          )}
+        </div>
+
+        <div className="sheet__sec">
+          <span className="flabel">After this cue (habit stacking)</span>
+          <input className="input" value={f.cue} placeholder="morning coffee" onChange={(e) => set({ cue: e.target.value })} />
+          <p className="minihint">“After [something you already do], I will…” is the strongest way to make a habit stick.</p>
+        </div>
+
+        {anchorOptions.length > 0 && (
+          <div className="sheet__sec">
+            <span className="flabel">Anchor to an existing habit</span>
+            <select className="input" value={f.anchor} onChange={(e) => set({ anchor: e.target.value })}>
+              <option value="">None</option>
+              {anchorOptions.map((h) => <option key={h.id} value={h.name}>{h.name}</option>)}
+            </select>
+          </div>
+        )}
+
+        <div className="sheet__sec">
+          <span className="flabel">Time &amp; place <span style={{ textTransform: 'none', letterSpacing: 0 }}>(optional)</span></span>
+          <div className="row2">
+            <input className="input" type="time" value={f.time} onChange={(e) => set({ time: e.target.value })} />
+            <input className="input" value={f.place} placeholder="the kitchen" onChange={(e) => set({ place: e.target.value })} />
+          </div>
+        </div>
+
+        <div className="sheet__sec">
+          <span className="flabel">Two-minute version <span style={{ textTransform: 'none', letterSpacing: 0 }}>(optional)</span></span>
+          <input className="input" value={f.minimumVersion} placeholder="one page" onChange={(e) => set({ minimumVersion: e.target.value })} />
+        </div>
+
+        {isEdit && (
+          <div className="sheet__sec">
+            <button type="button" className="btnp" onClick={() => { archiveHabit(habit.id); onClose() }}>
+              {habit.archived ? 'Restore from archive' : 'Archive (keeps history, hides from Today)'}
+            </button>
+          </div>
+        )}
+
+        <div className="sheet__foot">
+          {isEdit && (
+            <button type="button" className="btnp btnp--danger"
+              onClick={() => { if (confirm(`Delete “${habit.name}” and its history?`)) { deleteHabit(habit.id); onClose() } }}>Delete</button>
+          )}
+          <button type="submit" className="btnp btnp--accent" disabled={!f.name.trim()}>{isEdit ? 'Save' : 'Add habit'}</button>
         </div>
       </form>
     </div>
