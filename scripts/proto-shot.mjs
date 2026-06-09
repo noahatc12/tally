@@ -41,4 +41,14 @@ await page.waitForTimeout(500)
 await page.screenshot({ path: `${OUT}/proto-form.png`, fullPage: true })
 console.log('saved proto-form.png')
 
+// Onboarding: open the tweaks panel (host activate message) and flip the firstRun switch.
+await page.locator('.sheet__x').click().catch(() => {})
+await page.waitForTimeout(200)
+await page.evaluate(() => window.postMessage({ type: '__activate_edit_mode' }, '*'))
+await page.waitForTimeout(400)
+await page.locator('.twk-row-h', { hasText: 'Show first-run' }).locator('.twk-toggle').click()
+await page.waitForTimeout(600)
+await page.screenshot({ path: `${OUT}/proto-onboarding.png`, fullPage: true })
+console.log('saved proto-onboarding.png')
+
 await browser.close()

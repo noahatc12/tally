@@ -106,4 +106,27 @@ for (const s of shots) {
   console.log(`saved ${s.label} (today + detail + detail-count + overview + help + form, overflow 0)`)
   await ctx.close()
 }
+
+// Onboarding / empty state: seed only meta (a Look) with NO habits so RootView shows it.
+for (const o of [
+  { theme: 'light', direction: 'A', label: 'ledger', width: 402 },
+  { theme: 'dark', direction: 'C', label: 'nocturne', width: 402 },
+  { theme: 'light', direction: 'A', label: 'ledger-360', width: 360 },
+]) {
+  const ctx = await browser.newContext({ viewport: { width: o.width, height: 1700 }, deviceScaleFactor: 2 })
+  const meta = { schemaVersion: 2, points: 0, level: 0, badges: [], freezes: 0, theme: o.theme, direction: o.direction, customThemes: [], font: 'default' }
+  await ctx.addInitScript((m) => {
+    localStorage.setItem('habits', JSON.stringify([]))
+    localStorage.setItem('completions', JSON.stringify({}))
+    localStorage.setItem('meta', JSON.stringify(m))
+  }, meta)
+  const page = await ctx.newPage()
+  await page.goto(BASE, { waitUntil: 'networkidle' })
+  await page.waitForTimeout(600)
+  const obX = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)
+  if (obX > 0) throw new Error(`[onboarding ${o.label}] horizontal overflow: ${obX}px`)
+  await page.screenshot({ path: `${OUT}/port-onboarding-${o.label}.png` })
+  console.log(`saved onboarding ${o.label} (overflow 0)`)
+  await ctx.close()
+}
 await browser.close()
