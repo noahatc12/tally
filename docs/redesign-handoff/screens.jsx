@@ -119,7 +119,7 @@ function TodayScreen({ habits, completions, setCompletion, onOpen, onOverview, o
     <div className="screen">
       <header className="thead rise">
         <div>
-          <p className="thead__greeting">{greeting()}</p>
+          <p className="thead__greeting">{greeting()}{(() => { try { const n = localStorage.getItem('tally_name'); return n ? ', ' + n : ''; } catch (e) { return ''; } })()}</p>
           <div className="thead__brand">
             <h1 className="thead__word">tally</h1>
           </div>

@@ -120,6 +120,12 @@ const PALETTES = {
   sage: { label: 'Sage', dark: false,
     tokens: { '--bg': '#e9ece3', '--surface': '#f4f6ef', '--surface-2': '#d9ded0', '--text': '#272b24', '--text-muted': '#6e7568', '--border': '#cfd5c5', '--accent': '#6f8a5b', '--accent-contrast': '#f4f6ef', '--danger': '#a3573f' },
     heat: ['#dde2d4', '#c0c9ad', '#9aac80', '#7a8f5b', '#5a6e3f'] },
+  mist: { label: 'Mist', dark: false,
+    tokens: { '--bg': '#e8ebed', '--surface': '#f4f6f7', '--surface-2': '#d9dee1', '--text': '#282b2d', '--text-muted': '#71767a', '--border': '#cfd5d8', '--accent': '#6a7d86', '--accent-contrast': '#f4f6f7', '--danger': '#a85c4e' },
+    heat: ['#dee3e6', '#bcc6cb', '#94a3aa', '#6c7f88', '#465860'] },
+  heath: { label: 'Heath', dark: false,
+    tokens: { '--bg': '#efebf2', '--surface': '#f8f5fb', '--surface-2': '#e2dbe9', '--text': '#272330', '--text-muted': '#756d80', '--border': '#ddd3e6', '--accent': '#8a76a8', '--accent-contrast': '#f8f5fb', '--danger': '#a85877' },
+    heat: ['#e4dcec', '#c9bcd6', '#a895bd', '#8a76a8', '#665587'] },
   // ---- dark ----
   charcoal: { label: 'Charcoal', dark: true,
     tokens: { '--bg': '#18181a', '--surface': '#212123', '--surface-2': '#2b2b2e', '--text': '#e9e7e3', '--text-muted': '#9a978f', '--border': '#34343a', '--accent': '#c89060', '--accent-contrast': '#18181a', '--danger': '#d4705f' },

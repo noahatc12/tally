@@ -30,35 +30,59 @@ const TOD = {
 };
 
 const DAYS = 364;
-// Deterministic textured history: mostly done, periodic skips, two rough patches
-// (so the strength curve dips and recovers — the whole point of the model).
-function stateFor(off, phase) {
-  if (off === 0) return null; // today: left for the user
-  if (off >= 40 + phase && off <= 52 + phase) return off % 3 === 0 ? 'done' : 'missed';
-  if (off >= 150 + phase && off <= 165 + phase) return off % 2 === 0 ? 'done' : 'missed';
-  if (off % 23 === 0) return 'skip';
-  if (off % 14 === 0) return 'missed';
+
+// Per-habit pseudo-random history. Each habit gets a distinct profile (completion
+// rate, skip frequency, two rough patches in different places) seeded from its id,
+// so no two demo habits look alike — but it's deterministic per id (stable charts).
+function hashStr(s) { let h = 2166136261 >>> 0; for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return h >>> 0; }
+function mulberry32(seed) { let t = seed >>> 0; return () => { t = (t + 0x6D2B79F5) >>> 0; let x = Math.imul(t ^ (t >>> 15), 1 | t); x = (x + Math.imul(x ^ (x >>> 7), 61 | x)) ^ x; return ((x ^ (x >>> 14)) >>> 0) / 4294967296; }; }
+function profileFor(seed) {
+  const r = mulberry32(seed);
+  return {
+    doneProb: 0.60 + r() * 0.36,      // 0.60 .. 0.96  → varied strength levels
+    skipProb: 0.015 + r() * 0.085,
+    rough1: 24 + Math.floor(r() * 130),
+    rlen1: 6 + Math.floor(r() * 16),
+    rough2: 150 + Math.floor(r() * 150),
+    rlen2: 6 + Math.floor(r() * 18),
+    roughMiss: 0.38 + r() * 0.34,
+    hasRough2: r() > 0.35,
+  };
+}
+function stateFor(off, seed, p) {
+  if (off === 0) return null;
+  const u = mulberry32((seed ^ Math.imul(off, 2654435761)) >>> 0)();
+  const inRough = (off >= p.rough1 && off <= p.rough1 + p.rlen1) || (p.hasRough2 && off >= p.rough2 && off <= p.rough2 + p.rlen2);
+  if (inRough) return u < p.roughMiss ? 'missed' : (u < p.roughMiss + p.skipProb ? 'skip' : 'done');
+  if (u < p.skipProb) return 'skip';
+  if (u < p.skipProb + (1 - p.doneProb)) return 'missed';
   return 'done';
 }
-const walkMinutes = (off) => 18 + ((off * 7) % 34);
-const waterGlasses = (off) => 5 + ((off * 3) % 5); // 5..9
+// measured/duration logged amounts also vary per habit + day
+function loggedValue(seed, off, base, spread) {
+  const u = mulberry32((seed ^ Math.imul(off + 7, 40503)) >>> 0)();
+  return Math.round(base + u * spread);
+}
 
 function buildCompletions() {
   const c = {};
-  for (let off = DAYS; off >= 1; off--) {
-    const key = keyForOffset(off);
-    for (const h of HABITS) {
-      const st = stateFor(off, h.phase);
+  const salt = (Math.random() * 4294967296) >>> 0; // fresh every generation
+  for (const h of HABITS) {
+    const seed = (hashStr(h.id) ^ salt) >>> 0;
+    const p = profileFor(seed);
+    for (let off = DAYS; off >= 1; off--) {
+      const st = stateFor(off, seed, p);
       if (!st) continue;
+      const key = keyForOffset(off);
       c[key] = c[key] || {};
-      if (st === 'done' && h.type === 'duration') c[key][h.id] = { state: 'done', value: walkMinutes(off) };
-      else if (st === 'done' && h.type === 'count') c[key][h.id] = { state: 'done', value: waterGlasses(off) };
+      if (st === 'done' && h.type === 'duration') c[key][h.id] = { state: 'done', value: loggedValue(seed, off, (h.goal || 30) * 0.6, (h.goal || 30) * 0.8) };
+      else if (st === 'done' && h.type === 'count') c[key][h.id] = { state: 'done', value: loggedValue(seed, off, (h.goal || 8) * 0.55, (h.goal || 8) * 0.7) };
       else c[key][h.id] = { state: st };
     }
   }
   // partial today for life
   const tk = todayKey();
-  c[tk] = { walk: { state: 'done', value: 22 }, water: { state: 'in', value: 5 } };
+  c[tk] = { ...(c[tk] || {}), walk: { state: 'done', value: 22 }, water: { state: 'in', value: 5 } };
   return c;
 }
 

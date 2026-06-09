@@ -71,6 +71,16 @@ function App() {
 
   uE(() => { if (!celebrate) return; const id = setTimeout(() => setCelebrate(null), 1000); return () => clearTimeout(id); }, [celebrate]);
 
+  const finishSetup = ({ name, reminders, reminderTime, exampleData, starters }) => {
+    try {
+      if (name) localStorage.setItem('tally_name', name); else localStorage.removeItem('tally_name');
+      localStorage.setItem('tally_reminders', JSON.stringify({ on: !!reminders, time: reminderTime }));
+    } catch (e) {}
+    if (exampleData) setData(freshDemo());
+    else { const chosen = STARTERS.filter((s) => starters.includes(s.id)).map(newHabitFrom); setData({ habits: chosen, completions: {} }); }
+    setView('today');
+  };
+
   const openAdd = () => { setOnbAdded([]); setOnbMode('add'); setView('onboarding'); };
   const onbToggle = (id) => setOnbAdded((a) => (a.includes(id) ? a.filter((x) => x !== id) : [...a, id]));
   const onbStart = () => {
@@ -111,7 +121,7 @@ function App() {
       <IOSDevice dark={dark}>
         <div className="tally" data-screen-label={view} data-completed={t.completed || 'soften'} style={resolved.vars} {...resolved.attrs}>
           {view === 'onboarding' && (
-            <Onboarding added={onbAdded} onAdd={onbToggle} onStart={onbStart} />
+            <SetupWizard t={t} setTweak={setTweak} onFinish={finishSetup} />
           )}
           {view === 'today' && (
             <TodayScreen

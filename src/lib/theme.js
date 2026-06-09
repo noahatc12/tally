@@ -71,6 +71,12 @@ export const CURATED_THEMES = [
   { id: 'sage', name: 'Sage', dark: false, bg: '#e9ece3', surface: '#f4f6ef', text: '#272b24', accent: '#6f8a5b',
     surface2: '#d9ded0', textMuted: '#6e7568', border: '#cfd5c5', accentContrast: '#f4f6ef', danger: '#a3573f',
     heat: ['#dde2d4', '#c0c9ad', '#9aac80', '#7a8f5b', '#5a6e3f'] },
+  { id: 'mist', name: 'Mist', dark: false, bg: '#e8ebed', surface: '#f4f6f7', text: '#282b2d', accent: '#6a7d86',
+    surface2: '#d9dee1', textMuted: '#71767a', border: '#cfd5d8', accentContrast: '#f4f6f7', danger: '#a85c4e',
+    heat: ['#dee3e6', '#bcc6cb', '#94a3aa', '#6c7f88', '#465860'] },
+  { id: 'heath', name: 'Heath', dark: false, bg: '#efebf2', surface: '#f8f5fb', text: '#272330', accent: '#8a76a8',
+    surface2: '#e2dbe9', textMuted: '#756d80', border: '#ddd3e6', accentContrast: '#f8f5fb', danger: '#a85877',
+    heat: ['#e4dcec', '#c9bcd6', '#a895bd', '#8a76a8', '#665587'] },
   // ---- Nature · dark ----
   { id: 'charcoal', name: 'Charcoal', dark: true, bg: '#18181a', surface: '#212123', text: '#e9e7e3', accent: '#c89060',
     surface2: '#2b2b2e', textMuted: '#9a978f', border: '#34343a', accentContrast: '#18181a', danger: '#d4705f',

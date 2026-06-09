@@ -10,6 +10,7 @@ import { useState } from 'react'
 import { useHabitsContext } from '../context/habits-store.js'
 import { useScrollLock } from '../hooks/useScrollLock.js'
 import { DIRECTIONS, PALETTES, ACCENT_SWATCHES } from '../lib/directions.js'
+import { luminance } from '../lib/theme.js'
 
 // Looks in the prototype's order: the two editions of the hand-set look, then the soft alternate.
 const LOOKS = [
@@ -89,6 +90,27 @@ export default function ThemeModal({ onClose }) {
     ...customThemes.map((t) => ({ id: t.id, label: t.name })),
   ]
 
+  // Polarity of a palette id: Native follows the Look, a saved theme reads from its bg, a
+  // curated palette carries its own `dark` flag. Drives the Light/Dark filter (§3).
+  const palDark = (id) => {
+    if (id === 'auto') return (DIRECTIONS[meta?.direction || 'A'] || DIRECTIONS.A).dark
+    const saved = customThemes.find((t) => t.id === id)
+    if (saved) return luminance(saved.bg) < 0.5
+    return PALETTES[id]?.dark ?? false
+  }
+  const [mode, setMode] = useState(() => (palDark(currentSel) ? 'dark' : 'light'))
+  // Native always shows in both lists; everything else filters to the chosen polarity.
+  const visibleCards = paletteCards.filter((p) => p.id === 'auto' || palDark(p.id) === (mode === 'dark'))
+  // Switching polarity moves the selection to a sensible theme of that polarity if the
+  // current one no longer matches (Native when the Look already fits, else a default).
+  const switchMode = (m) => {
+    setMode(m)
+    if (palDark(currentSel) !== (m === 'dark')) {
+      const dirDark = (DIRECTIONS[meta?.direction || 'A'] || DIRECTIONS.A).dark
+      setTheme(dirDark === (m === 'dark') ? 'auto' : m === 'dark' ? 'charcoal' : 'sand')
+    }
+  }
+
   const swatchFor = (id) => {
     if (id === 'auto') return { bg: dirTokens['--bg'], surf: dirTokens['--surface'], acc: dirTokens['--accent'], text: dirTokens['--text'] }
     const saved = customThemes.find((t) => t.id === id)
@@ -138,8 +160,14 @@ export default function ThemeModal({ onClose }) {
 
             <div className="sheet__sec">
               <span className="flabel">Theme</span>
+              <div className="seg" style={{ marginBottom: 10 }}>
+                {[['light', 'Light'], ['dark', 'Dark']].map(([m, l]) => (
+                  <button key={m} type="button" className={'seg__btn' + (mode === m ? ' is-on' : '')}
+                    onClick={() => switchMode(m)}>{l}</button>
+                ))}
+              </div>
               <div className="themegrid">
-                {paletteCards.map((p) => {
+                {visibleCards.map((p) => {
                   const s = swatchFor(p.id)
                   const on = currentSel === p.id
                   return (

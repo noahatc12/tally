@@ -26,9 +26,20 @@ function ColorRow({ label, value, onChange }) {
 // ───────────────────────── Appearance sheet ─────────────────────────
 function ThemeSheet({ t, setTweak, onReset, onClose }) {
   const looks = [{ id: 'A', name: 'Ledger' }, { id: 'C', name: 'Nocturne' }, { id: 'B', name: 'Bloom' }];
-  const palettes = [{ id: 'auto', label: 'Native' },
-    ...Object.keys(PALETTES).filter((k) => k !== 'auto').map((k) => ({ id: k, label: PALETTES[k].label }))];
+  const allPalettes = [{ id: 'auto', label: 'Native' },
+    ...Object.keys(PALETTES).filter((k) => k !== 'auto' && k !== 'custom').map((k) => ({ id: k, label: PALETTES[k].label })),
+    { id: 'custom', label: 'Custom' }];
   const dirTokens = DIRECTIONS[t.direction].tokens;
+  const palDark = (id) => id === 'auto' ? DIRECTIONS[t.direction].dark : id === 'custom' ? !!t.customDark : (PALETTES[id] ? PALETTES[id].dark : false);
+  const [mode, setMode] = useMS(palDark(t.palette || 'auto') ? 'dark' : 'light');
+  const palettes = allPalettes.filter((p) => p.id === 'custom' || p.id === 'auto' || palDark(p.id) === (mode === 'dark'));
+  const switchMode = (m) => {
+    setMode(m);
+    if (palDark(t.palette || 'auto') !== (m === 'dark')) {
+      const def = DIRECTIONS[t.direction].dark === (m === 'dark') ? 'auto' : (m === 'dark' ? 'charcoal' : 'sand');
+      setTweak('palette', def);
+    }
+  };
 
   const swatchFor = (id) => {
     if (id === 'auto') return { bg: dirTokens['--bg'], surf: dirTokens['--surface'], acc: dirTokens['--accent'], text: dirTokens['--text'] };
@@ -60,12 +71,17 @@ function ThemeSheet({ t, setTweak, onReset, onClose }) {
 
         <div className="sheet__sec">
           <span className="flabel">Theme</span>
+          <div className="seg" style={{ marginBottom: 10 }}>
+            {[['light', 'Light'], ['dark', 'Dark']].map(([m, l]) => (
+              <button key={m} className={'seg__btn' + (mode === m ? ' is-on' : '')} onClick={() => switchMode(m)}>{l}</button>
+            ))}
+          </div>
           <div className="themegrid">
             {palettes.map((p) => {
               const s = swatchFor(p.id);
               const on = (t.palette || 'auto') === p.id;
               return (
-                <button key={p.id} className={'themecard' + (on ? ' is-on' : '')} onClick={() => setTweak('palette', p.id)}
+                <button key={p.id} className={'themecard' + (on ? ' is-on' : '')} onClick={() => { setTweak('palette', p.id); if (p.id === 'custom') setTweak('customDark', mode === 'dark'); }}
                   style={{ background: s.surf, borderColor: on ? undefined : s.bg }}>
                   <span className="themecard__sw" style={{ background: s.bg }}>
                     <span className="themecard__dot" style={{ background: s.acc }} />
@@ -164,8 +180,8 @@ function HabitFormSheet({ habit, habits = [], onSave, onDelete, onArchive, onClo
   const [iconName, setIconName] = useMS(habit?.iconName || '');
   const [tod, setTod] = useMS(habit?.tod || 'morning');
   const [type, setType] = useMS(habit?.type || 'binary');
-  const [goal, setGoal] = useMS(habit?.goal || (habit?.type === 'duration' ? 20 : 8));
-  const [unit, setUnit] = useMS(habit?.unit || (habit?.type === 'duration' ? 'min' : 'glasses'));
+  const [goal, setGoal] = useMS(habit?.goal ?? '');
+  const [unit, setUnit] = useMS(habit?.unit ?? '');
   const [cue, setCue] = useMS(habit?.cue || habit?.plan?.cue || '');
   const [kind, setKind] = useMS(sc.kind || 'daily');
   const [weekdays, setWeekdays] = useMS(sc.weekdays || [1, 2, 3, 4, 5]);
@@ -188,7 +204,7 @@ function HabitFormSheet({ habit, habits = [], onSave, onDelete, onArchive, onClo
       plan: { cue: cue.trim(), time, place: place.trim() },
       anchor: anchor || null, minimumVersion: minVer.trim(),
     };
-    if (type === 'count' || type === 'duration') { f.goal = Number(goal) || 1; f.unit = type === 'duration' ? 'min' : (unit.trim() || 'reps'); }
+    if (type === 'count' || type === 'duration') { f.goal = Number(goal) || (type === 'duration' ? 20 : 8); f.unit = type === 'duration' ? (unit || 'min') : (unit.trim() || 'times'); }
     onSave(f, habit?.id);
   };
 
@@ -253,12 +269,18 @@ function HabitFormSheet({ habit, habits = [], onSave, onDelete, onArchive, onClo
             <div className="row2" style={{ marginTop: 10 }}>
               <div>
                 <span className="flabel">Daily goal</span>
-                <input className="input" type="number" min="1" value={goal} onChange={(e) => setGoal(e.target.value)} />
+                <input className="input" type="number" min="1" value={goal} placeholder={type === 'duration' ? '20' : '8'} onChange={(e) => setGoal(e.target.value)} />
               </div>
               <div>
                 <span className="flabel">Unit</span>
-                <input className="input" value={type === 'duration' ? 'min' : unit} disabled={type === 'duration'}
-                  placeholder="glasses" onChange={(e) => setUnit(e.target.value)} />
+                {type === 'duration' ? (
+                  <select className="input" value={unit || 'min'} onChange={(e) => setUnit(e.target.value)}>
+                    <option value="min">minutes</option>
+                    <option value="hr">hours</option>
+                  </select>
+                ) : (
+                  <input className="input" value={unit} placeholder="glasses" onChange={(e) => setUnit(e.target.value)} />
+                )}
               </div>
             </div>
           )}

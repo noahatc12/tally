@@ -72,10 +72,10 @@ export default function HabitFormModal({ habit, existingHabits, onClose }) {
       tod: f.tod || null,
       type: f.type,
       target:
-        f.type === 'quantitative' && f.targetAmount
-          ? { amount: Number(f.targetAmount), unit: f.targetUnit.trim() || 'units' }
+        f.type === 'quantitative'
+          ? { amount: Number(f.targetAmount) || 8, unit: f.targetUnit.trim() || 'times' }
           : f.type === 'duration'
-            ? { amount: Math.max(1, Number(f.targetAmount) || 30), unit: 'min' }
+            ? { amount: Number(f.targetAmount) || 20, unit: f.targetUnit === 'hr' ? 'hr' : 'min' }
             : null,
       schedule: buildSchedule(),
       minimumVersion: f.minimumVersion.trim(),
@@ -148,32 +148,29 @@ export default function HabitFormModal({ habit, existingHabits, onClose }) {
           <div className="seg">
             {[['binary', 'Yes / no'], ['quantitative', 'Count'], ['duration', 'Timer']].map(([k, l]) => (
               <button key={k} type="button" className={'seg__btn' + (f.type === k ? ' is-on' : '')}
-                onClick={() => set({ type: k, targetAmount: k === 'duration' ? (f.targetAmount || 30) : f.targetAmount })}>{l}</button>
+                onClick={() => set({ type: k })}>{l}</button>
             ))}
           </div>
           {measured && (
-            <>
-              <div className="row2" style={{ marginTop: 10 }}>
-                <div>
-                  <span className="flabel">Daily goal</span>
-                  <input className="input" type="number" min="1" value={f.targetAmount}
-                    onChange={(e) => set({ targetAmount: e.target.value })} placeholder={f.type === 'duration' ? '30' : '8'} />
-                </div>
-                <div>
-                  <span className="flabel">Unit</span>
-                  <input className="input" value={f.type === 'duration' ? 'min' : f.targetUnit} disabled={f.type === 'duration'}
-                    placeholder="glasses" onChange={(e) => set({ targetUnit: e.target.value })} />
-                </div>
+            <div className="row2" style={{ marginTop: 10 }}>
+              <div>
+                <span className="flabel">Daily goal</span>
+                <input className="input" type="number" min="1" value={f.targetAmount}
+                  onChange={(e) => set({ targetAmount: e.target.value })} placeholder={f.type === 'duration' ? '20' : '8'} />
               </div>
-              {f.type === 'duration' && (
-                <div className="seg" style={{ marginTop: 10 }}>
-                  {[10, 15, 20, 30, 45, 60].map((m) => (
-                    <button key={m} type="button" className={'seg__btn' + (Number(f.targetAmount) === m ? ' is-on' : '')}
-                      style={{ minWidth: 0, padding: 0 }} onClick={() => set({ targetAmount: m })}>{m}m</button>
-                  ))}
-                </div>
-              )}
-            </>
+              <div>
+                <span className="flabel">Unit</span>
+                {f.type === 'duration' ? (
+                  <select className="input" value={f.targetUnit || 'min'} onChange={(e) => set({ targetUnit: e.target.value })}>
+                    <option value="min">minutes</option>
+                    <option value="hr">hours</option>
+                  </select>
+                ) : (
+                  <input className="input" value={f.targetUnit} placeholder="glasses"
+                    onChange={(e) => set({ targetUnit: e.target.value })} />
+                )}
+              </div>
+            </div>
           )}
         </div>
 
