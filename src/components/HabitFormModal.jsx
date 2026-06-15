@@ -7,6 +7,7 @@
 import { useState, createElement } from 'react'
 import { useHabitsContext } from '../context/habits-store.js'
 import { useScrollLock } from '../hooks/useScrollLock.js'
+import { useSheetDrag } from '../hooks/useSheetDrag.js'
 import { HABIT_ICONS } from '../lib/factories.js'
 import { HABIT_ICON_NAMES, iconComponent } from '../lib/icons.js'
 import { resolvePalette } from '../lib/theme.js'
@@ -39,6 +40,7 @@ function initialForm(habit, palette) {
 
 export default function HabitFormModal({ habit, existingHabits, onClose }) {
   useScrollLock()
+  const { dragHandlers, panelStyle, scrimStyle, panelRef, close } = useSheetDrag(onClose)
   const { meta, addHabit, updateHabit, archiveHabit, deleteHabit } = useHabitsContext()
   const palette = resolvePalette(meta?.theme || 'dark', meta?.customThemes || [])
   const [f, setF] = useState(() => initialForm(habit, palette))
@@ -84,26 +86,26 @@ export default function HabitFormModal({ habit, existingHabits, onClose }) {
     }
     if (isEdit) updateHabit(habit.id, payload)
     else addHabit(payload)
-    onClose()
+    close()
   }
 
   const anchorOptions = (existingHabits || []).filter((h) => h.id !== habit?.id)
   const measured = f.type === 'quantitative' || f.type === 'duration'
 
   return (
-    <div className="sheet" role="dialog" aria-modal="true" aria-label={isEdit ? 'Edit habit' : 'New habit'}>
-      <div className="sheet__scrim" onClick={onClose} />
-      <form className="sheet__panel" onSubmit={onSubmit}>
-        <div className="sheet__grab" />
+    <div className="sheet" role="dialog" aria-modal="true" aria-label={isEdit ? 'Edit habit' : 'New habit'} onClick={close}>
+      <div className="sheet__scrim" style={scrimStyle} />
+      <form className="sheet__panel" ref={panelRef} style={panelStyle} onSubmit={onSubmit} onClick={(e) => e.stopPropagation()}>
+        <div className="sheet__draghandle" {...dragHandlers}><span className="sheet__grab" /></div>
         <div className="sheet__head">
           <span className="sheet__title">{isEdit ? 'Edit habit' : 'New habit'}</span>
-          <button type="button" className="sheet__x" onClick={onClose} aria-label="Close">✕</button>
+          <button type="button" className="sheet__x" onClick={close} aria-label="Close">✕</button>
         </div>
 
         <div className="sheet__sec">
           <span className="flabel">Name</span>
           <input className="input" value={f.name} placeholder="e.g. Read 10 pages"
-            onChange={(e) => set({ name: e.target.value })} autoFocus />
+            onChange={(e) => set({ name: e.target.value })} />
         </div>
 
         <div className="sheet__sec">
@@ -234,7 +236,7 @@ export default function HabitFormModal({ habit, existingHabits, onClose }) {
 
         {isEdit && (
           <div className="sheet__sec">
-            <button type="button" className="btnp" onClick={() => { archiveHabit(habit.id); onClose() }}>
+            <button type="button" className="btnp" onClick={() => { archiveHabit(habit.id); close() }}>
               {habit.archived ? 'Restore from archive' : 'Archive (keeps history, hides from Today)'}
             </button>
           </div>
@@ -243,7 +245,7 @@ export default function HabitFormModal({ habit, existingHabits, onClose }) {
         <div className="sheet__foot">
           {isEdit && (
             <button type="button" className="btnp btnp--danger"
-              onClick={() => { if (confirm(`Delete “${habit.name}” and its history?`)) { deleteHabit(habit.id); onClose() } }}>Delete</button>
+              onClick={() => { if (confirm(`Delete “${habit.name}” and its history?`)) { deleteHabit(habit.id); close() } }}>Delete</button>
           )}
           <button type="submit" className="btnp btnp--accent" disabled={!f.name.trim()}>{isEdit ? 'Save' : 'Add habit'}</button>
         </div>

@@ -3,6 +3,7 @@
 // cards grouped by time of day. Data + mutations come from our store via proto-adapters.
 
 import { useMemo, useState } from 'react'
+import { LayoutGrid, CircleHelp, Palette, Plus } from 'lucide-react'
 import { useHabitsContext } from '../../context/habits-store.js'
 import { pickQuote } from '../../lib/quotes.js'
 import {
@@ -131,24 +132,23 @@ export default function TallyToday({ onOpenHabit, onOpenOverview }) {
   return (
     <div className="screen">
       <header className="thead rise">
-        <div>
-          <p className="thead__greeting">{greeting()}{meta?.name ? `, ${meta.name}` : ''}</p>
-          <div className="thead__brand"><h1 className="thead__word">tally</h1></div>
+        <div className="thead__bar">
+          <div className="thead__brand">
+            <span className="thead__wm">Tally</span>
+            <span className="thead__logo" aria-hidden="true"><TallyMark count={5} h={17} w={1.8} style={{ color: 'var(--accent)' }} /></span>
+          </div>
+          <div className="thead__actions">
+            <button className="iconbtn" type="button" onClick={onOpenOverview} aria-label="Overview" title="Overview"><LayoutGrid size={18} /></button>
+            <button className="iconbtn" type="button" onClick={() => setHelpOpen(true)} aria-label="How it works" title="How it works"><CircleHelp size={18} /></button>
+            <button className="iconbtn" type="button" onClick={() => setThemeOpen(true)} aria-label="Themes" title="Appearance"><Palette size={18} /></button>
+            <button className="iconbtn iconbtn--accent" type="button" onClick={() => setFormOpen(true)} aria-label="Add habit"><Plus size={16} /> New</button>
+          </div>
+        </div>
+        <div className="thead__greet">
+          <h1 className="thead__headline">{greeting()}{meta?.name ? `, ${meta.name}` : ''}</h1>
           <p className="thead__date">{dateLabel}</p>
         </div>
-        <div className="thead__actions">
-          <button className="iconbtn" type="button" onClick={onOpenOverview} aria-label="Overview" title="Overview">▦</button>
-          <button className="iconbtn" type="button" onClick={() => setHelpOpen(true)} aria-label="How it works" title="How it works">?</button>
-          <button className="iconbtn" type="button" onClick={() => setThemeOpen(true)} aria-label="Themes" title="Appearance">◑</button>
-          <button className="iconbtn iconbtn--accent" type="button" onClick={() => setFormOpen(true)} aria-label="Add habit">+ New</button>
-        </div>
       </header>
-
-      <div className="masthead rise" aria-hidden="true">
-        <span className="masthead__rule" />
-        <TallyMark count={5} h={12} w={1.8} style={{ color: 'var(--accent)' }} />
-        <span className="masthead__rule" />
-      </div>
 
       {active.length > 0 && (
         <aside className="quote rise" style={{ animationDelay: '30ms' }}>

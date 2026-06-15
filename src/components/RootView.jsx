@@ -43,7 +43,7 @@ export default function RootView() {
     if (habit) {
       return (
         <TallyShell>
-          <TallyDetail habit={habit} onBack={goToday} onShare={openShare} />
+          <TallyDetail habit={habit} onBack={goToday} onShare={openShare} onOpen={openHabit} />
           {share}
         </TallyShell>
       )

@@ -205,9 +205,8 @@ function trendSeries(habit, completions, points = 40) {
       let x = !rec ? 0 : rec.state === 'done' ? 100 : rec.state === 'in' ? null : 0;
       if (x != null) { started = true; s = alpha * x + (1 - alpha) * s; }
     }
-    if ((DAYS - off) % step === 0) series.push(Math.round(s));
+    if ((DAYS - off) % step === 0 || off === 0) series.push(Math.round(s));
   }
-  series.push(strengthOf(habit, completions));
   return series;
 }
 

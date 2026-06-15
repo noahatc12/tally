@@ -140,6 +140,7 @@ function App() {
           )}
           {view === 'detail' && selHabit && (
             <DetailScreen habit={selHabit} completions={data.completions} setCompletion={setCompletion} ink={inkMap[selHabit.id]}
+              habits={data.habits} onOpen={(id) => setSel(id)}
               onBack={() => setView('today')} onShare={() => setShareOpen(true)} onEdit={() => setForm({ habit: selHabit })} />
           )}
 

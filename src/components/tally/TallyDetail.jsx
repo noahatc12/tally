@@ -5,6 +5,7 @@
 // ShareCard, ported in step 5.
 
 import { useMemo, useState } from 'react'
+import { ChevronLeft, SquarePen, Sparkles, Check, ChevronsRight, Minus } from 'lucide-react'
 import { useHabitsContext } from '../../context/habits-store.js'
 import {
   todayKey, dateFromKey, toUiHabit, strengthOf, streakOf, longestStreak, weekRate,
@@ -12,12 +13,21 @@ import {
 } from '../../lib/proto-adapters.js'
 import { buildInkMap } from '../../lib/directions.js'
 import { Glyph, TrendChart, YearHeatmap } from './widgets.jsx'
+import { useHSwipe } from '../../hooks/useHSwipe.js'
 import HabitFormModal from '../HabitFormModal.jsx'
+
+// backfill glyph: Lucide outline matching the three-state controls
+function bfGlyph(state) {
+  if (state === 'done') return <Check size={13} strokeWidth={2.6} aria-hidden="true" />
+  if (state === 'skip') return <ChevronsRight size={13} strokeWidth={2.6} aria-hidden="true" />
+  if (state === 'missed') return <Minus size={13} strokeWidth={2.6} aria-hidden="true" />
+  return ''
+}
 
 // backfill cycle: done → skip → missed → clear; an untouched day starts at done.
 const NEXT = { done: 'skip', skip: 'missed', missed: null }
 
-export default function TallyDetail({ habit, onBack, onShare }) {
+export default function TallyDetail({ habit, onBack, onShare, onOpen }) {
   const { habits, completions, meta, setCompletion, clearCompletion } = useHabitsContext()
   const [editing, setEditing] = useState(false)
   const today = todayKey()
@@ -51,20 +61,35 @@ export default function TallyDetail({ habit, onBack, onShare }) {
   }
 
   const activeHabits = habits.filter((h) => !h.archived)
+  const idx = activeHabits.findIndex((h) => h.id === habit.id)
+  const hasNext = idx >= 0 && idx < activeHabits.length - 1
+  // Swipe left → next habit; swipe right → previous (or back to Today from the first).
+  const swipe = useHSwipe({
+    hasPrev: true,
+    hasNext,
+    onPrev: () => (idx > 0 ? onOpen?.(activeHabits[idx - 1].id) : onBack()),
+    onNext: () => hasNext && onOpen?.(activeHabits[idx + 1].id),
+  })
 
   return (
     <div className="screen detail" style={{ '--habit': ink }}>
       <div className="detail__bar rise">
-        <button className="backbtn" type="button" onClick={onBack}>‹ Today</button>
+        <button className="backbtn" type="button" onClick={onBack}><ChevronLeft size={16} /> Today</button>
+        {activeHabits.length > 1 && (
+          <div className="detail__dots" aria-hidden="true">
+            {activeHabits.map((h, i) => <span key={h.id} className={'detail__dot' + (i === idx ? ' is-on' : '')} />)}
+          </div>
+        )}
         <div style={{ display: 'flex', gap: 8 }}>
-          <button className="iconbtn" type="button" onClick={() => setEditing(true)} title="Edit habit" aria-label="Edit habit">✎</button>
-          <button className="iconbtn" type="button" onClick={onShare} title="Share" aria-label="Share">✦</button>
+          <button className="iconbtn" type="button" onClick={() => setEditing(true)} title="Edit habit" aria-label="Edit habit"><SquarePen size={17} /></button>
+          <button className="iconbtn" type="button" onClick={onShare} title="Share" aria-label="Share"><Sparkles size={17} /></button>
         </div>
       </div>
 
+      <div className="detail__pager" {...swipe.handlers} style={swipe.style}>
       <div className="detail__head rise">
         <span className="detail__icon" aria-hidden="true"><Glyph habit={habit} size={26} /></span>
-        <div>
+        <div className="detail__htext">
           <div className="detail__name">{habit.name}</div>
           <p className="detail__sched">{schedText}{ui.cue ? <> · after <b>{ui.cue}</b></> : null}</p>
           {planBits.length > 0 && <p className="detail__plan">{planBits.join('  ·  ')}</p>}
@@ -86,20 +111,16 @@ export default function TallyDetail({ habit, onBack, onShare }) {
       </div>
 
       {totals && (
-        <div className="statgrid rise" style={{ animationDelay: '100ms' }}>
-          {ui.type === 'duration' ? (
-            <>
-              <div className="stat"><span className="stat__v">{formatDuration(totals.total)}</span><span className="stat__l">Total time</span></div>
-              <div className="stat"><span className="stat__v">{formatDuration(totals.avg)}</span><span className="stat__l">Per active day</span></div>
-              <div className="stat"><span className="stat__v">{formatDuration(totals.week)}</span><span className="stat__l">This week</span></div>
-            </>
-          ) : (
-            <>
-              <div className="stat"><span className="stat__v">{Math.round(totals.total)}</span><span className="stat__l">Total {ui.unit}</span></div>
-              <div className="stat"><span className="stat__v">{totals.avg.toFixed(1)}</span><span className="stat__l">Per active day</span></div>
-              <div className="stat"><span className="stat__v">{Math.round(totals.week)}</span><span className="stat__l">This week</span></div>
-            </>
-          )}
+        <div className="ledger rise" style={{ animationDelay: '100ms' }}>
+          {(ui.type === 'duration'
+            ? [['Total', formatDuration(totals.total)], ['Per day', formatDuration(totals.avg)], ['This week', formatDuration(totals.week)]]
+            : [[`Total ${ui.unit}`, Math.round(totals.total)], ['Per day', totals.avg.toFixed(1)], ['This week', Math.round(totals.week)]]
+          ).map(([l, v]) => (
+            <div className="ledger__cell" key={l}>
+              <div className="ledger__v">{v}</div>
+              <div className="ledger__l">{l}</div>
+            </div>
+          ))}
         </div>
       )}
 
@@ -119,8 +140,8 @@ export default function TallyDetail({ habit, onBack, onShare }) {
           {week.map((c) => (
             <div className="bf" key={c.key}>
               <button className={`bf__dot${c.isToday ? '' : ' is-' + c.state}`} type="button"
-                onClick={() => cycle(c.key, c.state)}>
-                {c.state === 'done' ? '✓' : c.state === 'skip' ? '↷' : c.state === 'missed' ? '–' : ''}
+                onClick={() => cycle(c.key, c.state)} aria-label={c.state || 'empty'}>
+                {bfGlyph(c.state)}
               </button>
               <span className="bf__lbl"><b>{dateFromKey(c.key).getDate()}</b>{c.dow}</span>
             </div>
@@ -128,6 +149,7 @@ export default function TallyDetail({ habit, onBack, onShare }) {
         </div>
         <p className="backfill__hint">Forgiving by design. A <b>skip</b> never breaks your streak, only a real miss does.</p>
       </section>
+      </div>
 
       {editing && (
         <HabitFormModal habit={habit} existingHabits={activeHabits} onClose={() => setEditing(false)} />

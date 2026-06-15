@@ -9,6 +9,7 @@
 import { useState } from 'react'
 import { useHabitsContext } from '../context/habits-store.js'
 import { useScrollLock } from '../hooks/useScrollLock.js'
+import { useSheetDrag } from '../hooks/useSheetDrag.js'
 import { DIRECTIONS, PALETTES, ACCENT_SWATCHES } from '../lib/directions.js'
 import { luminance } from '../lib/theme.js'
 import { buildDemoData } from '../dev/seed.js'
@@ -70,6 +71,7 @@ function ThemeEditor({ initial, onSave, onCancel }) {
 
 export default function ThemeModal({ onClose }) {
   useScrollLock()
+  const { dragHandlers, panelStyle, scrimStyle, panelRef, close } = useSheetDrag(onClose)
   const {
     meta, setLook, setTheme, setAccent, setInk, setCompleted, setTypeface,
     addCustomTheme, updateCustomTheme, deleteCustomTheme, loadDemo,
@@ -135,13 +137,13 @@ export default function ThemeModal({ onClose }) {
   const accentIsCustom = meta?.accent && meta.accent !== 'auto' && !ACCENT_SWATCHES.some((a) => a.id === meta.accent)
 
   return (
-    <div className="sheet" role="dialog" aria-modal="true" aria-label="Appearance">
-      <div className="sheet__scrim" onClick={onClose} />
-      <div className="sheet__panel">
-        <div className="sheet__grab" />
+    <div className="sheet" role="dialog" aria-modal="true" aria-label="Appearance" onClick={close}>
+      <div className="sheet__scrim" style={scrimStyle} />
+      <div className="sheet__panel" ref={panelRef} style={panelStyle} onClick={(e) => e.stopPropagation()}>
+        <div className="sheet__draghandle" {...dragHandlers}><span className="sheet__grab" /></div>
         <div className="sheet__head">
           <span className="sheet__title">{editing ? (editing.mode === 'new' ? 'New theme' : 'Edit theme') : 'Appearance'}</span>
-          <button type="button" className="sheet__x" onClick={onClose} aria-label="Close">✕</button>
+          <button type="button" className="sheet__x" onClick={close} aria-label="Close">✕</button>
         </div>
 
         {editing ? (

@@ -4,17 +4,19 @@
 // is kept (a real-device necessity the prototype doesn't need).
 
 import { useScrollLock } from '../hooks/useScrollLock.js'
+import { useSheetDrag } from '../hooks/useSheetDrag.js'
 
 export default function HelpModal({ onClose }) {
   useScrollLock()
+  const { dragHandlers, panelStyle, scrimStyle, panelRef, close } = useSheetDrag(onClose)
   return (
-    <div className="sheet" role="dialog" aria-modal="true" aria-label="How it works">
-      <div className="sheet__scrim" onClick={onClose} />
-      <div className="sheet__panel">
-        <div className="sheet__grab" />
+    <div className="sheet" role="dialog" aria-modal="true" aria-label="How it works" onClick={close}>
+      <div className="sheet__scrim" style={scrimStyle} />
+      <div className="sheet__panel" ref={panelRef} style={panelStyle} onClick={(e) => e.stopPropagation()}>
+        <div className="sheet__draghandle" {...dragHandlers}><span className="sheet__grab" /></div>
         <div className="sheet__head">
           <span className="sheet__title">How it works</span>
-          <button type="button" className="sheet__x" onClick={onClose} aria-label="Close">✕</button>
+          <button type="button" className="sheet__x" onClick={close} aria-label="Close">✕</button>
         </div>
 
         <p className="guide__lead">
@@ -59,7 +61,7 @@ export default function HelpModal({ onClose }) {
         <p className="guide__note">Tip: open <b>Appearance</b> any time to switch themes: Sand, Pine, Ocean and more.</p>
 
         <div className="sheet__foot">
-          <button type="button" className="btnp btnp--accent" onClick={onClose}>Got it</button>
+          <button type="button" className="btnp btnp--accent" onClick={close}>Got it</button>
         </div>
       </div>
     </div>

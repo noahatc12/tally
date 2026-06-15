@@ -1,6 +1,81 @@
 // modals.jsx — in-app Appearance sheet + Habit create/edit form. Exported to window.
 const { useState: useMS } = React;
 
+// Drag-to-dismiss for bottom sheets. Two smooth ways to close:
+//  • drag the grab handle / header down
+//  • scroll the content to the top and keep pulling down (overscroll-to-close)
+// Otherwise it springs back. panelRef → the scrollable panel; dragHandlers → the
+// grab zone; panelStyle → the panel.
+function useSheetDrag(onClose) {
+  const [dy, setDy] = useMS(0);
+  const [dragging, setDragging] = useMS(false);
+  const [closing, setClosing] = useMS(false);
+  const [shown, setShown] = useMS(false);
+  const dyRef = React.useRef(0);
+  const closeRef = React.useRef(false);
+  const panelRef = React.useRef(null);
+  const set = (v) => { dyRef.current = v; setDy(v); };
+
+  // smooth entrance: start off-screen, then settle (transition-driven)
+  React.useEffect(() => { const id = setTimeout(() => setShown(true), 20); return () => clearTimeout(id); }, []);
+
+  // animated dismiss: slide the panel off-screen + fade scrim, then unmount
+  const close = () => {
+    if (closeRef.current) return; closeRef.current = true;
+    setDragging(false); setClosing(true);
+    const el = panelRef.current;
+    const h = el ? el.getBoundingClientRect().height + 80 : 900;
+    set(h);
+    setTimeout(onClose, 300);
+  };
+  const release = () => { const d = dyRef.current; if (d > 110) close(); else { setDragging(false); set(0); } };
+
+  // explicit handle drag (pointer = mouse + touch on the grab zone)
+  const hdrag = React.useRef(null);
+  const onPointerDown = (e) => { if (closeRef.current) return; hdrag.current = { y0: e.clientY, t0: Date.now() }; setDragging(true); try { e.currentTarget.setPointerCapture(e.pointerId); } catch (x) {} };
+  const onPointerMove = (e) => { if (!hdrag.current) return; const d = e.clientY - hdrag.current.y0; set(d > 0 ? d : d * 0.25); };
+  const end = (e) => { if (!hdrag.current) return; const d = Math.max(0, e.clientY - hdrag.current.y0); const v = d / Math.max(1, Date.now() - hdrag.current.t0); hdrag.current = null; if (d > 110 || (d > 40 && v > 0.5)) close(); else { setDragging(false); set(0); } };
+  const dragHandlers = { onPointerDown, onPointerMove, onPointerUp: end, onPointerCancel: end };
+
+  // content overscroll-to-close — native touch listeners so preventDefault works.
+  // Evaluated continuously: normal scrolling happens until the content is at the
+  // top, then a *continued* downward pull (even within the same swipe) takes over
+  // and drags the sheet. Pulling back up hands control back to scrolling.
+  React.useEffect(() => {
+    const el = panelRef.current; if (!el) return;
+    let lastY = 0, baseY = 0, captured = false, active = false;
+    const yOf = (e) => (e.touches && e.touches[0] ? e.touches[0].clientY : e.clientY);
+    const ts = (e) => { if (closeRef.current) return; lastY = yOf(e); captured = false; active = true; };
+    const tm = (e) => {
+      if (!active) return;
+      const y = yOf(e); const dInc = y - lastY; lastY = y;
+      if (!captured) {
+        if (el.scrollTop <= 0 && dInc > 0) { captured = true; baseY = y; setDragging(true); set(0); }
+        return;
+      }
+      const d = y - baseY;
+      if (d <= 0) { captured = false; setDragging(false); set(0); return; }
+      if (e.cancelable) e.preventDefault();
+      set(d);
+    };
+    const te = () => { if (captured) release(); active = false; captured = false; };
+    el.addEventListener('touchstart', ts, { passive: true });
+    el.addEventListener('touchmove', tm, { passive: false });
+    el.addEventListener('touchend', te, { passive: true });
+    el.addEventListener('touchcancel', te, { passive: true });
+    return () => { el.removeEventListener('touchstart', ts); el.removeEventListener('touchmove', tm); el.removeEventListener('touchend', te); el.removeEventListener('touchcancel', te); };
+  }, []);
+
+  const ease = 'cubic-bezier(.32,.72,0,1)';
+  const offscreen = !shown || closing;
+  const panelStyle = {
+    transform: (!shown && !closing) ? 'translateY(100%)' : `translateY(${dy}px)`,
+    transition: dragging ? 'none' : `transform .34s ${ease}`,
+  };
+  const scrimStyle = { opacity: offscreen ? 0 : 1, transition: 'opacity .34s ease' };
+  return { dragHandlers, panelStyle, scrimStyle, panelRef, close };
+}
+
 // Ink presets are derived from the live theme tokens, so they always match the
 // active palette. Stored as CSS strings (var()/color-mix) that resolve per theme.
 const INK_COLORS = [
@@ -48,14 +123,15 @@ function ThemeSheet({ t, setTweak, onReset, onClose }) {
     return { bg: p['--bg'], surf: p['--surface'], acc: p['--accent'], text: p['--text'] };
   };
 
+  const { dragHandlers: __dh, panelStyle: __ps, scrimStyle: __ss, panelRef: __pr, close: __close } = useSheetDrag(onClose);
   return (
-    <div className="sheet">
-      <div className="sheet__scrim" onClick={onClose} />
-      <div className="sheet__panel">
-        <div className="sheet__grab" />
+    <div className="sheet" onClick={__close}>
+      <div className="sheet__scrim" style={__ss} />
+      <div className="sheet__panel" ref={__pr} style={__ps} onClick={(e) => e.stopPropagation()}>
+        <div className="sheet__draghandle" {...__dh}><span className="sheet__grab" /></div>
         <div className="sheet__head">
           <span className="sheet__title">Appearance</span>
-          <button className="sheet__x" onClick={onClose} aria-label="Close">✕</button>
+          <button className="sheet__x" onClick={__close} aria-label="Close">✕</button>
         </div>
 
         <div className="sheet__sec">
@@ -208,19 +284,20 @@ function HabitFormSheet({ habit, habits = [], onSave, onDelete, onArchive, onClo
     onSave(f, habit?.id);
   };
 
+  const { dragHandlers: __dh, panelStyle: __ps, scrimStyle: __ss, panelRef: __pr, close: __close } = useSheetDrag(onClose);
   return (
-    <div className="sheet">
-      <div className="sheet__scrim" onClick={onClose} />
-      <div className="sheet__panel">
-        <div className="sheet__grab" />
+    <div className="sheet" onClick={__close}>
+      <div className="sheet__scrim" style={__ss} />
+      <div className="sheet__panel" ref={__pr} style={__ps} onClick={(e) => e.stopPropagation()}>
+        <div className="sheet__draghandle" {...__dh}><span className="sheet__grab" /></div>
         <div className="sheet__head">
           <span className="sheet__title">{editing ? 'Edit habit' : 'New habit'}</span>
-          <button className="sheet__x" onClick={onClose} aria-label="Close">✕</button>
+          <button className="sheet__x" onClick={__close} aria-label="Close">✕</button>
         </div>
 
         <div className="sheet__sec">
           <span className="flabel">Name</span>
-          <input className="input" value={name} placeholder="e.g. Read 10 pages" onChange={(e) => setName(e.target.value)} autoFocus />
+          <input className="input" value={name} placeholder="e.g. Read 10 pages" onChange={(e) => setName(e.target.value)} />
         </div>
 
         <div className="sheet__sec">
@@ -360,14 +437,15 @@ function HabitFormSheet({ habit, habits = [], onSave, onDelete, onArchive, onClo
 
 // ───────────────────────── Help / guide ─────────────────────────
 function HelpSheet({ onClose }) {
+  const { dragHandlers: __dh, panelStyle: __ps, scrimStyle: __ss, panelRef: __pr, close: __close } = useSheetDrag(onClose);
   return (
-    <div className="sheet">
-      <div className="sheet__scrim" onClick={onClose} />
-      <div className="sheet__panel">
-        <div className="sheet__grab" />
+    <div className="sheet" onClick={__close}>
+      <div className="sheet__scrim" style={__ss} />
+      <div className="sheet__panel" ref={__pr} style={__ps} onClick={(e) => e.stopPropagation()}>
+        <div className="sheet__draghandle" {...__dh}><span className="sheet__grab" /></div>
         <div className="sheet__head">
           <span className="sheet__title">How it works</span>
-          <button className="sheet__x" onClick={onClose} aria-label="Close">✕</button>
+          <button className="sheet__x" onClick={__close} aria-label="Close">✕</button>
         </div>
 
         <p className="guide__lead">Tap <b>+ New</b> to create a habit, then mark it each day. Missing one day won’t reset you; only missing repeatedly does. The goal is showing up, not perfection.</p>
@@ -409,7 +487,7 @@ function HelpSheet({ onClose }) {
         <p className="guide__note">Tip: open <b>Appearance</b> any time to switch themes: Sand, Pine, Ocean and more.</p>
 
         <div className="sheet__foot">
-          <button className="btnp btnp--accent" onClick={onClose}>Got it</button>
+          <button className="btnp btnp--accent" onClick={__close}>Got it</button>
         </div>
       </div>
     </div>
