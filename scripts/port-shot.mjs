@@ -76,7 +76,7 @@ for (const s of shots) {
     const docX = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)
     if (docX > 0) throw new Error(`[${s.label} ${tag}] horizontal overflow: ${docX}px`)
     await page.screenshot({ path: `${OUT}/port-${tag}-${s.label}.png` })
-    await page.getByText('‹ Today').click()
+    await page.locator('.backbtn').click()
     await page.waitForTimeout(300)
   }
 
@@ -96,7 +96,7 @@ for (const s of shots) {
   await page.locator('.share__close').click()
   await page.waitForTimeout(300)
 
-  await page.getByText('‹ Today').click()
+  await page.locator('.backbtn').click()
   await page.waitForTimeout(300)
 
   // Help sheet (?) and New-habit form (+ New) — body must be scroll-locked while open.
@@ -104,14 +104,14 @@ for (const s of shots) {
   await page.waitForTimeout(400)
   await page.screenshot({ path: `${OUT}/port-help-${s.label}.png` })
   await page.locator('.sheet__x').click()
-  await page.waitForTimeout(300)
+  await page.waitForTimeout(450) // animated sheet exit unmounts at ~300ms
   await page.locator('.iconbtn--accent').click()
   await page.waitForTimeout(400)
   const formX = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)
   if (formX > 0) throw new Error(`[${s.label} form] horizontal overflow: ${formX}px`)
   await page.screenshot({ path: `${OUT}/port-form-${s.label}.png` })
   await page.locator('.sheet__x').click()
-  await page.waitForTimeout(200)
+  await page.waitForTimeout(450)
 
   // Appearance sheet (◑) — full Look/Theme/Accent/Ink/Completed/Type sheet; scroll-locked.
   await page.locator('.iconbtn[title="Appearance"]').click()

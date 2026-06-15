@@ -5,16 +5,20 @@
 // the ShareCard, ported in step 5.
 
 import { useMemo } from 'react'
+import { ChevronLeft, Sparkles } from 'lucide-react'
 import { useHabitsContext } from '../../context/habits-store.js'
 import { todayKey, aggToday, aggregateYearGrid, strengthOf, trendSeries } from '../../lib/proto-adapters.js'
 import { buildInkMap } from '../../lib/directions.js'
 import { Glyph, YearHeatmap, Sparkline } from './widgets.jsx'
+import { useHSwipe } from '../../hooks/useHSwipe.js'
 
 export default function TallyOverview({ onBack, onOpenHabit, onShare }) {
   const { habits, completions, meta } = useHabitsContext()
   const today = todayKey()
   const active = useMemo(() => habits.filter((h) => !h.archived), [habits])
   const inkMap = useMemo(() => buildInkMap(habits, meta?.ink), [habits, meta?.ink])
+  // Swipe right anywhere on the overview → back to Today (matches Detail's paging gesture).
+  const swipe = useHSwipe({ hasPrev: true, hasNext: false, onPrev: () => onBack(), onNext: () => {} })
 
   const agg = useMemo(() => aggToday(active, completions, today), [active, completions, today])
   const grid = useMemo(() => aggregateYearGrid(active, completions, today), [active, completions, today])
@@ -27,9 +31,10 @@ export default function TallyOverview({ onBack, onOpenHabit, onShare }) {
   return (
     <div className="screen">
       <div className="overview__bar rise">
-        <button className="backbtn" type="button" onClick={onBack}>‹ Today</button>
-        <button className="iconbtn" type="button" onClick={onShare} title="Year in review" aria-label="Year in review">✦</button>
+        <button className="backbtn" type="button" onClick={onBack}><ChevronLeft size={16} /> Today</button>
+        <button className="iconbtn" type="button" onClick={onShare} title="Year in review" aria-label="Year in review"><Sparkles size={17} /></button>
       </div>
+      <div className="detail__pager" {...swipe.handlers} style={swipe.style}>
       <div className="overview__title rise">Overview</div>
 
       <div className="overview__today rise" style={{ animationDelay: '40ms' }}>
@@ -70,6 +75,7 @@ export default function TallyOverview({ onBack, onOpenHabit, onShare }) {
         </ul>
       </section>
       <div style={{ height: 8 }} />
+      </div>
     </div>
   )
 }

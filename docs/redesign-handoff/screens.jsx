@@ -6,7 +6,7 @@ function greeting() {
   return h < 12 ? 'Good morning' : h < 18 ? 'Good afternoon' : 'Good evening';
 }
 function dateLabel() {
-  return dateFromKey(todayKey()).toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric' });
+  return dateFromKey(todayKey()).toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
 }
 // almanac monogram — illuminated initial instead of an off-theme emoji
 const initial = (name) => (name || '?').trim().charAt(0).toUpperCase();
@@ -117,27 +117,24 @@ function TodayScreen({ habits, completions, setCompletion, onOpen, onOverview, o
 
   return (
     <div className="screen">
-      <header className="thead rise">
-        <div>
-          <p className="thead__greeting">{greeting()}{(() => { try { const n = localStorage.getItem('tally_name'); return n ? ', ' + n : ''; } catch (e) { return ''; } })()}</p>
-          <div className="thead__brand">
-            <h1 className="thead__word">tally</h1>
+        <header className="thead rise">
+          <div className="thead__bar">
+            <div className="thead__brand">
+              <span className="thead__wm">Tally</span>
+              <span className="thead__logo" aria-hidden="true"><TallyMark count={5} h={17} w={1.8} style={{ color: 'var(--accent)' }} /></span>
+            </div>
+            <div className="thead__actions">
+              <button className="iconbtn" type="button" onClick={onOverview} title="Overview" aria-label="Overview"><LucideIcon name="LayoutGrid" size={18} /></button>
+              <button className="iconbtn" type="button" onClick={onHelp} title="How it works" aria-label="How it works"><LucideIcon name="CircleHelp" size={18} /></button>
+              <button className="iconbtn" type="button" onClick={onTheme} title="Appearance" aria-label="Appearance"><LucideIcon name="Palette" size={18} /></button>
+              <button className="iconbtn iconbtn--accent" type="button" onClick={onNew}><LucideIcon name="Plus" size={16} /> New</button>
+            </div>
           </div>
-          <p className="thead__date">{dateLabel()}</p>
-        </div>
-        <div className="thead__actions">
-          <button className="iconbtn" type="button" onClick={onOverview} title="Overview">▦</button>
-          <button className="iconbtn" type="button" onClick={onHelp} title="How it works">?</button>
-          <button className="iconbtn" type="button" onClick={onTheme} title="Appearance">◑</button>
-          <button className="iconbtn iconbtn--accent" type="button" onClick={onNew}>+ New</button>
-        </div>
-      </header>
-
-      <div className="masthead rise" aria-hidden="true">
-        <span className="masthead__rule" />
-        <TallyMark count={5} h={12} w={1.8} style={{ color: 'var(--accent)' }} />
-        <span className="masthead__rule" />
-      </div>
+          <div className="thead__greet">
+            <h1 className="thead__headline">{greeting()}{(() => { try { const n = localStorage.getItem('tally_name'); return n ? ', ' + n : ''; } catch (e) { return ''; } })()}</h1>
+            <p className="thead__date">{dateLabel()}</p>
+          </div>
+        </header>
 
       <QuoteBanner />
 
@@ -201,7 +198,15 @@ function TodayScreen({ habits, completions, setCompletion, onOpen, onOverview, o
 }
 
 // ============================== DETAIL SCREEN ==============================
-function DetailScreen({ habit, completions, setCompletion, onBack, onShare, onEdit, ink }) {
+function DetailScreen({ habit, completions, setCompletion, onBack, onShare, onEdit, ink, habits = [], onOpen }) {
+  const sibs = habits.filter((h) => !h.archived);
+  const idx = sibs.findIndex((h) => h.id === habit.id);
+  const hasPrev = idx > 0, hasNext = idx >= 0 && idx < sibs.length - 1;
+  const swipe = useHSwipe({
+    hasPrev: true, hasNext,
+    onPrev: () => (idx > 0 ? (onOpen && onOpen(sibs[idx - 1].id)) : (onBack && onBack())),
+    onNext: () => hasNext && onOpen && onOpen(sibs[idx + 1].id),
+  });
   const strength = strengthOf(habit, completions);
   const streak = streakOf(habit, completions);
   const best = longestStreak(habit, completions);
@@ -232,16 +237,22 @@ function DetailScreen({ habit, completions, setCompletion, onBack, onShare, onEd
   return (
     <div className="screen detail" style={{ '--habit': ink || habit.color }}>
       <div className="detail__bar rise">
-        <button className="backbtn" type="button" onClick={onBack}>‹ Today</button>
+        <button className="backbtn" type="button" onClick={onBack}><LucideIcon name="ChevronLeft" size={16} /> Today</button>
+        {sibs.length > 1 && (
+          <div className="detail__dots" aria-hidden="true">
+            {sibs.map((h, i) => <span key={h.id} className={'detail__dot' + (i === idx ? ' is-on' : '')} />)}
+          </div>
+        )}
         <div style={{ display: 'flex', gap: 8 }}>
-          <button className="iconbtn" type="button" onClick={onEdit} title="Edit habit">✎</button>
-          <button className="iconbtn" type="button" onClick={onShare} title="Share">✦</button>
+          <button className="iconbtn" type="button" onClick={onEdit} title="Edit habit" aria-label="Edit habit"><LucideIcon name="SquarePen" size={17} /></button>
+          <button className="iconbtn" type="button" onClick={onShare} title="Share" aria-label="Share"><LucideIcon name="Sparkles" size={17} /></button>
         </div>
       </div>
 
+      <div className="detail__pager" {...swipe.handlers} style={swipe.style}>
       <div className="detail__head rise">
         <span className="detail__icon" aria-hidden="true">{glyph(habit, 26)}</span>
-        <div>
+        <div className="detail__htext">
           <div className="detail__name">{habit.name}</div>
           <p className="detail__sched">{schedText}{habit.cue ? <> · after <b>{habit.cue}</b></> : null}</p>
           {planBits.length > 0 && <p className="detail__plan">{planBits.join('  ·  ')}</p>}
@@ -263,20 +274,16 @@ function DetailScreen({ habit, completions, setCompletion, onBack, onShare, onEd
       </div>
 
       {totals && (
-        <div className="statgrid rise" style={{ animationDelay: '100ms' }}>
-          {habit.type === 'duration' ? (
-            <>
-              <div className="stat"><span className="stat__v">{formatDuration(totals.total)}</span><span className="stat__l">Total time</span></div>
-              <div className="stat"><span className="stat__v">{formatDuration(totals.avg)}</span><span className="stat__l">Per active day</span></div>
-              <div className="stat"><span className="stat__v">{formatDuration(totals.week)}</span><span className="stat__l">This week</span></div>
-            </>
-          ) : (
-            <>
-              <div className="stat"><span className="stat__v">{Math.round(totals.total)}</span><span className="stat__l">Total {habit.unit}</span></div>
-              <div className="stat"><span className="stat__v">{totals.avg.toFixed(1)}</span><span className="stat__l">Per active day</span></div>
-              <div className="stat"><span className="stat__v">{Math.round(totals.week)}</span><span className="stat__l">This week</span></div>
-            </>
-          )}
+        <div className="ledger rise" style={{ animationDelay: '100ms' }}>
+          {(habit.type === 'duration'
+            ? [['Total', formatDuration(totals.total)], ['Per day', formatDuration(totals.avg)], ['This week', formatDuration(totals.week)]]
+            : [[`Total ${habit.unit}`, Math.round(totals.total)], ['Per day', totals.avg.toFixed(1)], ['This week', Math.round(totals.week)]]
+          ).map(([l, v]) => (
+            <div className="ledger__cell" key={l}>
+              <div className="ledger__v">{v}</div>
+              <div className="ledger__l">{l}</div>
+            </div>
+          ))}
         </div>
       )}
 
@@ -296,8 +303,8 @@ function DetailScreen({ habit, completions, setCompletion, onBack, onShare, onEd
           {week.map((c) => (
             <div className="bf" key={c.key}>
               <button className={`bf__dot${c.isToday ? '' : ' is-' + c.state}`} type="button"
-                onClick={() => cycle(c.key, c.state)}>
-                {c.state === 'done' ? '✓' : c.state === 'skip' ? '↷' : c.state === 'missed' ? '–' : ''}
+                onClick={() => cycle(c.key, c.state)} aria-label={c.state || 'empty'}>
+                {c.state === 'done' ? <LucideIcon name="Check" size={13} stroke={2.6} /> : c.state === 'skip' ? <LucideIcon name="ChevronsRight" size={13} stroke={2.6} /> : c.state === 'missed' ? <LucideIcon name="Minus" size={13} stroke={2.6} /> : ''}
               </button>
               <span className="bf__lbl"><b>{dateFromKey(c.key).getDate()}</b>{c.dow}</span>
             </div>
@@ -305,6 +312,7 @@ function DetailScreen({ habit, completions, setCompletion, onBack, onShare, onEd
         </div>
         <p className="backfill__hint">Forgiving by design. A <b>skip</b> never breaks your streak, only a real miss does.</p>
       </section>
+      </div>
     </div>
   );
 }
@@ -315,7 +323,7 @@ function Onboarding({ onAdd, added, onStart }) {
     <div className="screen onb">
       <div className="onb__brandrow rise">
         <h1 className="onb__word">tally</h1>
-        <TallyMark count={5} h={26} w={3} style={{ color: 'var(--accent)' }} />
+        <TallyMark count={5} h={26} w={2.7} style={{ color: 'var(--accent)' }} />
       </div>
       <div className="masthead rise" aria-hidden="true" style={{ marginTop: 18 }}>
         <span className="masthead__rule" />
@@ -385,7 +393,7 @@ function ShareCard({ habits, completions, onClose }) {
       <div className="share__wrap">
         <div className="card">
           <div className="card__top">
-            <span className="card__brand">tally <TallyMark count={5} h={15} w={2} style={{ color: 'var(--accent)' }} /></span>
+            <span className="card__brand">tally <TallyMark count={5} h={15} w={1.6} style={{ color: 'var(--accent)' }} /></span>
             <span className="card__year">{year} IN REVIEW</span>
           </div>
           <h2 className="card__head">You showed up <b>{stats.activeDays} days</b> this year, and got back up every time.</h2>
@@ -414,13 +422,15 @@ function OverviewScreen({ habits, completions, onBack, onOpen, onShare, inkMap =
     habit: h, strength: strengthOf(h, completions), series: trendSeries(h, completions, 30),
     done: recordOf(completions, h.id, todayKey())?.state === 'done',
   })), [habits, completions]);
+  const swipe = useHSwipe({ hasPrev: true, hasNext: false, onPrev: () => onBack && onBack(), onNext: () => {} });
 
   return (
     <div className="screen">
       <div className="overview__bar rise">
-        <button className="backbtn" type="button" onClick={onBack}>‹ Today</button>
-        <button className="iconbtn" type="button" onClick={onShare} title="Year in review">✦</button>
+        <button className="backbtn" type="button" onClick={onBack}><LucideIcon name="ChevronLeft" size={16} /> Today</button>
+        <button className="iconbtn" type="button" onClick={onShare} title="Year in review" aria-label="Year in review"><LucideIcon name="Sparkles" size={17} /></button>
       </div>
+      <div className="detail__pager" {...swipe.handlers} style={swipe.style}>
       <div className="overview__title rise">Overview</div>
 
       <div className="overview__today rise" style={{ animationDelay: '40ms' }}>
@@ -458,6 +468,7 @@ function OverviewScreen({ habits, completions, onBack, onOpen, onShare, inkMap =
         </ul>
       </section>
       <div style={{ height: 8 }} />
+      </div>
     </div>
   );
 }
